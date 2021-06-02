@@ -530,13 +530,19 @@ public class Digester {
      */
     public String getSourceFileName(GobiiFile file) {
         String source = file.getSource();
+        return getSourceFileName(source);
+    }
+
+    //Make this accessible with a single source filename, as well as gobiiFile(above)
+    public static String getSourceFileName(String source){
         File sourceFolder = new File(source);
         File[] f = sourceFolder.listFiles();
-        if (f.length != 0) source = f[0].getName();
-        else {
-            source = sourceFolder.getName();//Otherwise we get full paths in source.
+        if (f.length != 0){
+            return f[0].getName();
         }
-        return source;
+        else {
+            return sourceFolder.getName();//Otherwise we get full paths in source.
+        }
     }
 
     /**

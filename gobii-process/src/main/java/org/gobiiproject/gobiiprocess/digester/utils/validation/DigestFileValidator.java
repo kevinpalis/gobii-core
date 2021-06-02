@@ -15,6 +15,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FilenameUtils;
+import org.gobii.masticator.aspects.TableAspect;
 import org.gobiiproject.gobiimodel.config.GobiiCropConfig;
 import org.gobiiproject.gobiimodel.dto.instructions.validation.ValidationConstants;
 import org.gobiiproject.gobiimodel.utils.error.Logger;
@@ -31,11 +32,25 @@ public class DigestFileValidator {
         String rootDir, validationFile, url, password, userName;
     }
 
+    private enum ValidationType{
+        WEBSERVICE,
+        DATABASE
+    }
+
     private String rootDir, rulesFile, url, password, username;
 
+    private ValidationType validationType;
+    private String dbUrl;
 
     public DigestFileValidator(String rootDir, String url, String username, String password) {
         this(rootDir, null, url, username, password);
+    }
+
+    public DigestFileValidator(String rootDir, String validationFile, String dbUrl){
+        this.rootDir = rootDir;
+        this.rulesFile = validationFile;
+        this.dbUrl = dbUrl;
+        this.validationType = ValidationType.DATABASE;
     }
 
     public DigestFileValidator(String rootDir, String validationFile, String url, String username, String password) {
@@ -44,13 +59,14 @@ public class DigestFileValidator {
         this.rulesFile = validationFile;
         this.username = username;
         this.password = password;
+        this.validationType = ValidationType.WEBSERVICE;
     }
 
     public static void main(String[] args) {
         InputParameters inputParameters = new InputParameters();
         readInputParameters(args, inputParameters);
         DigestFileValidator digestFileValidator = new DigestFileValidator(inputParameters.rootDir, inputParameters.validationFile, inputParameters.url, inputParameters.userName, inputParameters.password);
-        digestFileValidator.performValidation(null, null);
+        digestFileValidator.performValidation((GobiiCropConfig)null, null);
     }
 
     public void performValidation(GobiiCropConfig cropConfig) {
@@ -98,6 +114,40 @@ public class DigestFileValidator {
         }
     }
 
+    public void performValidation(String dbConnectionString, DatasetOrientationType orientation) {
+        String validationOutput = rootDir + "/" + "ValidationResult-" + new SimpleDateFormat("hhmmss").format(new Date()) + ".json";
+        /*
+         * Read validation Rules
+         * Login into server
+         * Perform validation
+         * */
+        try {
+            SequenceWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValues(new FileWriter(new File(validationOutput)));
+            List<ValidationUnit> validations = readRules(writer);
+            ValidationResult validationResult = new ValidationResult();
+            validationResult.fileName = FilenameUtils.getExtension(validations.get(0).getDigestFileName());
+            List<Failure> failures = new ArrayList<>();
+            try {
+                List<ValidationResult> validationResultList = doValidations(validations, dbConnectionString, orientation);
+                writer.write(validationResultList);
+            } catch (Exception e) {
+                validationResult.status = ValidationConstants.FAILURE;
+                Failure failure = new Failure();
+                failure.reason = FailureTypes.VALIDATION_ERROR;
+                failure.values.add(e.getMessage());
+                validationResult.failures.add(failure);
+                List<ValidationResult> validationResultList = new ArrayList<>();
+                validationResultList.add(validationResult);
+                writer.write(validationResultList);
+                Logger.logError("DigestFileValidator",e);
+            }
+            writer.close();
+        } catch (IOException e) {
+            Logger.logError("I/O Error ", e);
+        }
+    }
+
+
     /**
      * Run Validations
      *
@@ -125,6 +175,36 @@ public class DigestFileValidator {
         // READ ERRORS
         // ValidationError[] fileErrors = mapper.readValue(new File(validationOutput), ValidationError[].class);
     }
+
+    /**
+     * Run Validations
+     *
+     * @param validations validations
+     */
+    private List<ValidationResult> doValidations(List<ValidationUnit> validations, String dbConnectionString,
+                                                 DatasetOrientationType orientation) {
+        List<ValidationResult> validationResultList = new ArrayList<>();
+        for (ValidationUnit validation : validations) {
+            ValidationResult validationResult = new ValidationResult();
+            validationResult.fileName = FilenameUtils.getExtension(validation.getDigestFileName());
+            List<Failure> failureList = validate(validation, dbConnectionString, orientation);
+            if (failureList != null) {
+                if (failureList.size() > 0) {
+                    validationResult.status = ValidationConstants.FAILURE;
+                    validationResult.failures.addAll(failureList);
+                    validationResultList.add(validationResult);
+                } else {
+                    validationResult.status = ValidationConstants.SUCCESS;
+                    validationResultList.add(validationResult);
+                }
+            }
+        }
+        return validationResultList;
+        // READ ERRORS
+        // ValidationError[] fileErrors = mapper.readValue(new File(validationOutput), ValidationError[].class);
+    }
+
+
 
     /**
      * Read the command line arguments
@@ -264,6 +344,35 @@ public class DigestFileValidator {
         }
         return failureList;
     }
+
+    public List<Failure> validate(ValidationUnit validation, String dbConnection, DatasetOrientationType orientation) {
+        trimSpaces(validation);
+        List<Failure> failureList = new ArrayList<>();
+        switch (FilenameUtils.getExtension(validation.getDigestFileName())) {
+            case "germplasm":
+            case "germplasm_prop":
+            case "dnasample":
+            case "dnasample_prop":
+            case "dnarun":
+            case "dnarun_prop":
+            case "marker":
+            case "marker_prop":
+            case "linkage_group":
+            case "marker_linkage_group":
+            case "dataset_dnarun":
+            case "dataset_marker":
+                if (!new Validator(orientation).validate(validation, rootDir, failureList, dbConnection)) failureList = null;
+                break;
+            default:
+                try {
+                    ValidationUtil.createFailure(FailureTypes.INVALID_FILE_EXTENSIONS, new ArrayList<>(), " Given extension " + validation.getDigestFileName() + " is invalid.", failureList);
+                } catch (MaximumErrorsValidationException e) {
+                    //No action needed
+                }
+        }
+        return failureList;
+    }
+
 
     private void trimSpaces(ValidationUnit validationUnit) {
         validationUnit.setDigestFileName(validationUnit.getDigestFileName().trim());

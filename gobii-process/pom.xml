@@ -31,6 +31,12 @@
             <artifactId>gobii-domain</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.gobii</groupId>
+            <artifactId>masticator</artifactId>
+            <version>0.0.0-SNAPSHOT</version>
+        </dependency>
+
 
         <!-- Spring and Transactions -->
         <dependency>
@@ -193,6 +199,24 @@
                             </archive>
                         </configuration>
                         <id>make-extractor</id>
+                        <!-- bind to the packaging phase -->
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+
+                    <!--EBSLoader Execution-->
+                    <execution>
+                        <configuration>
+                            <finalName>EbsLoader</finalName>
+                            <archive>
+                                <manifest>
+                                    <mainClass>org.gobiiproject.gobiiprocess.digester.EBSLoader</mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                        <id>make-ebs-loader</id>
                         <!-- bind to the packaging phase -->
                         <phase>package</phase>
                         <goals>

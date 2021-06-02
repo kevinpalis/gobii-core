@@ -6,18 +6,12 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.sql.*;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.gobii.masticator.aspects.TableAspect;
 import org.gobiiproject.gobiimodel.config.GobiiCropConfig;
 import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
 import org.gobiiproject.gobiimodel.dto.instructions.validation.ValidationConstants;
@@ -284,6 +278,38 @@ class ValidationUtil {
         }
     }
 
+    /**
+     * Validation based on the existence of a file.
+     * Do something if a file exists and something else if it doesn't exist.
+     *
+     * @param fileName    Name of the file
+     * @param condition   Condition unit
+     * @param failureList failure list
+     */
+    static void validateFileExistenceCheck(String fileName, ConditionUnit condition, List<Failure> failureList, String dbConnection) throws MaximumErrorsValidationException {
+        if (condition.fileExistenceCheck != null) {
+            String existenceFile = condition.fileExistenceCheck;
+            List<String> files = new ArrayList<>();
+            boolean shouldFileExist = condition.fileExists.equalsIgnoreCase(ValidationConstants.YES);
+            getFilesWithExtension(new File(fileName).getParent(), existenceFile, files, failureList);
+            if (files.size() > 1) {
+                processFileError(existenceFile, files.size(), failureList);
+                return;
+            }
+            if ((shouldFileExist && files.size() == 1) || (!shouldFileExist && files.size() == 0)) {
+                if (condition.type != null) {
+                    if (condition.type.equalsIgnoreCase(ValidationConstants.FILE))
+                        validateColumnBetweenFiles(fileName, condition, failureList);
+                    else if (condition.type.equalsIgnoreCase(ValidationConstants.DB))
+                        validateDatabaseCalls(fileName, condition, failureList, dbConnection);
+                    else
+                        createFailure(FailureTypes.UNDEFINED_CONDITION_TYPE, new ArrayList<>(), condition.type, failureList);
+                }
+            }
+        }
+    }
+
+
     static boolean getFilesWithExtension(String dir, String fileExtension, List<String> filesWithExtension, List<Failure> failureList) throws MaximumErrorsValidationException {
         try {
             DirectoryStream<Path> files = Files.newDirectoryStream(Paths.get(dir), fileExtension);
@@ -473,6 +499,33 @@ class ValidationUtil {
         }
     }
 
+    static void validateDatabaseCalls(String fileName, ConditionUnit condition, List<Failure> failureList, String dbConnection) {
+        try {
+            if (condition.typeName != null) {
+                if (condition.typeName.equalsIgnoreCase(ValidationConstants.CV) || condition.typeName.equalsIgnoreCase(ValidationConstants.REFERENCE)
+                        || condition.typeName.equalsIgnoreCase(ValidationConstants.LINKAGE_GROUP) || condition.typeName.equalsIgnoreCase(ValidationConstants.DNARUN)
+                        || condition.typeName.equalsIgnoreCase(ValidationConstants.MARKER) || condition.typeName.equalsIgnoreCase(ValidationConstants.EXTERNAL_CODE)
+                        || condition.typeName.equalsIgnoreCase(ValidationConstants.DNASAMPLE) || condition.typeName.equalsIgnoreCase(ValidationConstants.DNASAMPLE_NAME) || condition.typeName.equalsIgnoreCase(ValidationConstants.DNASAMPLE_NAME_NUM)) {
+                    if (condition.fieldToCompare != null) {
+                        if (checkForHeaderExistence(fileName, condition.fieldToCompare, condition.required, failureList))
+                            if (condition.typeName.equalsIgnoreCase(ValidationConstants.CV) || condition.typeName.equalsIgnoreCase(ValidationConstants.REFERENCE) || condition.typeName.equalsIgnoreCase(ValidationConstants.EXTERNAL_CODE)) {
+                                validateDB(fileName, condition, failureList,dbConnection);
+                            } else {
+                                if (condition.foreignKey != null) {
+                                    if (condition.fieldToCompare.size() == 1)
+                                        validateDbWithForeignKey(fileName, condition, failureList,dbConnection);
+                                    else validateDNASampleNameAndNum(fileName, condition, failureList,dbConnection);
+                                } else printMissingFieldError("DB", "foreignKey", failureList);
+                            }
+                    } else printMissingFieldError("DB", "fieldToCompare", failureList);
+                } else printMissingFieldError("DB", "unsupported typeName", failureList);
+            } else printMissingFieldError("DB", "typeName", failureList);
+        } catch (MaximumErrorsValidationException e) {
+            ////Don't do any thing. This implies that particular error list is full.;
+        }
+    }
+
+
     /**
      * Validate terms in CV table
      *
@@ -506,6 +559,147 @@ class ValidationUtil {
             }
         }
     }
+
+    /**
+     * Validate terms in CV table
+     *
+     * @param fileName    fileName
+     * @param condition   condition
+     * @param failureList failure list
+     */
+    private static void validateDB(String fileName, ConditionUnit condition, List<Failure> failureList, String dbConnectionString) throws MaximumErrorsValidationException {
+
+        Set<String> fieldNameList = new HashSet<>();
+        String fieldToCompare = condition.fieldToCompare.get(0);
+        String typeName = condition.typeName;
+        if (readColumnIntoSet(fileName, fieldToCompare, fieldNameList, failureList)) {
+            if (typeName.equalsIgnoreCase(ValidationConstants.EXTERNAL_CODE)){
+                typeName = GobiiEntityNameType.GERMPLASM.name();
+            }
+            if (typeName.equalsIgnoreCase(ValidationConstants.CV)) {
+                //processResponseList(nameIdDTOListResponse, fieldToCompare, FailureTypes.UNDEFINED_CV_VALUE, failureList);
+                processCVList(fieldNameList, typeName,fieldToCompare, FailureTypes.UNDEFINED_CV_VALUE, failureList, dbConnectionString);
+            }
+            else if (typeName.equalsIgnoreCase(ValidationConstants.REFERENCE)) {
+                if(fieldToCompare.equals("reference_name")){// Don't want to fix the settings for this one.
+                    fieldToCompare = "name";
+                }
+                processNameList(fieldNameList, typeName,fieldToCompare, FailureTypes.UNDEFINED_REFERENCE_VALUE, failureList, dbConnectionString);
+            }
+            else{
+                //In theory, 'germplasm' works as a field to compare
+                processNameList(fieldNameList,typeName,fieldToCompare,FailureTypes.UNDEFINED_VALUE, failureList, dbConnectionString);
+            }
+        }
+    }
+
+
+    private static void processNameList(Set<String> fieldNameList, String typeName, String fieldToCompare,  String failureType, List<Failure> failureList, String dbConnectionString) {
+
+        //Example typename = germplasm (basically always table)
+        //Example fieldToCompare external_code (basically always column)
+        //Thus, example query - SELECT external_code from germplasm where external_code in ('A','B','X','Y','Z')
+        //Which returns:
+        //| X |
+        //| Y |
+        //postgres://
+        String user = dbConnectionString.substring(13,dbConnectionString.indexOf(':',13));
+        String password = dbConnectionString.substring(1+dbConnectionString.indexOf(':',13), dbConnectionString.indexOf("@",13));
+        String jdbcConnector = "jdbc:postgresql://" + dbConnectionString.substring(1+dbConnectionString.indexOf('@'));
+        Connection conn = null;
+        List<String> names = new ArrayList<String>();
+        try {
+           conn = DriverManager.getConnection(jdbcConnector,user, password);
+
+            Statement statement = conn.createStatement();
+            String fieldNameListAsString = fieldNameList.stream().collect(Collectors.joining("','", "('", "')"));
+            ResultSet results = statement.executeQuery("SELECT " + fieldToCompare + " from " + typeName + " where " + fieldToCompare + " in " + fieldNameListAsString);
+
+            while (results.next()) {
+                names.add(results.getString(1));//First column, one based integer system
+            }
+            conn.close();
+        } catch (Exception e) {
+            Failure f = new Failure();
+            f.reason = failureType + " in Database Lookup";
+            failureList.add(f);
+            try {
+                conn.close();
+            } catch (SQLException ex) {
+                //ignore
+            }
+            return;
+        }
+        List<String> namesNotInDB = new LinkedList(fieldNameList);
+        namesNotInDB.removeAll(names);
+        if (!namesNotInDB.isEmpty()) {
+            Failure missingEntityFailure = new Failure();
+            missingEntityFailure.reason = failureType;
+            missingEntityFailure.values = namesNotInDB;
+            failureList.add(missingEntityFailure);
+        }
+    }
+
+    private static void processCVList(Set<String> fieldNameList, String typeName, String fieldToCompare,  String failureType, List<Failure> failureList, String dbConnectionString) {
+
+        String cvTerm = null;
+        switch( fieldToCompare){
+            case "species_name":
+                cvTerm = "germplasm_species";
+                break;
+            case "type_name":
+                cvTerm =  "germplasm_type";
+                break;
+            case "strand_name":
+                cvTerm = "marker_strand";
+                break;
+            default:break;
+        }
+
+        if(cvTerm == null){
+            System.err.println("Invalid cv type: " + fieldToCompare);
+        }
+
+        String user = dbConnectionString.substring(13,dbConnectionString.indexOf(':',13));
+        String password = dbConnectionString.substring(1+dbConnectionString.indexOf(':',13), dbConnectionString.indexOf("@",13));
+        String jdbcConnector = "jdbc:postgresql://" + dbConnectionString.substring(1+dbConnectionString.indexOf('@'));
+
+        Connection conn = null;
+        List<String> names = new ArrayList<String>();
+        try {
+            conn = DriverManager.getConnection(jdbcConnector,user, password);
+
+            Statement statement = conn.createStatement();
+            String fieldNameListAsString = fieldNameList.stream().collect(Collectors.joining("','", "('", "')"));
+            String cvTermAsList = "('"+cvTerm + "')";
+            ResultSet results = statement.executeQuery("SELECT term from cv join cvgroup ON cv.cvgroup_id = cvgroup.cvgroup_id WHERE term in " + fieldNameListAsString + " and cvgroup.name in " + cvTermAsList);
+
+            while (results.next()) {
+                names.add(results.getString(1));//First column, one based integer system
+            }
+            conn.close();
+        } catch (Exception e) {
+            Failure f = new Failure();
+            f.reason = failureType + " in Database Lookup";
+            failureList.add(f);
+            try {
+                conn.close();
+            } catch (SQLException ex) {
+                //don't care
+            }
+            return;
+        }
+        List<String> namesNotInDB = new LinkedList<String>(fieldNameList);
+        namesNotInDB.removeAll(names);
+        if (!namesNotInDB.isEmpty()) {
+            Failure missingEntityFailure = new Failure();
+            missingEntityFailure.reason = failureType;
+            missingEntityFailure.values = namesNotInDB;
+            failureList.add(missingEntityFailure);
+        }
+    }
+
+
 
     private static void validateDNASampleNameAndNum(String fileName, ConditionUnit condition, List<Failure> failureList, GobiiCropConfig cropConfig) throws MaximumErrorsValidationException {
         List<String> fieldToCompare = condition.fieldToCompare;
@@ -546,6 +740,47 @@ class ValidationUtil {
             }
         }
     }
+
+    private static void validateDNASampleNameAndNum(String fileName, ConditionUnit condition, List<Failure> failureList, String dbConnection) throws MaximumErrorsValidationException {
+        List<String> fieldToCompare = condition.fieldToCompare;
+        Set<String> foreignKeyList = new HashSet<>();
+        if (readForeignKey(fileName, condition.foreignKey, foreignKeyList, failureList)) {
+            Map<String, Set<List<String>>> mapForeignkeyAndName = new HashMap<>();
+            if (createProjectIdSampleNameAndNumGroup(fileName, condition, mapForeignkeyAndName, failureList)) {
+                Map<String, String> foreignKeyValueFromDB;
+                if (foreignKeyList.size() != 1) {
+                    multipleProjectIdError(condition, failureList);
+                    return;
+                }
+                if (condition.typeName.equalsIgnoreCase(ValidationConstants.DNASAMPLE_NAME_NUM)) {
+                    String projectId = foreignKeyList.iterator().next();//There's only 1
+                    foreignKeyValueFromDB = ValidationWebServicesUtil.validateProjectId(projectId, failureList);
+                    if (foreignKeyValueFromDB.size() == 0) {
+                        undefinedForeignKey(condition, projectId, failureList);
+                        return;
+                    }
+                } else {
+                    createFailure(FailureTypes.UNDEFINED_FOREIGN_KEY, Collections.singletonList(condition.foreignKey), failureList);
+                    return;
+                }
+                String paramName = "dnaSampleNum";
+                for (Map.Entry<String, Set<List<String>>> ent : mapForeignkeyAndName.entrySet()) {
+                    if (foreignKeyValueFromDB.keySet().contains(ent.getKey())) {
+                        List<NameIdDTO> nameIdDTOList = new ArrayList<>();
+                        for (List<String> name : ent.getValue()) {
+                            NameIdDTO nameIdDTO = new NameIdDTO();
+                            nameIdDTO.setName(name.get(0));
+                            nameIdDTO.getParameters().put(paramName, ""+name.get(1));//Num is stringly typed
+                            nameIdDTOList.add(nameIdDTO);
+                        }
+                        //TODO: All of this
+                        //processNameAndNumList(, fieldToCompare, FailureTypes.UNDEFINED_DNASAMPLE_NAME_NUM_VALUE, failureList);
+                    } else undefinedForeignKey(condition, ent.getKey(), failureList);
+                }
+            }
+        }
+    }
+
 
     private static void validateDbWithForeignKey(String fileName, ConditionUnit condition, List<Failure> failureList, GobiiCropConfig cropConfig) throws MaximumErrorsValidationException {
         String fieldToCompare = condition.fieldToCompare.get(0);
@@ -650,6 +885,112 @@ class ValidationUtil {
 
         }
     }
+
+    private static void validateDbWithForeignKey(String fileName, ConditionUnit condition, List<Failure> failureList, String dbConnection) throws MaximumErrorsValidationException {
+        String fieldToCompare = condition.fieldToCompare.get(0);
+        String typeName = condition.typeName;
+        Set<String> foreignKeyList = new HashSet<>();
+        if (readForeignKey(fileName, condition.foreignKey, foreignKeyList, failureList)) {
+            Map<String, Set<String>> mapForeignkeyAndName = new HashMap<>();
+            if (createForeignKeyGroup(fileName, condition, mapForeignkeyAndName, failureList)) {
+                Map<String, String> foreignKeyValueFromDB = new HashMap<>();
+                if ((foreignKeyList.size() != 1) && condition.foreignKey.equalsIgnoreCase("platform_id")) {
+                    multiplePlatformIdError(condition, failureList);
+                    return;
+                }
+                if (condition.typeName.equalsIgnoreCase(ValidationConstants.MARKER) || condition.typeName.equalsIgnoreCase(ValidationConstants.DNASAMPLE)) {
+                    switch (condition.foreignKey.toLowerCase()){
+                        case "platform_id":
+                            for (String platformId : foreignKeyList) {
+                                foreignKeyValueFromDB = ValidationWebServicesUtil.validatePlatformId(platformId, failureList);
+                                if (foreignKeyValueFromDB.size() == 0) {
+                                    undefinedForeignKey(condition, platformId, failureList);
+                                    return;
+                                }
+                            }
+                            break;
+                        case "map_id":
+                            for (String mapId : foreignKeyList) {
+                                foreignKeyValueFromDB = ValidationWebServicesUtil.validateMapId(mapId, failureList);
+                                if (foreignKeyValueFromDB.size() == 0) {
+                                    undefinedForeignKey(condition, mapId, failureList);
+                                    return;
+                                }
+                            }
+                            break;
+                        case "experiment_id":
+                            for (String experimentId : foreignKeyList) {
+                                foreignKeyValueFromDB = ValidationWebServicesUtil.validateExperimentId(experimentId, failureList);
+                                if (foreignKeyValueFromDB.size() == 0) {
+                                    undefinedForeignKey(condition, experimentId, failureList);
+                                    return;
+                                }
+                            }
+                            break;
+                        case "project_id":
+                            for (String projectId : foreignKeyList) {
+                                foreignKeyValueFromDB = ValidationWebServicesUtil.validateProjectId(projectId, failureList);
+                                if (foreignKeyValueFromDB.size() == 0) {
+                                    undefinedForeignKey(condition, projectId, failureList);
+                                    return;
+                                }
+                            }
+                            break;
+                        default:
+                            undefinedForeignKey(condition,condition.foreignKey,failureList);
+                    }
+                } else {
+                    foreignKeyValueFromDB = ValidationWebServicesUtil.getAllowedForeignKeyList(condition.typeName, failureList);
+                }
+
+                for (Map.Entry<String, Set<String>> ent : mapForeignkeyAndName.entrySet()) {
+                    String foreignKey=ent.getKey();
+                    if (foreignKeyValueFromDB.keySet().contains(foreignKey)) {
+                        Set <String> nameSet = new HashSet<String>();
+                        for (String name : ent.getValue()) {
+                            nameSet.add(name);
+                        }
+                        List<NameIdDTO> nameIdDTOList = new ArrayList<>(); //Put into set, before final array
+                        for(String name: nameSet) {
+                            NameIdDTO nameIdDTO = new NameIdDTO();
+                            nameIdDTO.setName(name);
+                            nameIdDTOList.add(nameIdDTO);
+                        }
+
+                        String failureReason = null;
+                        switch(condition.typeName.toLowerCase()) {
+                            case ValidationConstants.LINKAGE_GROUP:
+                                failureReason = FailureTypes.UNDEFINED_LINKAGE_GROUP_NAME__VALUE;
+                                break;
+                            case ValidationConstants.DNARUN:
+                                failureReason = FailureTypes.UNDEFINED_DNARUN_NAME__VALUE;
+                                break;
+                            case ValidationConstants.DNASAMPLE:
+                                failureReason = FailureTypes.UNDEFINED_DNASAMPLE_NAME_VALUE;
+                                break;
+                            case ValidationConstants.MARKER:
+                                failureReason = FailureTypes.UNDEFINED_MARKER_NAME__VALUE;
+                                break;
+                            default:
+                                Logger.logError("ValidationUtils","No valid ValidationConstant defined for validation "+ condition.typeName);
+                        }
+
+                        //TODO: This
+//                        List<NameIdDTO> nameIdDTOListResponse = ValidationWebServicesUtil.getNamesByNameList(nameIdDTOList, typeName, foreignKey, failureList, cropConfig);
+  //                      processResponseList(nameIdDTOListResponse, fieldToCompare, failureReason, failureList);
+                    } else undefinedForeignKey(condition, ent.getKey(), failureList);
+                }//end for entry in entryset
+            }
+            else { //createForeignKeyGroup
+                Logger.logWarning("Vaidation","Unable to create foreignKeyGroup");
+            }
+        }
+        else{//readForeignKey
+            Logger.logWarning("Vaidation","Unable to read foreign key");
+
+        }
+    }
+
 
     private static void undefinedForeignKey(ConditionUnit condition, String value, List<Failure> failureList) throws MaximumErrorsValidationException {
         createFailure(FailureTypes.UNDEFINED_VALUE, Collections.singletonList(condition.foreignKey), value, failureList);

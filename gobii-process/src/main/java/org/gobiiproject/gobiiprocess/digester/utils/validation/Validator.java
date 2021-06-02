@@ -8,6 +8,7 @@ import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.gobii.masticator.aspects.Aspect;
 import org.gobiiproject.gobiimodel.config.GobiiCropConfig;
 import org.gobiiproject.gobiimodel.dto.instructions.validation.ValidationConstants;
 import org.gobiiproject.gobiimodel.types.DatasetOrientationType;
@@ -31,6 +32,22 @@ class Validator {
             if (checkForSingleFileExistence(dir, validationUnit.getDigestFileName(), failureList)) {
                 String filePath = dir + "/" + validationUnit.getDigestFileName();
                 List<Failure> failures = beginValidation(filePath, validationUnit, cropConfig);
+                failureList.addAll(failures);
+                return true;
+            } else {
+                return failureList.size() != 0;
+            }
+        } catch (MaximumErrorsValidationException e) {
+            //////Don't do any thing. This implies that particular error list is full.;
+        }
+        return true;
+    }
+
+    boolean validate(ValidationUnit validationUnit, String dir, List<Failure> failureList, String dbConnection) {
+        try {
+            if (checkForSingleFileExistence(dir, validationUnit.getDigestFileName(), failureList)) {
+                String filePath = dir + "/" + validationUnit.getDigestFileName();
+                List<Failure> failures = beginValidation(filePath, validationUnit, dbConnection);
                 failureList.addAll(failures);
                 return true;
             } else {
@@ -87,6 +104,29 @@ class Validator {
 
         return failureList;
     }
+
+    private List<Failure> beginValidation(String fileName, ValidationUnit validationUnit, String dbConnection) throws MaximumErrorsValidationException {
+        List<Failure> failureList = new ArrayList<>();
+        List<String[]> inputFile = new ArrayList<>();
+        if (!ValidationUtil.readFileIntoMemory(fileName, inputFile, failureList)) return failureList;
+        if(!LoaderGlobalConfigs.isEnableValidation()) {//Validation is disabled
+            return failureList;//Stop processing here with no non-load related failures
+        }
+        // Copying of the list to avoid possible deletion of original data
+        List<String[]> input = new ArrayList<>(inputFile);
+        failureList.addAll(validateRequiredColumns(fileName, validationUnit.getConditions(), input));
+        input = new ArrayList<>(inputFile);
+        failureList.addAll(validateRequiredUniqueColumns(fileName, validationUnit.getConditions(), input));
+        input = new ArrayList<>(inputFile);
+        failureList.addAll(validateOptionalNotNullColumns(fileName, validationUnit.getConditions(), input));
+        failureList.addAll(validateUniqueColumnList(fileName, validationUnit));
+        failureList.addAll(validateFileShouldExist(fileName, validationUnit));
+        failureList.addAll(validateColumnDBandFile(fileName, validationUnit, dbConnection));
+        failureList.addAll(validateMatrixSizeColumns(fileName,validationUnit.getConditions()));
+
+        return failureList;
+    }
+
 
     /**
      * Parses the validation rules and gives the rules which are required and not  unique
@@ -293,4 +333,36 @@ class Validator {
         }
         return failures;
     }
+    /**
+     * Checks if there is file comparision and does that
+     *
+     * @param filePath       File Path
+     * @param validationUnit Validation Unit
+     */
+    private List<Failure> validateColumnDBandFile(String filePath, ValidationUnit validationUnit, String dbConnection) {
+        List<Failure> failures = new ArrayList<>();
+        for (ConditionUnit condition : validationUnit.getConditions()) {
+            List<Failure> failureList = new ArrayList<>();
+            try {
+                if (condition.fileExistenceCheck != null) {
+                    validateFileExistenceCheck(filePath, condition, failureList, dbConnection);
+                } else if (condition.type != null) {
+                    if (condition.type.equalsIgnoreCase(ValidationConstants.FILE)) {
+                        validateColumnBetweenFiles(filePath, condition, failureList);
+                    } else if(condition.type.equalsIgnoreCase(ValidationConstants.FILE_SUBSET)){
+                        validateColumnSubsetBetweenFiles(filePath,condition,failureList);
+                    } else if (condition.type.equalsIgnoreCase(ValidationConstants.DB)) {
+                        validateDatabaseCalls(filePath, condition, failureList, dbConnection);
+                    } else {
+                        ValidationUtil.createFailure(FailureTypes.UNDEFINED_CONDITION_TYPE, Collections.singletonList(condition.type), failureList);
+                    }
+                }
+            } catch (MaximumErrorsValidationException e) {
+                ////Don't do any thing. This implies that particular error list is full.;
+            }
+            failures.addAll(failureList);
+        }
+        return failures;
+    }
+
 }
