@@ -3,15 +3,17 @@ package org.gobiiproject.gobiiprocess.digester.csv.matrixValidation;
 import org.apache.commons.lang.StringUtils;
 import org.gobiiproject.gobiimodel.utils.error.Logger;
 
+import java.nio.CharBuffer;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * A separation routine for multi-allelic nucleotides for GDM-446. Takes a delimited string and converts it into an
  * undelimited N character string of alleles, with N being the number of alleles its looking for.
  */
 public class NucleotideSeparatorSplitter implements RowProcessor {
-
+    private static final String OUTPUT_SEPARATOR = "/";
     private int nucleotideCount;
     private static String UNKNOWN_ALLELE = "N";
     private String unknownSegment;
@@ -29,7 +31,7 @@ public class NucleotideSeparatorSplitter implements RowProcessor {
     public NucleotideSeparatorSplitter(int nucleotideCount, Set<String> missingSegmentsFromFile){
         this.nucleotideCount = nucleotideCount;
         this.missingSegmentsFromFile = missingSegmentsFromFile;
-        this.unknownSegment = StringUtils.repeat(UNKNOWN_ALLELE,nucleotideCount);
+        this.unknownSegment = String.join(OUTPUT_SEPARATOR,StringUtils.repeat(UNKNOWN_ALLELE,nucleotideCount).split(""));
     }
 
     public boolean process(int rowNo, List<String> inrow, List<String> outrow, MatrixErrorUtil matrixErrorUtil) {
@@ -60,8 +62,13 @@ public class NucleotideSeparatorSplitter implements RowProcessor {
 
                     error = validateInputElement(element);
                     if(error==null) {
-                        result = processInputElement(element);
-                        error = validateOutputElement(result);
+                        try {
+                            result = processInputElement(element);
+                            error = validateOutputElement(result);
+                        }
+                        catch(Exception e){
+                                error=e.getMessage();
+                            }
                     }
                 }
                 outrow.add(result);
@@ -91,21 +98,16 @@ public class NucleotideSeparatorSplitter implements RowProcessor {
 
 
         boolean hasSeparators=(length != nucleotideCount);
-        if((length != nucleotideCount) && (length != expectedLengthWithSeparators)){
-            return "Unexpected Length Element " + element; // incorrect length
+        String separatorCharacter = findSeparator(element);
+        if(separatorCharacter!=null) {
+          String[] subelements= element.split(Pattern.quote(separatorCharacter));
+          if(subelements.length != nucleotideCount){
+              return "Unexpected Length Element " + element; // incorrect length
+          }
         }
-
-        if(hasSeparators) {
-            char separatorCharacter = element.charAt(1);
-            if(!validSeparators.contains(""+separatorCharacter)){
-                return "Unexpected separator in " + element + ": " + separatorCharacter + " Expected:" + Arrays.deepToString(validSeparators.toArray()); // incorrect separator character OR wrongly sized element
-                //Expected separator from <list>, received garbage
-            }
-            for(int i = 1; i < element.length();i+=2){
-                if(element.charAt(i) != separatorCharacter){
-                    return "Unexpected character in separator slot in " + element + ": " + element.charAt(i) + " Expected:" + separatorCharacter; // incorrect separator character OR wrongly sized element
-                    //Expected more of the same separator, received garbage
-                }
+        else{
+            if(element.length()!=nucleotideCount){
+                return "Unexpected Length Element " + element; // incorrect length
             }
         }
 
@@ -113,19 +115,39 @@ public class NucleotideSeparatorSplitter implements RowProcessor {
     }
 
     /**
-     * Removes separators from input elements
+     * Replaces separators from input elements
      * @param element input element
      * @return processed input element
      */
-    private String processInputElement(String element){
+    private String processInputElement(String element) throws Exception {
         int length = element.length();
         boolean hasSeparators=((length != nucleotideCount));
         if(hasSeparators && length>1) { //If nucleotideCount=1, there's no separator character
-            char separator = element.charAt(1);
+            String separator = findSeparator(element);
+            if(separator==null){
+                throw new Exception("No separator found for element of unusual length " + element);
+            }
             //Pattern.quote to escape literals like / and | being interpreted as regular expression syntax
-            return element.replaceAll(Pattern.quote( ""+separator ), "");
+            return element.replaceAll(Pattern.quote( separator ), OUTPUT_SEPARATOR);
+        }
+        //There are no separators, so each allele is 'naked'
+        else if(length > 1){
+            //Really complicated way of saying split out every character, put OUTPUT_SEPARATOR between them. What a one-liner, though...
+            return String.join(OUTPUT_SEPARATOR, element.split(""));
         }
         else return element;
+    }
+
+    /**
+     * From the list of valid potential separator characters, find the first one that matches
+     * @param separatedString
+     * @return
+     */
+    public static String findSeparator(String separatedString){
+        for(String character:separatedString.split("")){
+            if(validSeparators.contains(character))return character;
+        }
+        return null;
     }
 
     /**
@@ -134,9 +156,9 @@ public class NucleotideSeparatorSplitter implements RowProcessor {
      * @return null on success, error message on failure
      */
     private String validateOutputElement(String element) {
-        if (element.length() != nucleotideCount) {
-            return "Unexpected Segment Count after split in " + element;
-        }
+        //if (element.length() != nucleotideCount) {
+         //   return "Unexpected Segment Count after split in " + element;
+        //}
         return null;
     }
 }

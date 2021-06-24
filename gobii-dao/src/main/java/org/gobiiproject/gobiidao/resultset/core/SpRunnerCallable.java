@@ -88,6 +88,7 @@ public class SpRunnerCallable {
 
     } // run()
 
+    @SuppressWarnings("unchecked")
     private Work createWorkFunction(final SpDef spDef, final Promise<Integer> promise)  {
 
         return connection -> {

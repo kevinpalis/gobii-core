@@ -8,5 +8,6 @@ public enum GobiiFileType {
     FLAPJACK,
     GENERIC,
     VCF,
-    META_DATA
+    META_DATA,
+    INTERTEK
 }

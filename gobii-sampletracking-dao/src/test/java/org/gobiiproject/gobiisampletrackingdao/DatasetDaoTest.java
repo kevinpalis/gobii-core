@@ -1,77 +1,152 @@
 package org.gobiiproject.gobiisampletrackingdao;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+import java.util.Random;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+
 import org.gobiiproject.gobiimodel.entity.Dataset;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.math.BigInteger;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
-import static junit.framework.TestCase.assertTrue;
-
-/**
- * This tests are created with knowledge of exisiting data in api.gobii.org:gobii-dev database
- * TODO: Setup class to create required data in the test database needs to be completed in future.
- */
 @RunWith(SpringJUnit4ClassRunner.class)
-@Ignore
+@ContextConfiguration(locations = {"classpath:/spring/test-config.xml"})
+@Slf4j
+@Transactional
 public class DatasetDaoTest {
+
+
+    @PersistenceContext
+    protected EntityManager em;
 
     @Autowired
     private DatasetDao datasetDao;
 
+    @Autowired
+    private CvDao cvDao;
+
+    DaoTestSetUp daoTestSetUp;
+
+    Random random = new Random();
+
+    final Integer testPageSize = 10;
+
+    @Before
+    public void createTestData() {
+        daoTestSetUp = new DaoTestSetUp(em, cvDao);
+        daoTestSetUp.createTestDatasets(testPageSize);
+        em.flush();
+
+    }
 
     @Test
     public void testListDatasets() {
 
-        Integer testPageSize = 10;
+        Integer testRowOffset = 0;
 
-        List<Dataset> datasets = datasetDao.listDatasets(
-                testPageSize, null, null);
+        List<Dataset> datasets = datasetDao.getDatasets(
+                testPageSize, testRowOffset,
+                null, null,
+                null,
+                null, null);
 
-        //As test database table has ananlyses greater than 0, assert the same
-        for( Dataset dataset : datasets) {
-
-            assertTrue(dataset.getMappedAnalyses().size() > 0);
-            assertTrue(dataset.getMarkerCount() >= 0);
-            assertTrue(dataset.getDnaRunCount() >= 0);
-
-        }
 
         assertTrue(datasets.size() <= testPageSize);
 
     }
 
 
-
     @Test
     public void testListDatasetsWithPageSize() {
 
-        List<Dataset> datasets = datasetDao.listDatasets(10, null, null);
+        Integer testRowOffset = 0;
 
-        assertTrue(datasets.size() == 10);
+        List<Dataset> datasets = datasetDao.getDatasets(
+            testPageSize, testRowOffset, null, null,
+            null, null, null);
+
+        assertTrue("Dataset Page Size condition failed",
+            datasets.size() <= testPageSize && datasets.size() > 0);
 
     }
-
-
 
     @Test
     public void testGetDatasetById() {
 
-        List<Dataset> datasets = datasetDao.listDatasets(10, null, null);
+        Integer datasetId =
+            daoTestSetUp
+                .getCreatedDatasets()
+                .get(random.nextInt(daoTestSetUp.getCreatedDatasets().size()))
+                .getDatasetId();
 
-        assertTrue(datasets.size() == 10);
+        Dataset dataset = datasetDao.getDataset(datasetId);
 
-        Integer datasetId = datasets.get(9).getDatasetId();
-
-        Dataset dataset = datasetDao.getDatasetById(datasetId);
-
-        assertTrue(dataset.getDatasetId() == datasetId);
+        assertTrue("Failing get Dataset by Id",
+                dataset.getDatasetId() == datasetId);
 
     }
 
+    @Test
+    public void testGetDatasetByExperiemntId() {
+
+        Integer experimentId =
+            daoTestSetUp.getCreatedExperiments()
+                .get(
+                    random.nextInt(daoTestSetUp.getCreatedExperiments().size()))
+                .getExperimentId();
+
+        List<Dataset> datasetsByExperimentId =
+            datasetDao.getDatasets(testPageSize, 0, null, null,
+                null, experimentId, null);
+
+        int numOfDatasetsInExperiemt = 0;
+
+        for(Dataset dataset : daoTestSetUp.getCreatedDatasets()) {
+            if(dataset.getExperiment().getExperimentId() == experimentId) {
+                numOfDatasetsInExperiemt++;
+            }
+        }
+
+        assertTrue("No Dataset to test",
+            datasetsByExperimentId.size() <= testPageSize
+            && datasetsByExperimentId.size() == numOfDatasetsInExperiemt);
+
+        for (Dataset dataset : datasetsByExperimentId) {
+            assertTrue("Failing Experiment Id Filter",
+                    dataset.getExperiment().getExperimentId() == experimentId);
+        }
+
+    }
+
+    @Test
+    public void testGetDatasetsWithAnalysisAndCounts() {
+
+
+        List<Object[]> resultTuple =
+            datasetDao.getDatasetsWithAnalysesAndCounts(
+                testPageSize, 0,
+                null, null,
+                null, null);
+
+
+        assertTrue("Failed getDatasetsWithAnalysisAndCounts", resultTuple.size() >= testPageSize);
+
+    }
+
+    @Test
+    public void testCountAnalysesArray() {
+        int count = datasetDao.getDatasetCountWithAnalysesContaining(1);
+        log.info("Count: " + count);
+        assert count >= 0;
+    }
 }

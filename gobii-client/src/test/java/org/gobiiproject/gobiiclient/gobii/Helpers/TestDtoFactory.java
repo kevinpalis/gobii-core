@@ -1,32 +1,36 @@
 package org.gobiiproject.gobiiclient.gobii.Helpers;
 
-import org.gobiiproject.gobiiclient.gobii.dbops.crud.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import org.gobiiproject.gobiiclient.gobii.dbops.crud.DtoCrudRequestExperimentTest;
+import org.gobiiproject.gobiiclient.gobii.dbops.crud.DtoCrudRequestOrganizationTest;
+import org.gobiiproject.gobiiclient.gobii.dbops.crud.DtoCrudRequestPlatformTest;
 import org.gobiiproject.gobiimodel.cvnames.JobPayloadType;
 import org.gobiiproject.gobiimodel.cvnames.JobProgressStatusType;
 import org.gobiiproject.gobiimodel.cvnames.JobType;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.AnalysisDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ContactDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.DataSetDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.DisplayDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ManifestDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.MapsetDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.MarkerGroupDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.PlatformDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ReferenceDTO;
-import org.gobiiproject.gobiimodel.dto.entity.children.MarkerGroupMarkerDTO;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.CvDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.JobDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.MarkerDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.AnalysisDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ContactDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.DisplayDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ManifestDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.MapsetDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.MarkerGroupDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.OrganizationDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.PlatformDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ProtocolDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ReferenceDTO;
+import org.gobiiproject.gobiimodel.dto.children.MarkerGroupMarkerDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.CvDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.DataSetDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.JobDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.MarkerDTO;
 import org.gobiiproject.gobiimodel.dto.system.PingDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.OrganizationDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ProtocolDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiProcessType;
 import org.gobiiproject.gobiimodel.utils.DateUtils;
-
-import java.sql.Timestamp;
-import java.util.*;
 
 /**
  * Created by Phil on 4/27/2016.
@@ -109,9 +113,9 @@ public class TestDtoFactory {
         returnVal.setStatusId(1);
         returnVal.setModifiedBy(1);
        returnVal.setCreatedBy(1);
-        returnVal.setPlatformCode(uniqueStem + "dummy code");
-        returnVal.setPlatformDescription(uniqueStem + "dummy description");
-        returnVal.setPlatformName(uniqueStem + "New Platform");
+        returnVal.setPlatformCode(uniqueStemString + "dummy code");
+        returnVal.setPlatformDescription(uniqueStemString + "dummy description");
+        returnVal.setPlatformName(uniqueStemString + "New Platform");
         returnVal.setTypeId(1);
 
         returnVal.setProperties(entityParamValues.getProperties());
@@ -151,9 +155,8 @@ public class TestDtoFactory {
     }
 
     public static String getFolderNameWithTimestamp(String folderName) {
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        //Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         String returnVal = folderName.replaceAll(" ", "_") + DateUtils.makeDateIdString();
-
 
         return returnVal;
     }
@@ -163,7 +166,6 @@ public class TestDtoFactory {
                                                      List<Integer> analysisIds) throws Exception {
 
         DataSetDTO returnVal = new DataSetDTO();
-
 
         // set the big-ticket items
 
@@ -202,10 +204,10 @@ public class TestDtoFactory {
 
         String uniqueStemString = uniqueStem.toString();
         // set the plain properties
-        returnVal.setName(uniqueStem + "dummy name");
-        returnVal.setCode(uniqueStem + "add dummy code");
+        returnVal.setName(uniqueStemString + "dummy name");
+        returnVal.setCode(uniqueStemString + "add dummy code");
         returnVal.setCreatedBy(1);
-        returnVal.setDescription(uniqueStem + "dummy description");
+        returnVal.setDescription(uniqueStemString + "dummy description");
         returnVal.setMapType(1);
         returnVal.setModifiedBy(1);
         returnVal.setReferenceId(GlobalPkValues.getInstance().getAPkVal(GobiiEntityNameType.REFERENCE));
@@ -223,10 +225,10 @@ public class TestDtoFactory {
         ReferenceDTO returnVal = new ReferenceDTO();
 
         String uniqueStemString = uniqueStem.toString();
-        returnVal.setName(uniqueStem + ": reference");
-        returnVal.setVersion("version:" + uniqueStem);
-        returnVal.setLink(uniqueStem + " link");
-        returnVal.setFilePath(uniqueStem + " file path");
+        returnVal.setName(uniqueStemString + ": reference");
+        returnVal.setVersion("version:" + uniqueStemString);
+        returnVal.setLink(uniqueStemString + " link");
+        returnVal.setFilePath(uniqueStemString + " file path");
 
         return returnVal;
 
@@ -278,9 +280,9 @@ public class TestDtoFactory {
         ManifestDTO returnVal = new ManifestDTO();
 
         String uniqueStemString = uniqueStem.toString();
-        returnVal.setName(uniqueStem + ": reference");
-        returnVal.setCode("version:" + uniqueStem);
-        returnVal.setFilePath(uniqueStem + " file path");
+        returnVal.setName(uniqueStemString + ": reference");
+        returnVal.setCode("version:" + uniqueStemString);
+        returnVal.setFilePath(uniqueStemString + " file path");
         returnVal.setCreatedBy(1);
         returnVal.setModifiedBy(1);
 
@@ -299,16 +301,16 @@ public class TestDtoFactory {
                 GobiiEntityNameType.ORGANIZATION);
 
 
-        returnVal.setFirstName(uniqueStem + " new contact");
-        returnVal.setLastName(uniqueStem + "new lastname");
-        returnVal.setEmail(uniqueStem + "mail@email.com");
-        returnVal.setCode(uniqueStem + "added New Code");
+        returnVal.setFirstName(uniqueStemString + " new contact");
+        returnVal.setLastName(uniqueStemString + "new lastname");
+        returnVal.setEmail(uniqueStemString + "mail@email.com");
+        returnVal.setCode(uniqueStemString + "added New Code");
         returnVal.setCreatedBy(1);
         returnVal.setModifiedBy(1);
         returnVal.setOrganizationId(organizationId);
         returnVal.getRoles().add(1);
         returnVal.getRoles().add(2);
-        returnVal.setUserName(uniqueStem + "new username");
+        returnVal.setUserName(uniqueStemString + "new username");
 
         return returnVal;
 

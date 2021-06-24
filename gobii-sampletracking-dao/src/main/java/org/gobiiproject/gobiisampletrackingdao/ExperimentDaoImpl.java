@@ -1,175 +1,133 @@
 package org.gobiiproject.gobiisampletrackingdao;
 
-import org.gobiiproject.gobiimodel.entity.Experiment;
-import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
-import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
-import org.gobiiproject.gobiisampletrackingdao.spworkers.SpDef;
-import org.gobiiproject.gobiisampletrackingdao.spworkers.SpWorker;
-import org.hibernate.exception.ConstraintViolationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
+import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-import java.util.Date;
-import java.util.List;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
 
+import org.gobiiproject.gobiimodel.config.GobiiException;
+import org.gobiiproject.gobiimodel.entity.Experiment;
+import org.gobiiproject.gobiimodel.entity.VendorProtocol;
+import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
+import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
+
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 public class ExperimentDaoImpl implements ExperimentDao {
-
-
-    Logger LOGGER = LoggerFactory.getLogger(ExperimentDaoImpl.class);
 
     @PersistenceContext
     protected EntityManager em;
 
-    @Autowired
-    protected SpWorker spWorker;
-
-
     @Override
-    @Transactional
-    public Integer createExperiment(Experiment newExperiment) {
+    @SuppressWarnings("unchecked")
+    public List<Experiment> getExperiments(Integer pageSize, Integer rowOffset,
+                                           Integer projectId) {
 
-        Integer returnVal = 0;
+        List<Experiment> experiments;
 
         try {
 
-            SpDef spDef = new SpDef("{call createexperiment(?,?,?,?,?,?,?,?,?,?,?)}")
-                    .addParamDef(1, String.class, newExperiment.getExperimentName())
-                    .addParamDef(2, String.class, newExperiment.getExperimentCode())
-                    .addParamDef(3, Integer.class, newExperiment.getProjectId())
-                    .addParamDef(4, Integer.class, newExperiment.getVendorProtocolId())
-                    .addParamDef(5, Integer.class, newExperiment.getManifestId())
-                    .addParamDef(6, String.class, newExperiment.getDataFile())
-                    .addParamDef(7, Integer.class, newExperiment.getCreatedBy())
-                    .addParamDef(8, Date.class, newExperiment.getCreatedDate())
-                    .addParamDef(9, Integer.class, newExperiment.getModifiedBy())
-                    .addParamDef(10, Date.class, newExperiment.getModifiedDate())
-                    .addParamDef(11, Integer.class, newExperiment.getStatus().getCvId());
+            Objects.requireNonNull(pageSize, "pageSize : Required non null");
+            Objects.requireNonNull(pageSize, "rowOffset : Required non null");
 
-            spWorker.run(spDef);
+            CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 
-            returnVal = spWorker.getResult();
+            CriteriaQuery<Experiment> criteriaQuery = criteriaBuilder.createQuery(Experiment.class);
 
-        }
-        catch (ConstraintViolationException constraintViolation) {
+            Root<Experiment> experimentRoot = criteriaQuery.from(Experiment.class);
+            criteriaQuery.select(experimentRoot);
 
-            String errorMsg;
+            Join<Object, Object> project = (Join<Object, Object>) experimentRoot.fetch("project");
 
-            GobiiValidationStatusType statusType = GobiiValidationStatusType.BAD_REQUEST;
+            project.fetch("contact", JoinType.LEFT).fetch("organization", JoinType.LEFT);
 
-            // Postgresql error code for Unique Constraint Violation is 23505
-            if(constraintViolation.getSQLException() != null) {
+            Join<Object, Object>  vendorProtocol =
+                    (Join<Object, Object>) experimentRoot
+                            .fetch("vendorProtocol");
+            vendorProtocol.fetch("protocol", JoinType.LEFT).fetch("platform", JoinType.LEFT);
+            vendorProtocol.fetch("vendor", JoinType.LEFT);
 
-                if(constraintViolation.getSQLException().getSQLState().equals("23505")) {
-
-                    statusType = GobiiValidationStatusType.ENTITY_ALREADY_EXISTS;
-
-                    errorMsg = "Experiment already exists";
-
-                }
-                else {
-
-                    errorMsg = "Invalid request or Missing required fields.";
-
-                }
-
+            if(projectId != null) {
+                criteriaQuery.where(criteriaBuilder.equal(project.get("projectId"), projectId));
             }
-            else {
-                errorMsg = constraintViolation.getMessage();
-            }
-            throw (new GobiiDaoException(
-                    GobiiStatusLevel.ERROR,
-                    statusType,
-                    errorMsg)
-            );
-        }
-        catch(Exception e) {
-            LOGGER.error(e.getMessage(), e);
 
+            experiments = em.createQuery(criteriaQuery)
+                .setFirstResult(rowOffset)
+                .setMaxResults(pageSize)
+                .getResultList();
+
+            return experiments;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new GobiiDaoException(GobiiStatusLevel.ERROR, GobiiValidationStatusType.UNKNOWN,
-                    e.getMessage());
+                e.getMessage() + " Cause Message: " + e.getCause().getMessage());
         }
-
-        return returnVal;
-
     }
 
     @Override
-    public Experiment getExperimentById(Integer experimentId) {
-
-        List<Experiment> experimentList;
-
+    public Experiment getExperiment(Integer i) throws GobiiDaoException {
         try {
+            return em.find(Experiment.class, i, getHints());
+        }
+        catch (IllegalArgumentException e) {
+            throw new GobiiDaoException(GobiiStatusLevel.ERROR, GobiiValidationStatusType.UNKNOWN,
+                e.getMessage() + " Cause Message: " + e.getCause().getMessage());
+        }
+    }
 
-            experimentList = em
-                    .createNativeQuery(
-                            "SELECT * FROM experiment WHERE experiment_id = ?", Experiment.class)
-                    .setParameter(1, experimentId)
-                    .getResultList();
+    @Override
+    public VendorProtocol getVendorProtocol(Integer vendorProtocolId) {
+        return em.find(VendorProtocol.class, vendorProtocolId);
+    }
 
+    @Override
+    public Experiment createExperiment(Experiment experiment) throws Exception {
+        em.persist(experiment);
+        em.flush();
+        em.refresh(experiment, getHints());
+        return experiment;
+    }
 
+    @Override
+    public Experiment updateExperiment(Experiment target) throws Exception {
+        Experiment experiment = em.merge(target);
+        em.flush();
+        em.refresh(experiment, getHints());
+        return experiment;
+    }
+    
+    private Map<String, Object> getHints() {
+        EntityGraph<?> graph = em.getEntityGraph("graph.experiment");
+        Map<String, Object> hints = new HashMap<>();
+        hints.put("javax.persistence.fetchgraph", graph);
+        return hints;    
+    }
 
-            if (experimentList.size() == 0) {
-                return null;
-            } else if (experimentList.size() > 1) {
-                throw new GobiiDaoException(GobiiStatusLevel.ERROR,
-                        GobiiValidationStatusType.VALIDATION_NOT_UNIQUE,
-                        "Multiple resources found. Violation of Unique Experiment Id constraint." +
-                                " Please contact your Data Administrator to resolve this. " +
-                                "Changing underlying database schemas and constraints " +
-                                "without consulting GOBii Team is not recommended.");
-
+    @Override
+    public void deleteExperiment(Experiment experiment) {
+        try {
+                em.remove(experiment);
+                em.flush();
+            } catch (javax.persistence.PersistenceException pe) {
+                throw new GobiiException(
+                    GobiiStatusLevel.ERROR,
+                    GobiiValidationStatusType.FOREIGN_KEY_VIOLATION,
+                    "Associated resources found. Cannot complete the action unless they are deleted.");
+            } catch (Exception e) {
+                throw e;
             }
-        }
-        catch(Exception e) {
-
-            LOGGER.error(e.getMessage(), e);
-
-            throw new GobiiDaoException(GobiiStatusLevel.ERROR,
-                    GobiiValidationStatusType.UNKNOWN,
-                    e.getMessage());
-        }
-
-        return experimentList.get(0);
 
     }
-
-    /**
-     * Updates the Experiment with given datafile path by experimentId.
-     * @param experimentId - Id of the experiment to be updated.
-     * @param dataFilePath - data file path that needs to be added.
-     * @return number of records updated.
-     */
-    @Override
-    @Transactional
-    public Integer updateExperimentDataFile(Integer experimentId, String dataFilePath) {
-
-        Integer updatedRecords = 0;
-
-        try {
-
-            updatedRecords = em
-                    .createNativeQuery(
-                            "UPDATE experiment SET data_file = ? WHERE experiment_id = ?")
-                    .setParameter(1, dataFilePath)
-                    .setParameter(2, experimentId)
-                    .executeUpdate();
-
-            return updatedRecords;
-
-        }
-        catch(Exception e) {
-
-            LOGGER.error(e.getMessage(), e);
-
-            throw new GobiiDaoException(GobiiStatusLevel.ERROR,
-                    GobiiValidationStatusType.UNKNOWN,
-                    e.getMessage());
-        }
-
-    }
-
 }

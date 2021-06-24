@@ -5,7 +5,7 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>org.gobiiproject</groupId>
-        <version>GOBII Server 2.2_2020-03-04</version>
+        <version>GOBII Server 2.2.3_2021-02-03</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -23,6 +23,13 @@
 
         <dependency>
             <groupId>org.gobiiproject</groupId>
+            <artifactId>gobii-sampletracking-dao</artifactId>
+        </dependency>
+
+
+
+        <dependency>
+            <groupId>org.gobiiproject</groupId>
             <artifactId>gobii-client</artifactId>
         </dependency>
 
@@ -31,6 +38,17 @@
             <artifactId>gobii-domain</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.gobii</groupId>
+            <artifactId>masticator</artifactId>
+            <version>0.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.2.4</version>
+            <type>maven-plugin</type>
+        </dependency>
 
         <!-- Spring and Transactions -->
         <dependency>
@@ -62,6 +80,8 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>4.13.1</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- Commons -->
@@ -73,19 +93,19 @@
         <!-- Mockito, Hamcrest and PowerMock -->
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.18.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-library</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
+            <artifactId>powermock-api-mockito2</artifactId>
+            <version>2.0.0-beta.5</version>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
+            <version>2.0.0-beta.5</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
@@ -99,149 +119,104 @@
             <version>1.18.8</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.gobii</groupId>
+            <artifactId>masticator</artifactId>
+            <version>0.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
 
+        <dependency>
+            <groupId>org.gobiiproject</groupId>
+            <artifactId>gobii-model</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.github.samtools/htsjdk -->
+        <dependency>
+            <groupId>com.github.samtools</groupId>
+            <artifactId>htsjdk</artifactId>
+            <version>2.21.3</version>
+        </dependency>
     </dependencies>
 
     <build>
 
-        <plugins>
 
-            <!-- Maven Assembly Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4.1</version>
-                <configuration>
-                    <!-- get all project dependencies -->
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.2.4</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                            <configuration>
+                                <finalName>Digester</finalName>
+                                <shadedArtifactAttached>true</shadedArtifactAttached>
+                                <transformers>
+                                    <transformer implementation=
+                                                         "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                        <mainClass>org.gobiiproject.gobiiprocess.digester.GobiiDigester</mainClass>
+                                    </transformer>
+                                    <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                        <resource>META-INF/spring.handlers</resource>
+                                    </transformer>
+                                    <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                        <resource>META-INF/spring.schemas</resource>
+                                    </transformer>
+                                </transformers>
+                                <filters>
+                                    <filter>
+                                        <artifact>*:*</artifact>
+                                        <excludes>
+                                            <exclude>META-INF/*.SF</exclude>
+                                            <exclude>META-INF/*.DSA</exclude>
+                                            <exclude>META-INF/*.RSA</exclude>
+                                        </excludes>
+                                    </filter>
+                                </filters>
+                            </configuration>
+                        </execution>
 
-                </configuration>
-                <executions>
-
-
-                    <!--gobii config check Execution-->
-                    <execution>
-                        <configuration>
-                            <finalName>gobiiconfig</finalName>
-                            <!-- MainClass in mainfest make a executable jar -->
-                            <archive>
-                                <manifest>
-                                    <mainClass>org.gobiiproject.gobiiprocess.GobiiConfig</mainClass>
-                                </manifest>
-                            </archive>
-                        </configuration>
-                        <id>make-assembly</id>
-                        <!-- bind to the packaging phase -->
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-
-                    </execution>
-
-                    <!-- brapi integration tool execution -->
-                    <execution>
-                        <configuration>
-                            <finalName>brapitool</finalName>
-                            <!-- MainClass in mainfest make a executable jar -->
-                            <archive>
-                                <manifest>
-                                    <mainClass>org.gobiiproject.gobiiprocess.BrAPIIntegrationTool</mainClass>
-                                </manifest>
-                            </archive>
-                        </configuration>
-                        <id>make-brapitool</id>
-                        <!-- bind to the packaging phase -->
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-
-                    </execution>
-
-                    <!--Digester Execution-->
-                    <execution>
-                        <configuration>
-                            <finalName>Digester</finalName>
-                            <archive>
-                                <manifest>
-                                    <mainClass>org.gobiiproject.gobiiprocess.digester.Digester</mainClass>
-                                </manifest>
-                            </archive>
-                        </configuration>
-                        <id>make-digester</id>
-                        <!-- bind to the packaging phase -->
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-
-                    </execution>
-
-
-                    <!--Extractor Execution-->
-                    <execution>
-                        <configuration>
-                            <finalName>Extractor</finalName>
-                            <archive>
-                                <manifest>
-                                    <mainClass>org.gobiiproject.gobiiprocess.extractor.GobiiExtractor</mainClass>
-                                </manifest>
-                            </archive>
-                        </configuration>
-                        <id>make-extractor</id>
-                        <!-- bind to the packaging phase -->
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-
-                    <!--User Authentication Execution-->
-                    <execution>
-                        <configuration>
-                            <finalName>UserAuthentication</finalName>
-                            <archive>
-                                <manifest>
-                                    <mainClass>org.gobiiproject.gobiiprocess.UserAuthentication</mainClass>
-                                </manifest>
-                            </archive>
-                        </configuration>
-                        <id>make-userauthentication</id>
-                        <!-- bind to the packaging phase -->
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-
-                    </execution>
-
-                    <!--gobii digest validation -->
-                    <execution>
-                        <configuration>
-                            <finalName>digestValidator</finalName>
-                            <!-- MainClass in mainfest make a executable jar -->
-                            <archive>
-                                <manifest>
-                                    <mainClass>org.gobiiproject.gobiiprocess.digester.utils.validation.DigestFileValidator</mainClass>
-                                </manifest>
-                            </archive>
-                        </configuration>
-                        <id>make-digestValidator</id>
-                        <!-- bind to the packaging phase -->
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-
-                    </execution>
-
-
-                </executions>
-            </plugin>
-        </plugins>
+                        <!-- Separate Execution for EBSLoader. I don't really know what I'm doing, but hey, it's software. Cut twice, then eyeball it-->
+                        <execution>
+                            <id>EbsExecution</id>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                            <configuration>
+                                <finalName>EbsLoader</finalName>
+                                <shadedArtifactAttached>true</shadedArtifactAttached>
+                                <transformers>
+                                    <transformer implementation=
+                                                         "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                        <mainClass>org.gobiiproject.gobiiprocess.digester.EBSLoader</mainClass>
+                                    </transformer>
+                                </transformers>
+                                <filters>
+                                    <filter>
+                                        <artifact>*:*</artifact>
+                                        <excludes>
+                                            <exclude>META-INF/*.SF</exclude>
+                                            <exclude>META-INF/*.DSA</exclude>
+                                            <exclude>META-INF/*.RSA</exclude>
+                                        </excludes>
+                                    </filter>
+                                </filters>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>9</source>
+                        <target>9</target>
+                    </configuration>
+                   </plugin>
+            </plugins>
     </build>
 </project>

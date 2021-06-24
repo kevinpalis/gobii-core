@@ -9,7 +9,7 @@ import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContextAuth;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContext;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiEnvelopeRestResource;
 import org.gobiiproject.gobiiclient.gobii.Helpers.*;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ProtocolDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ProtocolDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiProcessType;
 import org.junit.AfterClass;
@@ -68,7 +68,8 @@ public class DtoCrudRequestProtocolTest implements DtoCrudRequestTest{
         PayloadEnvelope<ProtocolDTO> resultEnvelopeForGetByID = restResourceForGetById
                 .get(ProtocolDTO.class);
         Assert.assertFalse(TestUtils.checkAndPrintHeaderMessages(resultEnvelopeForGetByID.getHeader()));
-        ProtocolDTO protocolDTOResponseForParams = resultEnvelopeForGetByID.getPayload().getData().get(0);
+        //ProtocolDTO protocolDTOResponseForParams = 
+        resultEnvelopeForGetByID.getPayload().getData().get(0); //TODO: convert to assertion?
 
         GlobalPkValues.getInstance().addPkVal(GobiiEntityNameType.PROTOCOL, protocolDTOResponse.getProtocolId());
 
@@ -234,12 +235,13 @@ public class DtoCrudRequestProtocolTest implements DtoCrudRequestTest{
             Assert.assertTrue(currentProtocolDto.getProtocolId().equals(protocolDTOFromLink.getProtocolId()));
         }
 
+        Integer experimentId = (new GlobalPkColl<DtoCrudRequestExperimentTest>().getAPkVal(DtoCrudRequestExperimentTest.class, GobiiEntityNameType.EXPERIMENT));
 
         //get ProtocolDetails By ExperimentId
         RestUri restUriProtocolsForGetDetailsByExperimentId = GobiiClientContext.getInstance(null, false)
                 .getUriFactory()
                 .resourceByUriIdParam(RestResourceId.GOBII_EXPERIMENTS)
-                .setParamValue("id", "1")
+                .setParamValue("id", experimentId.toString())
                 .appendSegment(RestResourceId.GOBII_PROTOCOL);
 
         GobiiEnvelopeRestResource<ProtocolDTO,ProtocolDTO> restResourceProtocolForGetDetailsByExperimentId = new GobiiEnvelopeRestResource<>(restUriProtocolsForGetDetailsByExperimentId);

@@ -12,11 +12,11 @@ import org.hibernate.jdbc.Work;
  */
 public class SpGetDatasetNames implements Work {
 
+    @SuppressWarnings("unused")
     private Map<String, Object> parameters = null;
 
     public SpGetDatasetNames() {
     }
-
 
     private ResultSet resultSet = null;
 

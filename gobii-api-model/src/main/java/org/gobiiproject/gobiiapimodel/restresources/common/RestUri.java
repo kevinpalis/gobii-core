@@ -20,6 +20,7 @@ public class RestUri {
     public static char URL_SEPARATOR = '/';
     private final String DELIM_PARAM_BEGIN = "{";
     private final String DELIM_PARAM_END = "}";
+    private final String CROP_TYPE_PATTERN = "{cropType}";
 
     private String domain = null;
     private Integer port = null;
@@ -252,13 +253,13 @@ public class RestUri {
         return this.destinationFilenPath;
     }
 
-    public String makeUrlComplete() throws Exception {
+    public String makeUrlComplete(String cropType) throws Exception {
 
         if(LineUtils.isNullOrEmpty(this.domain) || this.port == null ) {
             throw new Exception("Domain and Port values are required");
         }
 
-        String returnVal = this.domain + ":" + this.port + "/" + this.makeUrlWithQueryParams();
+        String returnVal = this.domain + ":" + this.port + "/" + this.makeUrlWithQueryParams(cropType);
 
         returnVal = returnVal.replace("//", "/");
 
@@ -277,9 +278,9 @@ public class RestUri {
      * @return
      * @throws Exception
      */
-    public String makeUrlWithQueryParams() throws Exception {
+    public String makeUrlWithQueryParams(String cropType) throws Exception {
 
-        String returnVal = this.makeUrlPath();
+        String returnVal = this.makeUrlPath(cropType);
         returnVal += "?";
         for (ResourceParam currentParam : this.getRequestParams()) {
             returnVal += currentParam.getName() + "=" + currentParam.getValue();
@@ -288,7 +289,7 @@ public class RestUri {
         return returnVal;
     }
 
-    public String makeUrlPath() throws Exception {
+    public String makeUrlPath(String cropType) throws Exception {
 
         String returnVal = this.requestTemplate; // in case there are no path variables
 
@@ -319,6 +320,10 @@ public class RestUri {
                         + " does not contain the path path variable "
                         + paramToReplace);
             }
+        }
+
+        if(returnVal.contains(CROP_TYPE_PATTERN)) {
+            returnVal = returnVal.replace(CROP_TYPE_PATTERN, cropType);
         }
 
         if (returnVal.contains(this.DELIM_PARAM_BEGIN)) {

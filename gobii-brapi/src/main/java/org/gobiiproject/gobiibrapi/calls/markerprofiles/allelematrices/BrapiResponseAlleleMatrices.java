@@ -1,6 +1,5 @@
 package org.gobiiproject.gobiibrapi.calls.markerprofiles.allelematrices;
 
-import org.gobiiproject.gobiibrapi.calls.studies.search.BrapiResponseStudiesSearchItem;
 import org.gobiiproject.gobiibrapi.core.responsemodel.BrapiResponseDataList;
 
 /**

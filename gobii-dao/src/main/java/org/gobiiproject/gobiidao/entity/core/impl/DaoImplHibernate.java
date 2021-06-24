@@ -18,6 +18,7 @@ public abstract class DaoImplHibernate<T> implements EntityDao<T> {
 
     private Class<T> type;
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public DaoImplHibernate() {
         Type t = getClass().getGenericSuperclass();
         ParameterizedType pt = (ParameterizedType) t;

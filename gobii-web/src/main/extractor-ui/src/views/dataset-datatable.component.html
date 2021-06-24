@@ -1,0 +1,187 @@
+<div style="border: 0px; padding-left: 5px">
+    <BR>
+    <p-checkbox binary="true"
+                [(ngModel)]="filterToExtractReady"
+                (onChange)="handleFilterToExtractReadyChecked($event)"
+                [disabled]="disableFilterToExtractReadyCheckbox">
+    </p-checkbox>
+    <label class="the-legend">Extract-Ready&nbsp;</label>
+    <BR>
+    <div class="container-fluid">
+
+
+        <!--<name-id-list-box-->
+        <!--[gobiiExtractFilterType]="gobiiExtractFilterType"-->
+        <!--[filterParamName]="nameIdFilterParamTypes.CV_JOB_STATUS">-->
+        <!--</name-id-list-box>-->
+
+    </div> <!--status selector row -->
+    <p-table [value]="datasetsFileItems$ | async"
+                 [(selection)]="selectedDatasets"
+                 (onRowSelect)="handleRowSelect($event)"
+                 (onRowUnselect)="handleRowUnSelect($event)"
+                 (onRowClick)="handleOnRowClick($event)"
+                 dataKey="_entity.id"
+                 resizableColumns="true"
+                 scrollHeight="700px"
+                 scrollWidth="100%"
+                 columnResizeMode="expand"
+                 emptymessage="There are no matching rows..."
+    >
+
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="width:5%"></th>
+                <th style="width:5%"></th>
+                <th style="width:18%">Name</th>
+                <th style="width:18%">ProjectName</th>
+                <th style="width:18%">Experiment</th>
+                <th style="width:18%">PI</th>
+                <th style="width:18%">Loaded</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-fi>
+            <tr [pSelectableRowDisabled]="!fi._entity.completed">
+                <td style="padding:1;">
+                
+                    <p-tableCheckbox [value]="fi" 
+                        [hidden]="hideNonExtractReadyJobs(fi, {
+                            'load' : ['completed']
+                        })"
+                        [id]="viewIdGeneratorService.makeDatasetRowCheckboxId(fi._entity.datasetName)">
+                    </p-tableCheckbox>
+                </td>
+                <td style="padding:0"><button pButton type="button" icon="pi pi-eye" class="p-button-secondary p-button-sm"
+                    (click)="selectDataset($event,fi,datasetOverlayPanel);"></button>
+                </td>
+        
+            <td class="cell-entry"> {{ fi._entity.datasetName }}</td>
+            <td class="cell-entry"> {{ fi._entity.projectName }}</td>
+            <td class="cell-entry"> {{ fi._entity.experimentName }}</td>
+            <td class="cell-entry"> <span pTooltip="{{fi._entity.piLastName}}, {{fi._entity.piFirstName}}" tooltipPosition="left"
+                tooltipStyleClass="tableTooltip"> {{fi._entity.piLastName}}, {{fi._entity.piFirstName}} </span></td>
+            <td class="cell-entry"> {{ fi._entity.loadedDate | date:'yyyy-MM-dd' }}</td>
+            </tr>
+           
+
+        </ng-template>
+       
+    </p-table>
+    <p-overlayPanel #datasetOverlayPanel
+                    appendTo="body"
+                    [showCloseIcon]="true" 
+                    (onHide)="handleHideOverlayPanel($event)">
+
+
+        <!-- you have to  -->
+        <legend>Details:
+            {{ selectedDatasetDetailEntity ? selectedDatasetDetailEntity.datasetName : null}}
+        </legend>
+
+
+        <div class="panel panel-default">
+            <table class="table table-striped table-hover">
+                <!--<table class="table table-striped table-hover table-bordered">-->
+                <tbody>
+                <tr>
+                    <td><b>Principal Investigator</b></td>
+                    <td>
+                        {{ selectedDatasetDetailEntity ? selectedDatasetDetailEntity.piLastName + ", " + selectedDatasetDetailEntity.piFirstName : null}}
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>Loaded By</b></td>
+                    <td>{{ selectedDatasetDetailEntity ? selectedDatasetDetailEntity.loaderLastName : null}}
+                        {{ (selectedDatasetDetailEntity && selectedDatasetDetailEntity.loaderFirstName) ? ", " : null}}
+                        {{ selectedDatasetDetailEntity ? selectedDatasetDetailEntity.loaderFirstName : null}}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><b>Loaded Date</b></td>
+                    <td>
+                        {{ selectedDatasetDetailEntity ? (selectedDatasetDetailEntity.loadedDate | date:'yyyy-MM-dd') : null}}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><b>Project</b></td>
+                    <td>
+                        {{ selectedDatasetDetailEntity ? selectedDatasetDetailEntity.projectName : null}}
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <td><b>Data Type</b></td>
+                    <td>
+                        {{ selectedDatasetDetailEntity ? selectedDatasetDetailEntity.datatypeName : null}}
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <td><b>Calling Analysis</b></td>
+                    <td>
+                        {{ selectedDatasetDetailEntity ? selectedDatasetDetailEntity.callingAnalysisName : null}}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><b>Total Samples</b></td>
+                    <td>
+                        {{ selectedDatasetDetailEntity ? selectedDatasetDetailEntity.totalSamples : null}}
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <td><b>Total Markers</b></td>
+                    <td>
+                        {{ selectedDatasetDetailEntity ? selectedDatasetDetailEntity.totalMarkers : null}}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><b>Experiment</b></td>
+                    <td>
+                        {{ selectedDatasetDetailEntity ? selectedDatasetDetailEntity.experimentName : null}}
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><b>Platform</b></td>
+                    <td>
+                        {{ selectedDatasetDetailEntity ? selectedDatasetDetailEntity.platformName : null}}
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><b>Protocol</b></td>
+                    <td>
+                        {{ selectedDatasetDetailEntity ? selectedDatasetDetailEntity.protocolName : null}}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <BR>
+        <div>
+
+            <p-panel
+                    header="{{ selectedDatasetDetailEntity ? selectedDatasetDetailEntity.analysesIds.length : null}} Analyses"
+                    (onBeforeToggle)="handleOpenAnalysesTab($event)"
+                    [(toggleable)]="analysisPanelToggle"
+                    [(collapsed)]="analysisPanelCollapsed">
+                <p *ngFor="let name of datasetAnalysesNames">
+                    {{ name }}
+                </p>
+            </p-panel>
+        </div>
+
+    </p-overlayPanel>
+
+    <div *ngIf="doPaging">
+        <button pButton type="button" (click)="onClickForNextPage$.next($event)" label="Test Paging"></button>
+    </div>
+</div> <!-- enclosing box  -->

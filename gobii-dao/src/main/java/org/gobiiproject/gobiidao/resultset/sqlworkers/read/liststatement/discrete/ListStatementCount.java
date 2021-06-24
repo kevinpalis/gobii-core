@@ -13,6 +13,7 @@ import static org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId.QUERY
 /**
 
  */
+@SuppressWarnings("serial")
 public class ListStatementCount implements ListStatement {
 
     private final String PARAM_NAME_TABLE = "tableName";

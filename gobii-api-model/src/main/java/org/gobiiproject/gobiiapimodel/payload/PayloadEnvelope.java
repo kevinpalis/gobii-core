@@ -15,6 +15,7 @@ public class PayloadEnvelope<T> {
     public PayloadEnvelope() {
     }
 
+    @SuppressWarnings("unchecked")
     public PayloadEnvelope<T> fromJson(JsonObject jsonObject,
                                       Class<T> dtoType) throws Exception {
 

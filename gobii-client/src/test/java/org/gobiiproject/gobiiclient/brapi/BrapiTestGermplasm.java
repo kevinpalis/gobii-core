@@ -43,6 +43,7 @@ public class BrapiTestGermplasm {
     }
 
 
+    @SuppressWarnings({"rawtypes"})
     @Test
     public void getGermplasmByDbid() throws Exception {
 

@@ -7,7 +7,7 @@ import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContext;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContextAuth;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiEnvelopeRestResource;
 import org.gobiiproject.gobiiclient.gobii.Helpers.TestUtils;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;

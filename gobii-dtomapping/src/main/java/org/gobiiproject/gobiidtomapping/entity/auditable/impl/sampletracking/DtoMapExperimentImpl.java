@@ -9,7 +9,7 @@ import org.gobiiproject.gobiidtomapping.core.GobiiDtoMappingException;
 import org.gobiiproject.gobiidtomapping.entity.auditable.sampletracking.DtoMapExperiment;
 import org.gobiiproject.gobiidtomapping.entity.noaudit.impl.DtoMapNameIdListImpl;
 import org.gobiiproject.gobiimodel.config.GobiiException;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.sampletracking.ExperimentDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.sampletracking.ExperimentDTO;
 import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
 import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
 import org.slf4j.Logger;
@@ -35,6 +35,7 @@ public class DtoMapExperimentImpl implements DtoMapExperiment {
     private RsExperimentDao rsExperimentDao;
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<ExperimentDTO> getList() throws GobiiDtoMappingException {
 
         List<ExperimentDTO> returnVal;

@@ -14,7 +14,7 @@ import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContextAuth;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContext;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiEnvelopeRestResource;
 import org.gobiiproject.gobiiclient.gobii.Helpers.*;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ManifestDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ManifestDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiProcessType;
 import org.junit.AfterClass;
@@ -118,7 +118,8 @@ public class DtoCrudRequestManifestTest implements DtoCrudRequestTest {
                 .get(ManifestDTO.class);
 
         Assert.assertFalse(TestUtils.checkAndPrintHeaderMessages(resultEnvelopeForGetById.getHeader()));
-        ManifestDTO manifestDTOResponseForParams = resultEnvelopeForGetById.getPayload().getData().get(0);
+        //ManifestDTO manifestDTOResponseForParams = 
+        resultEnvelopeForGetById.getPayload().getData().get(0);
 
         GlobalPkValues.getInstance().addPkVal(GobiiEntityNameType.MANIFEST, manifestDTOResponse.getManifestId());
 

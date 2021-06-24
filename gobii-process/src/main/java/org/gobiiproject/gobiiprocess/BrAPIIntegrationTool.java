@@ -108,6 +108,7 @@ public class BrAPIIntegrationTool {
         return returnVal;
     }
 
+    @SuppressWarnings("unused")
     public static void main(String[] args) throws Exception {
 
 

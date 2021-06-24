@@ -14,6 +14,7 @@ import org.gobiiproject.gobiiclient.core.common.HttpMethodResult;
 /**
  * Created by Phil on 12/16/2016.
  */
+@SuppressWarnings({"rawtypes", "unused"})
 public class BrapiEnvelopeRestResource<T_POST_OBJ_TYPE, T_RESPONSE_TYPE_MASTER, T_RESPONSE_TYPE_DETAIL extends BrapiResponseDataList> {
 
     private RestUri restUri;
@@ -39,6 +40,7 @@ public class BrapiEnvelopeRestResource<T_POST_OBJ_TYPE, T_RESPONSE_TYPE_MASTER, 
         this.httpCore = httpCore;
     }
 
+    @SuppressWarnings("unchecked")
     private BrapiResponseEnvelopeMasterDetail<T_RESPONSE_TYPE_DETAIL> getTypedListObjFromResult(HttpMethodResult httpMethodResult) throws Exception {
 
         BrapiResponseEnvelopeMasterDetail<T_RESPONSE_TYPE_DETAIL> returnVal = new BrapiResponseEnvelopeMasterDetail();

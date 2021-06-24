@@ -1,10 +1,23 @@
 package org.gobiiproject.gobiisampletrackingdao;
 
+import java.util.List;
+
 import org.gobiiproject.gobiimodel.entity.Experiment;
+import org.gobiiproject.gobiimodel.entity.VendorProtocol;
 
 public interface ExperimentDao {
 
-    Integer createExperiment(Experiment experiment);
-    Experiment getExperimentById(Integer experimentId);
-    Integer updateExperimentDataFile(Integer experimentId, String dataFilePath);
+    List<Experiment> getExperiments(Integer pageSize, Integer rowOffset,
+                                    Integer projectId);
+
+	Experiment getExperiment(Integer i) throws GobiiDaoException;
+
+	VendorProtocol getVendorProtocol(Integer vendorProtocolId);
+
+	Experiment createExperiment(Experiment experiment) throws Exception;
+
+	Experiment updateExperiment(Experiment target) throws Exception;
+
+	void deleteExperiment(Experiment experiment);
+
 }

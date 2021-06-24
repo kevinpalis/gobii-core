@@ -23,6 +23,7 @@ import java.util.Map;
 /**
  * Created by Phil on 4/18/2016.
  */
+@SuppressWarnings("unused")
 public class SpWorker implements Work {
 
     Logger LOGGER = LoggerFactory.getLogger(SpWorker.class);
@@ -37,7 +38,7 @@ public class SpWorker implements Work {
     protected EntityManager em;
 
     private SpDef spDef = null;
-    private Map<String, Object> paramVals = null;
+    private Map<String, Object> paramVals = null; //TODO: remove this?
 
     Integer result = null;
 
@@ -63,6 +64,7 @@ public class SpWorker implements Work {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void execute(Connection connection) throws SQLException, GobiiDaoException {
 
         CallableStatement callableStatement = connection.prepareCall(spDef.getCallString());

@@ -1,95 +1,143 @@
 package org.gobiiproject.gobiisampletrackingdao;
 
+import static junit.framework.TestCase.assertTrue;
+
+import java.math.BigDecimal;
+import java.util.*;
+
+import org.gobiiproject.gobiimodel.entity.Dataset;
 import org.gobiiproject.gobiimodel.entity.Marker;
-import org.junit.Ignore;
+import org.gobiiproject.gobiimodel.entity.MarkerLinkageGroup;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
-import static junit.framework.TestCase.assertTrue;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 
 /**
  * Test cases for MarkerDaoImpl
- * TODO: The dataset test are written with knowledge of undelying data in
- *   api.gobii.org. Need to refactor in future with Test databases and setup data
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@Ignore
+@ContextConfiguration(locations = {"classpath:/spring/test-config.xml"})
+@Transactional
 public class MarkerDaoTest {
+
+    @PersistenceContext
+    protected EntityManager em;
 
     @Autowired
     private MarkerDao markerDao;
 
+    @Autowired
+    private CvDao cvDao;
+
+    DaoTestSetUp daoTestSetUp;
+
+    final int testPageSize = 10;
+
     Random random = new Random();
+
+    @Before
+    public void createTestData() {
+        daoTestSetUp = new DaoTestSetUp(em, cvDao);
+        daoTestSetUp.createTestMarkers(testPageSize);
+        em.flush();
+    }
 
     @Test
     public void testGetMarkers() {
 
-        Integer pageSize = 200;
-
         Integer rowOffset = 0;
 
-        List<Marker> markers = markerDao.getMarkers(
-                pageSize, rowOffset,
-                null, null);
+        List<Marker> markers = markerDao.getMarkers(testPageSize, rowOffset, null, null);
 
         assertTrue("Empty marker list",markers.size() > 0);
 
         if(markers.size() > 0) {
 
-            pageSize = markers.size() - 1;
+            int pageSize = markers.size() - 1;
 
-            List<Marker> markersPaged = markerDao.getMarkers(
-                    pageSize, rowOffset,
-                    null, null);
-
+            List<Marker> markersPaged = markerDao.getMarkers(pageSize, rowOffset, null, null);
 
             assertTrue("marker result list size not equal to the page size",
-                    markersPaged.size() == pageSize);
+                markersPaged.size() == pageSize);
         }
     }
 
     @Test
     public void testGetMarkersByDatasetId() {
 
-        Integer pageSize = 200;
+        Integer testDatasetId = daoTestSetUp.getCreatedDatasets()
+            .get(random.nextInt(daoTestSetUp.getCreatedDatasets().size())).getDatasetId();
 
-        Integer rowOffset = 0;
+        List<Marker> markers = markerDao.getMarkersByDatasetId(testDatasetId, testPageSize, 0);
 
-        Integer datasetId  = 17;
-
-
-        List<Marker> markers = markerDao.getMarkersByDatasetId(datasetId,
-                pageSize, rowOffset);
-
-        assertTrue("Empty marker list",markers.size() > 0);
-
+        assertTrue("marker result list size not equal to the page size",
+            markers.size() <= testPageSize);
 
         for(Marker marker : markers) {
-
-            assertTrue(marker.getDatasetMarkerIdx().has(datasetId.toString()));
-
+            assertTrue(marker.getDatasetMarkerIdx().has(testDatasetId.toString()));
         }
 
 
-        //Test Get MarkerStartAndStop by datasetId
-        markers = markerDao.getMarkersWithStartAndStop(pageSize, rowOffset, null, datasetId);
+    }
 
-        assertTrue("Empty marker list",markers.size() > 0);
+    @Test
+    public void testGetMarkersByMap() {
+
+        daoTestSetUp.createTestMarkerLinkageGroups(10);
+        em.flush();
+
+        MarkerLinkageGroup testMarkerLinkageGroup = daoTestSetUp
+            .getCreatedMarkerLinkageGroups()
+            .get(random.nextInt(daoTestSetUp.getCreatedMarkerLinkageGroups().size()));
+
+        Integer testDatasetId = Integer.parseInt(testMarkerLinkageGroup
+            .getMarker().getDatasetMarkerIdx().fieldNames().next());
+
+        Integer testMapsetId = testMarkerLinkageGroup.getLinkageGroup().getMapset().getMapsetId();
+
+
+        List<Marker> markers = markerDao.getMarkersByMap(
+            testPageSize, 0, testMapsetId, null,
+            null, null, null, null,
+            testDatasetId);
+
+        assertTrue("marker result list size not equal to the page size",
+            markers.size() <= testPageSize);
+
+        for(Marker marker : markers) {
+            assertTrue(marker.getDatasetMarkerIdx().has(testDatasetId.toString()));
+        }
+
+        // Test minPosition
+        BigDecimal testMinPos = testMarkerLinkageGroup.getStart();
+
+        Set<Integer> markersHigherThanMinPos = new HashSet<>();
+
+        for(MarkerLinkageGroup markerLinkageGroup : daoTestSetUp.getCreatedMarkerLinkageGroups()) {
+            if(markerLinkageGroup.getStart().compareTo(testMinPos) >= 0 &&
+                markerLinkageGroup.getLinkageGroup().getMapset().getMapsetId() == testMapsetId) {
+                markersHigherThanMinPos.add(markerLinkageGroup.getMarker().getMarkerId());
+            }
+        }
+
+        markers = markerDao.getMarkersByMap(
+            testPageSize, 0, testMapsetId, null,
+            null, null, testMinPos, null,
+            null);
 
 
         for(Marker marker : markers) {
-
-            assertTrue(marker.getDatasetMarkerIdx().has(datasetId.toString()));
-
+            markersHigherThanMinPos.remove(marker.getMarkerId());
         }
+
+        assertTrue(markersHigherThanMinPos.size() == 0);
 
 
     }
@@ -97,115 +145,185 @@ public class MarkerDaoTest {
     @Test
     public void testGetMarkersByMarkerIdCursor() {
 
-        Integer pageSize = 200;
 
         Integer rowOffset = 0;
 
-        Integer datasetId  = 17;
+        List<Marker> markers = markerDao.getMarkers(testPageSize, rowOffset, null, null);
 
-        List<Marker> markers = markerDao.getMarkersByDatasetId(datasetId,
-                pageSize, rowOffset);
-
-        assertTrue("Empty marker list",markers.size() > 0);
+        assertTrue("Empty markers list", markers.size() > 0 && markers.size() <= testPageSize);
 
         Integer markerIdCursor = markers.get(random.nextInt(markers.size())).getMarkerId();
 
-        List<Marker> markersByMarkerIdCursor = markerDao.getMarkersByMarkerIdCursor(
-                markerIdCursor,
-                datasetId,
-                pageSize);
-
+        List<Marker> markersByMarkerIdCursor =
+            markerDao.getMarkersByMarkerIdCursor(testPageSize, markerIdCursor, null, null);
 
         for(Marker marker : markersByMarkerIdCursor) {
-
-            assertTrue(marker.getMarkerId() > markerIdCursor);
-
-            assertTrue(marker.getDatasetMarkerIdx().has(datasetId.toString()));
-
+            assertTrue("Get Markers By MarkerId cursor failed",
+                marker.getMarkerId() > markerIdCursor);
         }
 
-
-    }
-
-    @Test
-    public void testGetMarkerStartStopTuples() {
-
-        Integer pageSize = 200;
-
-        Integer rowOffset = 0;
-
-        List<Marker> markers = markerDao.getMarkersWithStartAndStop(
-                pageSize, rowOffset,
-                null, null);
-
-        assertTrue("Empty marker list",markers.size() > 0);
-
-        if(markers.size() > 0) {
-
-            pageSize = markers.size() - 1;
-
-            List<Marker> markersPaged = markerDao.getMarkersWithStartAndStop(
-                    pageSize, rowOffset,
-                    null, null);
-
-            boolean atleastOneStartStopIsMapped = false;
-
-            for(Marker marker : markersPaged) {
-                if(marker.getMarkerStart() != null || marker.getMarkerStop() != null) {
-                    atleastOneStartStopIsMapped = true;
-                }
-            }
-
-            assertTrue(atleastOneStartStopIsMapped);
-
-            assertTrue("marker result list size not equal to the page size",
-                    markersPaged.size() == pageSize);
-        }
 
     }
 
     @Test
     public void testGetMarkersByMarkerIds() {
 
+        Set<Integer> markerIds = new HashSet<>();
 
-        // TODO: Hardcoded list from api.gobii.ord:gobii-dev marker table
-        //  Need to replace this with a standard setupcalss functionality in future.
-        List<Integer> markerIds = new ArrayList<>(Arrays.asList(
-                6, 7, 8, 9, 10,
-                11, 12, 13, 14,
-                15
-        ));
+        for(Marker mockMarker :
+            daoTestSetUp.getCreatedMarkers()
+                .subList(0, (int) Math.ceil((double) testPageSize/2))) {
+            markerIds.add(mockMarker.getMarkerId());
+        }
 
         List<Marker> markers = markerDao.getMarkersByMarkerIds(markerIds);
 
-        assertTrue(markers.size() <= markerIds.size());
+        assertTrue("Get Markers by MarkerIds failed", markers.size() <= markerIds.size());
 
         for(Marker marker : markers) {
-            assertTrue(markerIds.contains(marker.getMarkerId()));
+            assertTrue("Get Markers by MarkerIds failed",
+                markerIds.contains(marker.getMarkerId()));
         }
-
     }
-
 
     @Test
     public void testGetMarkersByMarkerNames() {
 
+        Set<String> markerNames = new HashSet<>();
 
-        List<String> markerNames = new ArrayList<>(Arrays.asList(
-                "BS00062676", "kw004_Sbm1", "TaMoc-7A_2433",
-                "Tsn1", "TaCKX-D1", "TaCwi-4A_1523",
-                "TaCwi-A1a/b", "snp3BS-8", "TaGASR-A1", "TaGS-D1",
-                "TaGW2-HAP-A/G", "TaSus2-2B_SNP", "TaTGW6-A1_1050",
-                "snpOS0312", "Xsnp3BS-2"));
+        for(Marker mockMarker :
+            daoTestSetUp.getCreatedMarkers()
+                .subList(0, (int) Math.ceil((double) testPageSize/2))) {
+            markerNames.add(mockMarker.getMarkerName());
+        }
 
         List<Marker> markers = markerDao.getMarkersByMarkerNames(markerNames);
 
-        assertTrue(markers.size() <= markerNames.size());
+        assertTrue("Get Markers by MarkerIds failed",
+            markers.size() <= markerNames.size());
 
         for(Marker marker : markers) {
-            assertTrue(markerNames.contains(marker.getMarkerName()));
+            assertTrue("Get Markers by MarkerIds failed",
+                markerNames.contains(marker.getMarkerName()));
         }
 
+    }
+
+    @Test
+    public void testQueryByNamesAndPlatformId() {
+
+        Integer testPlatformId =
+            daoTestSetUp
+                .getCreatedMarkers()
+                .get(random.nextInt(daoTestSetUp.getCreatedMarkers().size() -  1))
+                .getPlatform()
+                .getPlatformId();
+
+        Set<String> testMarkerNames = new HashSet<>();
+
+        Set<Integer> expectedMarkerIds = new HashSet<>();
+
+        for(Marker marker : daoTestSetUp.getCreatedMarkers()) {
+            if(marker.getPlatform().getPlatformId() == testPlatformId) {
+                expectedMarkerIds.add(marker.getMarkerId());
+            }
+            testMarkerNames.add(marker.getMarkerName());
+        }
+
+
+        List<Marker> markers = markerDao.queryMarkersByNamesAndPlatformId(
+            testMarkerNames,
+            testPlatformId,
+            testPageSize,
+            0);
+
+        assertTrue("query markers by names and platform id failed",
+            markers.size() == expectedMarkerIds.size());
+
+        Set<Integer> resultMarkerIds = new HashSet<>();
+        for(Marker marker : markers) {
+            resultMarkerIds.add(marker.getMarkerId());
+        }
+
+        resultMarkerIds.removeAll(expectedMarkerIds);
+
+        assertTrue("query markers by names and platform id failed",
+            resultMarkerIds.size() == 0);
+
+
+    }
+
+    @Test
+    public void testGetMarkersByMarkerNamesAndDatasetIds() {
+
+
+        Set<String> datasetIds = new HashSet<>();
+
+        Set<String> markerNames = new HashSet<>();
+
+        int i = 0;
+
+        for(Dataset mockDataset : daoTestSetUp.getCreatedDatasets()) {
+            if(i%2 == 0) {
+                datasetIds.add(mockDataset.getDatasetId().toString());
+            }
+            i++;
+        }
+
+        int numFilteredMarkers = 0;
+
+        for(Marker mockMarker :
+            daoTestSetUp.getCreatedMarkers()
+                .subList(0, (int) Math.ceil((double) testPageSize/2))) {
+
+            markerNames.add(mockMarker.getMarkerName());
+
+            for(String datasetId : datasetIds) {
+                if(mockMarker.getDatasetMarkerIdx().has(datasetId)) {
+                    numFilteredMarkers++;
+                    break;
+                }
+            }
+
+        }
+
+        List<Marker> markers = markerDao.getMarkers(
+                null, markerNames,
+                datasetIds, null, null);
+
+        assertTrue("Get Markers by names and dataset ids failes",
+            markers.size() <= numFilteredMarkers);
+
+        for(Marker marker : markers) {
+
+            assertTrue(markerNames.contains(marker.getMarkerName()));
+            boolean hasDatsetId = false;
+            for(String datasetId : datasetIds) {
+                if(marker.getDatasetMarkerIdx().has(datasetId)) {
+                    hasDatsetId = true;
+                    break;
+                }
+            }
+            assertTrue("Get Markers by names and dataset ids failes", hasDatsetId);
+
+        }
+
+    }
+
+    @Test
+    public void testGetMarkersByPlatformMarkerName() {
+        List<List<String>> markerTuples = new ArrayList<>();
+
+        List<String> tuple1 = new ArrayList<>();
+        tuple1.add(daoTestSetUp.getCreatedMarkers().get(0).getPlatform().getPlatformName());
+        tuple1.add(daoTestSetUp.getCreatedMarkers().get(0).getMarkerName());
+
+        markerTuples.add(tuple1);
+
+        List<Marker> markers = markerDao.getMarkersByPlatformMarkerNameTuples(markerTuples);
+
+        assertTrue("Get Markers by marker name and platform name failed",
+            markers.size() == 1);
     }
 
 }

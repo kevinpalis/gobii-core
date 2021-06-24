@@ -33,6 +33,7 @@ import org.gobiiproject.gobiiapimodel.restresources.common.ResourceParam;
 import org.gobiiproject.gobiiapimodel.restresources.common.RestUri;
 import org.gobiiproject.gobiiapimodel.types.GobiiHttpHeaderNames;
 import org.gobiiproject.gobiibrapi.types.BRAPIHttpHeaderNames;
+import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContext;
 import org.gobiiproject.gobiimodel.types.RestMethodType;
 import org.gobiiproject.gobiimodel.utils.LineUtils;
 import org.slf4j.Logger;
@@ -55,26 +56,26 @@ public class HttpCore {
     private TokenType tokenType = TokenType.GOBII;
     private String host = null;
     private Integer port = null;
-    private String httpScheme = "http";
     private boolean logJson = false;
+    private String scheme = null;
+
 
     public HttpCore(String host,
                     Integer port) {
+
         this.host = host;
         this.port = port;
-
     }
-
-
-    //To set HTTP scheme incase
+    
     public HttpCore(String host,
                     Integer port,
-                    String httpScheme) {
+                    String scheme) {
 
         this.host = host;
         this.port = port;
-        this.httpScheme = httpScheme;
+        this.scheme = scheme;
     }
+
 
 
     Logger LOGGER = LoggerFactory.getLogger(HttpCore.class);
@@ -96,7 +97,10 @@ public class HttpCore {
     }
 
     URIBuilder getBaseBuilder() throws Exception {
-        return (new URIBuilder().setScheme(this.httpScheme)
+        if(scheme == null) {
+            scheme = "http";
+        }
+        return (new URIBuilder().setScheme(scheme)
                 .setHost(host)
                 .setPort(port));
     }
@@ -106,7 +110,7 @@ public class HttpCore {
         URI returnVal;
 
         URIBuilder baseBuilder = getBaseBuilder()
-                .setPath(restUri.makeUrlPath());
+                .setPath(restUri.makeUrlPath(""));
 
         for (ResourceParam currentParam : restUri.getRequestParams()) {
             baseBuilder.addParameter(currentParam.getName(), currentParam.getValue());
@@ -142,8 +146,8 @@ public class HttpCore {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private HttpResponse submitUriRequest(HttpUriRequest httpUriRequest, Map<String, String> headers) throws Exception {
-
 
         if (headers != null) {
             Iterator it = headers.entrySet().iterator();
@@ -232,9 +236,16 @@ public class HttpCore {
         httpMethodResult.setFileName(destinationFqpn);
 
     }
-
+    
     private HttpMethodResult submitHttpMethod(HttpRequestBase httpRequestBase,
                                               RestUri restUri) throws Exception {
+        return submitHttpMethod(httpRequestBase, restUri, false);
+    }
+
+    
+    private HttpMethodResult submitHttpMethod(HttpRequestBase httpRequestBase,
+                                              RestUri restUri,
+                                              boolean anonymous) throws Exception {
 
         HttpMethodResult returnVal = null;
 
@@ -244,8 +255,9 @@ public class HttpCore {
         URI uri = makeUri(restUri);
         httpRequestBase.setURI(uri);
 
-
-        this.setTokenHeader(httpRequestBase);
+        if(!anonymous) {
+            this.setTokenHeader(httpRequestBase);
+        }
         httpResponse = submitUriRequest(httpRequestBase, restUri.getHttpHeaders());
         returnVal = new HttpMethodResult(httpResponse);
         returnVal.setUri(uri);
@@ -357,7 +369,7 @@ public class HttpCore {
 
         if (logJson) {
 
-            System.out.println("=========method: " + restMethodType.toString() + " on resource: " + restUri.makeUrlPath());
+            System.out.println("=========method: " + restMethodType.toString() + " on resource: " + restUri.makeUrlPath(""));
 
             if (!LineUtils.isNullOrEmpty(body)) {
 
@@ -379,13 +391,18 @@ public class HttpCore {
 
     }
 
-    public HttpMethodResult get(RestUri restUri) throws Exception {
+    public HttpMethodResult get(RestUri restUri, boolean anonymous) throws Exception {
 
-        HttpMethodResult returnVal = this.submitHttpMethod(new HttpGet(), restUri);
+        HttpMethodResult returnVal = this.submitHttpMethod(new HttpGet(), restUri, anonymous);
         this.logRequest(RestMethodType.GET, restUri, null, returnVal);
         return returnVal;
 
     }
+    
+    public HttpMethodResult get(RestUri restUri) throws Exception {
+        return get(restUri, false);
+    }
+
 
     public HttpMethodResult post(RestUri restUri,
                                  String body) throws Exception {

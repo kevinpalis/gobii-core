@@ -87,6 +87,7 @@
     <mvc:resources mapping="/ts/**" location="/js/" />
     <mvc:resources mapping="/js/**" location="/js/" />
     <mvc:resources mapping="/modules/**" location="/modules/" />
+    <mvc:resources mapping="/assets/**" location="/assets/" />
 
     <!-- Configure to plugin JSON as request and response in method handler -->
     <!--<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">-->

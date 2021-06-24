@@ -10,10 +10,10 @@ import org.gobiiproject.gobiiclient.core.gobii.GobiiEnvelopeRestResource;
 import org.gobiiproject.gobiiclient.gobii.Helpers.GlobalPkColl;
 import org.gobiiproject.gobiiclient.gobii.Helpers.GlobalPkValues;
 import org.gobiiproject.gobiiclient.gobii.Helpers.TestUtils;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.OrganizationDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ProtocolDTO;
-import org.gobiiproject.gobiimodel.dto.entity.children.VendorProtocolDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.OrganizationDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ProtocolDTO;
+import org.gobiiproject.gobiimodel.dto.children.VendorProtocolDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiProcessType;
 import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
@@ -185,6 +185,7 @@ public class DtoCrudRequestVendorProtocolTest implements DtoCrudRequestTest {
 
 
     @Test
+    @SuppressWarnings("all")
     public void multiProtocolTest() throws Exception {
 
         // ********** PRE-CREATE ENTITIES

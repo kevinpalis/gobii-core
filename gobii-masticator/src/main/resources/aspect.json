@@ -1,0 +1,16 @@
+{"metadata":
+  {"marker":
+    {"asdf": ["COLUMN", {"row": 1, "column": 0}],
+     "qwer": ["COLUMN", {"row": 1, "column": 1}],
+     "zxcv": ["COLUMN", {"row": 1, "column": 2}],
+     "head": ["ROW", {"row": 0, "column": 0}],
+     "idx":  ["TRANSFORM", "IUPAC->2LETTER", ["RANGE", 0]],
+     "cell": ["CELL", {"row": 0, "column": 0}],
+     "const": ["CONSTANT", "{{PLATFORM_ID}}"],
+     "cns":  "ohhh yea"},
+   "matrix":
+     {"size": 4,
+      "aspect": ["TRANSFORM", {"lang": "clj", "script": "(fn [x y] (apply str (shuffle (into (into [] x) y))))"},
+                  ["ALIGN", ["ROW", {"row": 1, "column":  0}],
+                            ["MATRIX", {"row": 1, "column": 0}]]]}
+

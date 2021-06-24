@@ -1,208 +1,140 @@
+/**
+ * ProjetDaoImpl.java
+ * 
+ * ProjectDao Default Implementation.  DAO for Project and Project Properties (CV)
+ * @author Rodolfo N. Duldulao, Jr.
+ */
 package org.gobiiproject.gobiisampletrackingdao;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.gobiiproject.gobiimodel.config.GobiiException;
+import org.gobiiproject.gobiimodel.cvnames.CvGroupTerm;
+import org.gobiiproject.gobiimodel.entity.Cv;
 import org.gobiiproject.gobiimodel.entity.Project;
 import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
 import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
-import org.gobiiproject.gobiisampletrackingdao.spworkers.SpDef;
-import org.gobiiproject.gobiisampletrackingdao.spworkers.SpWorker;
-import org.hibernate.exception.ConstraintViolationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.*;
-import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
-
-/**
- * Data Access Object(DAO) for Project.
- */
+@Slf4j
 public class ProjectDaoImpl implements ProjectDao {
 
-    Logger LOGGER = LoggerFactory.getLogger(ProjectDao.class);
+    @Autowired
+    private CvDao cvDao;
 
     @PersistenceContext
     protected EntityManager em;
 
-    @Autowired
-    protected SpWorker spWorker;
-
-    /**
-     * Uses createprojectwithprops stored function in postgres database.
-     * Stored procedure arguments by index are below, (1-based index)
-     * 1 - projectname
-     * 2 - projectcode
-     * 3 - projectdescription
-     * 4 - picontact
-     * 5 - createdby
-     * 6 - createddate
-     * 7 - modifiedby
-     * 8 - modifieddate
-     * 9 - projectstatus
-     * 10 - props
-     *
-     * Stored function returns integer project id.
-     *
-     * @param newProject - Project entity to be created.
-     * @return projectId - Id of the newly created project
-     */
-    @Override
-    @Transactional
-    public Integer createProject(Project newProject) {
-
-        Integer returnVal = 0;
-
-        try {
-
-            SpDef spDef = new SpDef("{call createprojectwithprops(?,?,?,?,?,?,?,?,?,?)}")
-                    .addParamDef(1, String.class, newProject.getProjectName())
-                    .addParamDef(2, String.class, newProject.getProjectCode())
-                    .addParamDef(3, String.class, newProject.getProjectDescription())
-                    .addParamDef(4, Integer.class, newProject.getPiContactId())
-                    .addParamDef(5, Integer.class, newProject.getCreatedBy())
-                    .addParamDef(6, Date.class, newProject.getCreatedDate())
-                    .addParamDef(7, Integer.class, newProject.getModifiedBy())
-                    .addParamDef(8, Date.class, newProject.getModifiedDate())
-                    .addParamDef(9, Integer.class, newProject.getStatus().getCvId())
-                    .addParamDef(10, JsonNode.class, newProject.getProperties());
-
-            spWorker.run(spDef);
-
-            returnVal = spWorker.getResult();
-
-        }
-        catch (ConstraintViolationException constraintViolation) {
-
-            String errorMsg;
-
-            GobiiValidationStatusType statusType = GobiiValidationStatusType.BAD_REQUEST;
-
-            // Postgresql error code for Unique Constraint Violation is 23505
-            if(constraintViolation.getSQLException() != null) {
-
-                if(constraintViolation.getSQLException().getSQLState().equals("23505")) {
-
-                    statusType = GobiiValidationStatusType.ENTITY_ALREADY_EXISTS;
-
-                    errorMsg = "Project already exists";
-
-                }
-                else {
-
-                    errorMsg = "Invalid request or Missing Required fields.";
-
-                }
-
-            }
-            else {
-                errorMsg = constraintViolation.getMessage();
-            }
-            throw (new GobiiDaoException(
-                    GobiiStatusLevel.ERROR,
-                    statusType,
-                    errorMsg)
-            );
-        }
-        catch(Exception e) {
-            LOGGER.error(e.getMessage(), e);
-
-            throw new GobiiDaoException(GobiiStatusLevel.ERROR, GobiiValidationStatusType.UNKNOWN,
-                    e.getMessage());
-        }
-
-        return returnVal;
-
-    }
+    final int defaultPageSize = 1000;
 
     @Override
-    public Project getProjectById(Integer projectId) {
-
-        List<Project> projectList;
+    public List<Project> getProjects(Integer pageNum, Integer pageSize, String piContactUserName) {
+        log.debug("DAO getting projects");
+        List<Project> projects = new ArrayList<>();
+        piContactUserName = (Optional.ofNullable(piContactUserName)).orElse("");
 
         try {
+            CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+            CriteriaQuery<Project> criteriaQuery = criteriaBuilder.createQuery(Project.class);
 
-            projectList = em
-                    .createNativeQuery(
-                            "SELECT * FROM project WHERE project_id = ?", Project.class)
-                    .setParameter(1, projectId)
+            Root<Project> projectRoot = criteriaQuery.from(Project.class);
+            projectRoot.fetch("contact");
+            criteriaQuery.select(projectRoot);
+            if (!piContactUserName.isBlank()) {
+                criteriaQuery.where(
+                    criteriaBuilder.equal(
+                        projectRoot.get("contact").get("username"),
+                        piContactUserName
+                    )
+                );
+            }
+            criteriaQuery.orderBy(criteriaBuilder.asc(projectRoot.get("projectId")));
+
+            projects = em.createQuery(criteriaQuery).setFirstResult(pageNum * pageSize).setMaxResults(pageSize)
                     .getResultList();
-
-
-
-            if (projectList.size() == 0) {
-                return null;
-            } else if (projectList.size() > 1) {
-                throw new GobiiDaoException(GobiiStatusLevel.ERROR,
-                        GobiiValidationStatusType.VALIDATION_NOT_UNIQUE,
-                        "Multiple resources found. Violation of Unique Project Id constraint." +
-                                " Please contact your Data Administrator to resolve this. " +
-                                "Changing underlying database schemas and constraints " +
-                                "without consulting GOBii Team is not recommended.");
-
-            }
+            log.debug("Projects List " + projects.size());
+            return projects;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new GobiiDaoException(GobiiStatusLevel.ERROR, GobiiValidationStatusType.UNKNOWN,
+                    e.getMessage() + " Cause Message: " + e.getCause().getMessage());
         }
-        catch(Exception e) {
-
-           LOGGER.error(e.getMessage(), e);
-
-           throw new GobiiDaoException(GobiiStatusLevel.ERROR,
-                   GobiiValidationStatusType.UNKNOWN,
-                   e.getMessage());
-        }
-
-        return projectList.get(0);
 
     }
 
     @Override
-    public Project getProjectByName(String projectName) {
-        Project project = new Project();
+    public Project createProject(Project projectToBeCreated) throws Exception {
+        em.persist(projectToBeCreated);
+        em.flush();
+        return projectToBeCreated;
+    }
+
+    public Cv getCv(Integer id) throws Exception {
+        return em.find(Cv.class, id);
+    }
+
+    @Override
+    public Project patchProject(Project projectToBePatched) throws Exception {   
+        Project project = em.merge(projectToBePatched);
+        em.flush();
+        em.refresh(project, this.getContactHints());
         return project;
     }
 
+
     @Override
-    public List<Project> listProjects(Integer pageNum, Integer pageSize, Map<String, String> projectQuery) {
+    public List<Cv> getCvProperties(Integer page, Integer pageSize) {
+        return cvDao.getCvs(null, CvGroupTerm.CVGROUP_PROJECT_PROP.getCvGroupName(), null, page, pageSize);
+    }
 
-        List<Project> projectList = new ArrayList<>();
-
+    @Override
+    public Project getProject(Integer projectId) {
+        log.info("Getting project %d", projectId );
         try {
-
-            if(pageNum == null || pageSize == null) {
-                throw new GobiiDaoException(GobiiStatusLevel.ERROR,
-                        GobiiValidationStatusType.UNKNOWN,
-                        "Required page size and page number.");
-            }
-
-            projectList = em
-                    .createNativeQuery(
-                            "SELECT * FROM project LIMIT ? OFFSET ? ", Project.class)
-                    .setParameter(1, pageSize)
-                    .setParameter(2, pageNum*pageSize)
-                    .getResultList();
-
+            Project project = em.find(Project.class, projectId, getContactHints());
+            return project;
         }
-        catch(Exception e) {
-
-            LOGGER.error(e.getMessage(), e);
-
-            throw new GobiiDaoException(GobiiStatusLevel.ERROR,
-                    GobiiValidationStatusType.UNKNOWN,
-                    e.getMessage());
+        catch (IllegalArgumentException e) {
+            throw new GobiiException(
+                GobiiStatusLevel.ERROR,
+                GobiiValidationStatusType.UNKNOWN,
+                "Unable tp fetch project");
         }
+    }
 
-        return projectList;
+    private Map<String, Object> getContactHints() {
+        EntityGraph<?> graph = this.em.getEntityGraph("project.contact");
+        Map<String, Object> hints = new HashMap<>();
+        hints.put("javax.persistence.fetchgraph", graph);
+        return hints;
     }
 
     @Override
-    public Integer updateProject(Project newProject) {
-        return 0;
+    public void deleteProject(Project project) throws Exception {
+        try {
+            em.remove(project);
+            em.flush();
+        } catch (javax.persistence.PersistenceException pe) {
+            throw new GobiiException(
+                GobiiStatusLevel.ERROR,
+                GobiiValidationStatusType.FOREIGN_KEY_VIOLATION,
+                "Associated resources found. Cannot complete the action unless they are deleted.");
+        } catch (Exception e) {
+            throw e;
+        }
     }
-
 
 }

@@ -23,9 +23,11 @@
   "gobiiCropType":"zoan",
   "datasetType":{"id":null, "name":"IUPAC"}},
  "instructions":
- [{"table":"marker",
-   "gobiiFileColumns":
-   [{"gobiiColumnType":"CONSTANT",
+ [
+   {
+     "table":"marker",
+     "gobiiFileColumns": [
+       {"gobiiColumnType":"CONSTANT",
      "name":"platform_id",
      "constantValue":"34",
      "subcolumn":false},

@@ -30,6 +30,7 @@ public class ListStatementProjectPaged implements ListStatementPaged {
         return "project_id";
     }
 
+    @SuppressWarnings("unused")
     private String getColTableAlias() {
         return "proj";
     }

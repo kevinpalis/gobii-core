@@ -16,6 +16,7 @@ public class ErrorMessageInterpreter {
 				while (br.ready()) {
 					message += br.readLine() + "\n";
 				}
+				br.close();
 			} catch (Exception e) {
 				//Error file was empty - message ends
 			}

@@ -1,14 +1,11 @@
 package org.gobiiproject.gobiidao.resultset.core;
 
 import java.sql.SQLException;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.sql.DataSource;
-import org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
+
 import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.jpa.HibernateEntityManagerFactory;
 
 /**
@@ -21,7 +18,7 @@ public class DbMetaData {
 
     public String getCurrentDbUrl() throws SQLException {
 
-        String returnVal = "";
+        //String returnVal = "";
 //        Shared EntityManager proxy for target factory [org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean@48fde1c2]
 
 

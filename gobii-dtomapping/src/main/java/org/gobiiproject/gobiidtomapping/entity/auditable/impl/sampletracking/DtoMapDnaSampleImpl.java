@@ -1,18 +1,9 @@
 package org.gobiiproject.gobiidtomapping.entity.auditable.impl.sampletracking;
 
-import org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQueryColl;
-import org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId;
 import org.gobiiproject.gobiidtomapping.core.GobiiDtoMappingException;
-import org.gobiiproject.gobiidtomapping.entity.auditable.sampletracking.DtoMapDnaSample;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.sampletracking.DnaSampleDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.ProjectSamplesDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.ProjectSamplesDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.sql.ResultSet;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by VCalaminos on 5/2/2019.
@@ -27,7 +18,7 @@ public class DtoMapDnaSampleImpl {
 
     public ProjectSamplesDTO createSamples(ProjectSamplesDTO projectSamplesDTO) throws GobiiDtoMappingException {
 
-        ProjectSamplesDTO returnVal = null;
+        //ProjectSamplesDTO returnVal = null;
 
         try {
 

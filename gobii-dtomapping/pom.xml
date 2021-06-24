@@ -5,7 +5,7 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>org.gobiiproject</groupId>
-        <version>GOBII Server 2.2_2020-03-04</version>
+        <version>GOBII Server 3.0.0_2021-04-11</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -41,6 +41,24 @@
             <artifactId>gobii-sampletracking-dao</artifactId>
         </dependency>
 
+          <!-- JUNIT -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>4.2.2.RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+       
 
     </dependencies>
 

@@ -633,7 +633,7 @@ public class GobiiConfig {
             String svrHost;
             Integer port;
             String contextPath;
-            String errorContextPath;
+            //String errorContextPath;
             String userName;
             String password;
             String resourceQCStart;
@@ -885,7 +885,7 @@ public class GobiiConfig {
                 List<String> argsSet = new ArrayList<>();
                 List<String> valsSet = new ArrayList<>();
 
-                String configFileFqpn = null;
+                //String configFileFqpn = null;
                 String configFileTestDirectory = null;
                 String configUtilCommandlineStem = null;
                 String initialConfigUrl = null;
@@ -1560,7 +1560,7 @@ public class GobiiConfig {
 
         // The logging framework emits debugging messages before it knows not to emit them.
         // Until we solve this problem, we we'll visually set those messages aside
-        List<String> gobiiCropTypes = gobiiClientContext.getInstance(null, false).getCropTypeTypes();
+        List<String> gobiiCropTypes = GobiiClientContext.getInstance(null, false).getCropTypeTypes();
         GobiiConfig.printSeparator();
 
         for (String currentCropId : gobiiCropTypes) {

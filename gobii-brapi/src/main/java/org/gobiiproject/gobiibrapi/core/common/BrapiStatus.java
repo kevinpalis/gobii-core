@@ -1,12 +1,5 @@
 package org.gobiiproject.gobiibrapi.core.common;
 
-import org.gobiiproject.gobiiapimodel.payload.Pagination;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Created by Phil on 12/15/2016.
  */

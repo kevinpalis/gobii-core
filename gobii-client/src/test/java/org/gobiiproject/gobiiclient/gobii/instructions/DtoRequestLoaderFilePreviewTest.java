@@ -195,23 +195,22 @@ public class DtoRequestLoaderFilePreviewTest {
 
     public static boolean checkPreviewFileMatch(List<List<String>> previewFileItems, File resourcesDirectory, String filePath) throws FileNotFoundException {
 
-        Scanner input = new Scanner(System.in);
-
-            int lineCtr = 0; //count lines read
-            input = new Scanner(getFileOfType(filePath, resourcesDirectory));
-            while (lineCtr<50) { //read first 50 lines only
-                int ctr=0; //count words stored
-                String line = input.nextLine();
-                for(String s: line.split("\t")){
-                    if(ctr==50) break;
-                    else{
-                        if(!previewFileItems.get(lineCtr).get(ctr).equals(s)) return false;
-                        ctr++;
-                    }
+        //Scanner input = new Scanner(System.in);
+        int lineCtr = 0; //count lines read
+        Scanner input = new Scanner(getFileOfType(filePath, resourcesDirectory));
+        while (lineCtr<50) { //read first 50 lines only
+            int ctr=0; //count words stored
+            String line = input.nextLine();
+            for(String s: line.split("\t")){
+                if(ctr==50) break;
+                else{
+                    if(!previewFileItems.get(lineCtr).get(ctr).equals(s)) return false;
+                    ctr++;
                 }
-                lineCtr++;
             }
-            input.close();
+            lineCtr++;
+        }
+        input.close();
 
 
         return true;

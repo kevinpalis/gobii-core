@@ -1,18 +1,17 @@
 package org.gobiiproject.gobiibrapi.calls.markerprofiles.allelematrixsearch;
 
-import org.gobiiproject.gobidomain.services.CvService;
-import org.gobiiproject.gobidomain.services.ExtractorInstructionFilesService;
+import org.gobiiproject.gobiidomain.services.CvService;
+import org.gobiiproject.gobiidomain.services.ExtractorInstructionFilesService;
 import org.gobiiproject.gobiiapimodel.restresources.common.RestUri;
 import org.gobiiproject.gobiiapimodel.restresources.gobii.GobiiUriFactory;
 import org.gobiiproject.gobiiapimodel.types.GobiiControllerType;
 import org.gobiiproject.gobiimodel.config.RestResourceId;
-import org.gobiiproject.gobiibrapi.core.common.BrapiMetaData;
 import org.gobiiproject.gobiimodel.config.GobiiException;
-import org.gobiiproject.gobiimodel.cvnames.CvGroup;
+import org.gobiiproject.gobiimodel.cvnames.CvGroupTerm;
 import org.gobiiproject.gobiimodel.cvnames.DatasetType;
 import org.gobiiproject.gobiimodel.cvnames.JobProgressStatusType;
-import org.gobiiproject.gobiimodel.dto.entity.children.PropNameId;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.CvDTO;
+import org.gobiiproject.gobiimodel.dto.children.PropNameId;
+import org.gobiiproject.gobiimodel.dto.noaudit.CvDTO;
 import org.gobiiproject.gobiimodel.dto.instructions.extractor.ExtractorInstructionFilesDTO;
 import org.gobiiproject.gobiimodel.dto.instructions.extractor.GobiiDataSetExtract;
 import org.gobiiproject.gobiimodel.dto.instructions.extractor.GobiiExtractorInstruction;
@@ -43,7 +42,7 @@ public class BrapiResponseMapAlleleMatrixSearch {
     private PropNameId getDatatypeIdForName(DatasetType datasetType) {
 
 
-        List<CvDTO> datasetCvs = cvService.getCvsByGroupName(CvGroup.CVGROUP_DATASET_TYPE.getCvGroupName());
+        List<CvDTO> datasetCvs = cvService.getCvsByGroupName(CvGroupTerm.CVGROUP_DATASET_TYPE.getCvGroupName());
 
         AtomicInteger datasetTypeId = new AtomicInteger(0);
         datasetCvs
@@ -66,8 +65,8 @@ public class BrapiResponseMapAlleleMatrixSearch {
         GobiiExtractorInstruction gobiiExtractorInstruction = new GobiiExtractorInstruction();
 
         gobiiExtractorInstruction.getDataSetExtracts().add(gobiiDataSetExtract);
-        extractorInstructionFilesDTO.getProcedure().getMetadata().setContactId(1);
-        extractorInstructionFilesDTO.getProcedure().getInstructions().add(gobiiExtractorInstruction);
+        gobiiExtractorInstruction.setContactId(1);
+        extractorInstructionFilesDTO.getGobiiExtractorInstructions().add(gobiiExtractorInstruction);
 
         String jobId = DateUtils.makeDateIdString();
         extractorInstructionFilesDTO.setInstructionFileName(jobId);
@@ -133,12 +132,12 @@ public class BrapiResponseMapAlleleMatrixSearch {
         String brapiAsynchStatus = null;
 
         if ((extractorInstructionFilesDTONew
-                .getProcedure().getInstructions().size() > 0) &&
+                .getGobiiExtractorInstructions().size() > 0) &&
                 (extractorInstructionFilesDTONew
-                        .getProcedure().getInstructions().get(0).getDataSetExtracts().size() > 0)) {
+                        .getGobiiExtractorInstructions().get(0).getDataSetExtracts().size() > 0)) {
 
             GobiiDataSetExtract gobiiDataSetExtract = extractorInstructionFilesDTONew
-                    .getProcedure().getInstructions()
+                    .getGobiiExtractorInstructions()
                     .get(0)
                     .getDataSetExtracts()
                     .get(0);
@@ -149,7 +148,7 @@ public class BrapiResponseMapAlleleMatrixSearch {
             brapiAsynchStatus =  getBrapiJobStatus(jobProgressStatus);
 
             if (brapiAsynchStatus != null && brapiAsynchStatus.equals("FAILED")) {
-                throw new GobiiException("");
+                throw new GobiiException(gobiiDataSetExtract.getLogMessage());
             }
         }
 
@@ -205,18 +204,18 @@ public class BrapiResponseMapAlleleMatrixSearch {
                 .getStatus(crop, jobId);
 
         if ((extractorInstructionFilesDTONew
-                .getProcedure().getInstructions().size() > 0) &&
+                .getGobiiExtractorInstructions().size() > 0) &&
                 (extractorInstructionFilesDTONew
-                        .getProcedure().getInstructions().get(0).getDataSetExtracts().size() > 0)) {
+                        .getGobiiExtractorInstructions().get(0).getDataSetExtracts().size() > 0)) {
 
             GobiiDataSetExtract gobiiDataSetExtract = extractorInstructionFilesDTONew
-                    .getProcedure().getInstructions()
+                    .getGobiiExtractorInstructions()
                     .get(0)
                     .getDataSetExtracts()
                     .get(0);
 
-            if ((extractorInstructionFilesDTONew.getProcedure().getInstructions().size() > 0) &&
-                    (extractorInstructionFilesDTONew.getProcedure().getInstructions().get(0).getDataSetExtracts().size() > 0)) {
+            if ((extractorInstructionFilesDTONew.getGobiiExtractorInstructions().size() > 0) &&
+                    (extractorInstructionFilesDTONew.getGobiiExtractorInstructions().get(0).getDataSetExtracts().size() > 0)) {
 
                     if (gobiiDataSetExtract.getExtractedFiles().size() > 0) {
 
@@ -224,14 +223,18 @@ public class BrapiResponseMapAlleleMatrixSearch {
 
                             if( currentFile.getName().toLowerCase().contains("dataset.genotype")) {
                                 // first make the http link
-                                RestUri restUri = new GobiiUriFactory(request.getServerName(), request.getServerPort(),
-                                        request.getContextPath(), GobiiControllerType.GOBII)
-                                        .resourceColl(RestResourceId.GOBII_FILES)
-                                        .addUriParam("gobiiJobId", jobId)
-                                        .addUriParam("destinationType", GobiiFileProcessDir.EXTRACTOR_OUTPUT.toString().toLowerCase())
-                                        .addQueryParam("fileName", currentFile.getName());
+                                RestUri restUri = new GobiiUriFactory(
+                                    request.getServerName(),
+                                    request.getServerPort(),
+                                    request.getContextPath(),
+                                    crop,
+                                    GobiiControllerType.GOBII)
+                                    .resourceColl(RestResourceId.GOBII_FILES)
+                                    .addUriParam("gobiiJobId", jobId)
+                                    .addUriParam("destinationType", GobiiFileProcessDir.EXTRACTOR_OUTPUT.toString().toLowerCase())
+                                    .addQueryParam("fileName", currentFile.getName());
 
-                                String fileUri = restUri.makeUrlComplete();
+                                String fileUri = restUri.makeUrlComplete(crop);
                                 dataFiles.add(fileUri);
                             }
 

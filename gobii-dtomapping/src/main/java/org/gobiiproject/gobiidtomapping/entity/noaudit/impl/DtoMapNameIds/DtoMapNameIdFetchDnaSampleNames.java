@@ -12,7 +12,7 @@ import org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId;
 import org.gobiiproject.gobiidtomapping.core.GobiiDtoMappingException;
 import org.gobiiproject.gobiidtomapping.entity.noaudit.impl.DtoMapNameIdFetch;
 import org.gobiiproject.gobiimodel.config.GobiiException;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiFilterType;
 import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Created by VCalaminos on 9/18/2018.
  */
+@SuppressWarnings("serial")
 public class DtoMapNameIdFetchDnaSampleNames implements DtoMapNameIdFetch {
 
     @Autowired
@@ -37,7 +38,7 @@ public class DtoMapNameIdFetchDnaSampleNames implements DtoMapNameIdFetch {
     private Integer getDnaSamplesFromResultSet(List<NameIdDTO> nameIdDTOList, ResultSet resultSet, String columnName, String columnId, GobiiFilterType gobiiFilterType) throws SQLException {
 
         Collections.sort(nameIdDTOList);
-        Integer index;
+        //Integer index;
         Integer nameId;
 
         List<NameIdDTO> nameList = new ArrayList<>();
@@ -114,7 +115,8 @@ public class DtoMapNameIdFetchDnaSampleNames implements DtoMapNameIdFetch {
                         put("nameArray", nameIdDTOList);
                     }});
 
-            Integer resultSize = getDnaSamplesFromResultSet(nameIdDTOList, resultSet, "name", "dnasample_id", gobiiFilterType);
+            //Integer resultSize = 
+            getDnaSamplesFromResultSet(nameIdDTOList, resultSet, "name", "dnasample_id", gobiiFilterType);
 
         } catch (Exception e) {
             throw new GobiiDaoException(e);

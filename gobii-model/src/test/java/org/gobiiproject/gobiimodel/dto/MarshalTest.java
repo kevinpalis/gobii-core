@@ -1,18 +1,18 @@
 package org.gobiiproject.gobiimodel.dto;
 
 
-import org.gobiiproject.gobiimodel.dto.instructions.loader.GobiiLoaderProcedure;
-import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.*;
+import org.gobiiproject.gobiimodel.dto.instructions.loader.GobiiLoaderProcedure;
+import org.junit.Test;
 
 
 public class MarshalTest {

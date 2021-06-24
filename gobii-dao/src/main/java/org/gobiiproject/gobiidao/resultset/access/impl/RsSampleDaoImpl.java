@@ -27,6 +27,7 @@ public class RsSampleDaoImpl implements RsSampleDao {
     private StoredProcExec storedProcExec = null;
 
     @Autowired
+    @SuppressWarnings("unused")
     private SpRunnerCallable spRunnerCallable;
 
 

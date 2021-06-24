@@ -109,6 +109,7 @@ public class DtoNoticeFilesTestTest {
     }
 
     @Ignore
+    @SuppressWarnings("unused")
     public void testGetConfidentialityNotice() throws Exception {
         //*************************************************************
         // ****************** Remove the file if it's already there

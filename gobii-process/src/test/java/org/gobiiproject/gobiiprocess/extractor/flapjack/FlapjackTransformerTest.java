@@ -11,16 +11,19 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-@Ignore //TODO- Refactor. Powermock static mocking is broken in Java 13
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(HelperFunctions.class)
+//@RunWith(SafePowerMockRunner.class)
+//@PrepareForTest(HelperFunctions.class)
 public class FlapjackTransformerTest {
 
 	/**
 	 * Extended File.
 	 */
 
+	/*
+	 Commented out as static mocking no longer works
+
 	@Test
+
 	public void testGenerateMapFileExtended() {
 
 		PowerMockito.mockStatic(HelperFunctions.class);
@@ -41,9 +44,9 @@ public class FlapjackTransformerTest {
 
 	/**
 	 * Not an Extended File.
-	 */
+	 *
 
-	@Test
+	//@Test
 	public void testGenerateMapFileNoChrLenghtAndNotExtended() {
 
 		PowerMockito.mockStatic(HelperFunctions.class);
@@ -61,7 +64,7 @@ public class FlapjackTransformerTest {
 				"outFile", "errorFile", false), true);
 	}
 
-	@Test
+	//@Test
 	public void testGenerateGenotypeFile() {
 
 		String tempFile = "tempDir" + "tmp";
@@ -91,6 +94,14 @@ public class FlapjackTransformerTest {
 		assertEquals(FlapjackTransformer.generateGenotypeFile("markerFile", "sampleFile", "genotypeFile", "tempDir",
 				"outFile", "errorFile"), true);
 
-	}
+	}*/
+	@Test
+	public void testSplitList() {
+		assertEquals("2,3",FlapjackTransformer.getSplitList("Beta,Gamma","Alpha\tBeta\tGamma","\t"));
 
+	//Warn on missing, but just omit
+		assertEquals("3",FlapjackTransformer.getSplitList("Delta,Gamma","Alpha\tBeta\tGamma","\t"));
+		assertEquals("",FlapjackTransformer.getSplitList("Delta,Epsilon","Alpha\tBeta\tGamma","\t"));
+
+	}
 }

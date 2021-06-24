@@ -12,6 +12,7 @@ import org.gobiiproject.gobiidao.resultset.core.listquery.ParameterizedSql;
 * the page frame define the last row of the previous page, such that the query gives you the PAGELIIMITth
 * page's records.
 * */
+@SuppressWarnings({"serial"})
 public class PagerSql {
 
     Map<String, Object> sqlParamVals;

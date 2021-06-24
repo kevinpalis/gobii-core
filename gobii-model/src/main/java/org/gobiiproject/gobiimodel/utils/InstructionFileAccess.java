@@ -18,11 +18,12 @@ import org.gobiiproject.gobiimodel.config.GobiiException;
  */
 public class InstructionFileAccess<T> {
 
-    private final String LOADER_FILE_EXT = ".json";
+    //private final String LOADER_FILE_EXT = ".json";
 
 
     Class<T> instanceType;
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public InstructionFileAccess(Class instanceType) {
         this.instanceType = instanceType;
     }

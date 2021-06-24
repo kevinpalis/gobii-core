@@ -8,7 +8,7 @@ import org.gobiiproject.gobiidao.resultset.access.RsContactDao;
 import org.gobiiproject.gobiidtomapping.core.GobiiDtoMappingException;
 import org.gobiiproject.gobiidtomapping.entity.noaudit.impl.DtoMapNameIdFetch;
 import org.gobiiproject.gobiimodel.config.GobiiException;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiFilterType;
 import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
@@ -53,7 +53,7 @@ public class DtoMapNameIdFetchContacts implements DtoMapNameIdFetch {
         try {
 
             ResultSet resultSet = rsContactDao.getContactNamesForRoleName(roleName);
-            List<NameIdDTO> listDTO = new ArrayList<>();
+            //List<NameIdDTO> listDTO = new ArrayList<>();
 
             while (resultSet.next()) {
                 returnVal.add(this.makeNameIdDto(resultSet));

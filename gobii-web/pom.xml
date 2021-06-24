@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.gobiiproject</groupId>
         <artifactId>parent</artifactId>
-        <version>GOBII Server 2.2_2020-03-04</version>
+        <version>GOBII Server 3.0.0_2021-04-11</version>
     </parent>
 
     <groupId>org.gobiiproject</groupId>
@@ -39,6 +39,7 @@
         <doc-location-generated>${project.basedir}/src/main/resources/docs/generated</doc-location-generated>
 
         <maven.exec.skip>false</maven.exec.skip> <!-- default -->
+        <powermock.version>2.0.2</powermock.version>
 
     </properties>
 
@@ -108,7 +109,14 @@
         <dependency>
             <groupId>com.github.kongchen</groupId>
             <artifactId>swagger-maven-plugin</artifactId>
-            <version>3.1.7</version>
+            <version>3.1.8</version>
+            <scope>provided</scope>
+            <!-- <exclusions>
+                 <exclusion>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>jsr311-api</artifactId>
+            </exclusion>
+            </exclusions> -->
         </dependency>
 
 
@@ -116,18 +124,36 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Spring MVC -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Spring and Transactions -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!--Spring ORM support-->
@@ -176,12 +202,18 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
-        <dependency>
+        <!-- <dependency>
             <groupId>org.jboss.logging</groupId>
             <artifactId>jboss-logging</artifactId>
-        </dependency>
+        </dependency> -->
         <!--Hibernate-->
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
@@ -194,16 +226,42 @@
         </dependency>
 
         <!-- Test Artifacts -->
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>3.2.3.RELEASE</version>
+            <version>5.2.4.RELEASE</version>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>4.13</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito2</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        
+
+        <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>2.4.0</version>
+        </dependency>
+
+        <!-- End Test Artifacts -->
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -251,7 +309,13 @@
         <!-- Jackson JSON Processor -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.9.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <version>2.9.8</version>
         </dependency>
 
         <!-- Jackson JSON Mapper -->
@@ -289,16 +353,51 @@
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-jaxrs2</artifactId>
             <version>2.0.0</version>
+            <exclusions>
+            <exclusion>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+            </exclusion>
+        </exclusions>
         </dependency>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-jaxrs2-servlet-initializer</artifactId>
             <version>2.0.0</version>
+            <exclusions>
+            <exclusion>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+            </exclusion>
+        </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.mockito</groupId> 
+            <artifactId>mockito-core</artifactId>
+            <version>2.21.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-        </dependency>
+            <scope>test</scope>
+        </dependency> -->
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path-assert</artifactId>
@@ -335,11 +434,25 @@
         </dependency>
 
 
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.12</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Keycloak -->
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-spring-security-adapter</artifactId>
+            <version>10.0.2</version>
+        </dependency>
 
     </dependencies>
 
     <build>
-        <finalName>gobii-web</finalName>
+        <finalName>gdm</finalName>
 
         <resources>
             <resource>
@@ -358,10 +471,16 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.2</version>
+                <version>3.8.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <release>11</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.20</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
 
@@ -374,62 +493,56 @@
             </configuration>
             </plugin>
 
-            <!-- Replacing deprecated grunt-maven-plugin with front-end-maven-plugin
-                https://github.com/allegro/grunt-maven-plugin
-            -->
             <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
                 <version>${frontend-maven-plugin-version}</version>
-
+                <configuration>
+                    <workingDirectory>src/main/extractor-ui</workingDirectory>
+                </configuration>
                 <executions>
-
-
-
                     <execution>
-                        <!-- optional: you don't really need execution ids,
-                        but it looks nice in your build log. -->
-                        <id>install node and npm</id>
+                        <id>install-node-and-npm</id>
                         <goals>
                             <goal>install-node-and-npm</goal>
                         </goals>
                         <configuration>
-                            <nodeVersion>${node-version}</nodeVersion>
-                            <npmVersion>${npm-version}</npmVersion>
+                            <nodeVersion>v12.18.3</nodeVersion>
                         </configuration>
                     </execution>
-
                     <execution>
                         <id>npm install</id>
                         <goals>
                             <goal>npm</goal>
                         </goals>
-
-                        <!-- optional: default phase is "generate-resources" -->
-                        <phase>generate-resources</phase>
-
                         <configuration>
-                            <!-- optional: The default argument is actually
-                            "install", so unless you need to run some other npm command,
-                            you can remove this whole <configuration> section.
-                            -->
                             <arguments>install</arguments>
                         </configuration>
                     </execution>
-
                     <execution>
-                        <id>npm run build</id>
+                        <id>npm build</id>
                         <goals>
                             <goal>npm</goal>
                         </goals>
-                        <phase>generate-resources</phase>
                         <configuration>
-                            <skip>${maven.exec.skip}</skip>
                             <arguments>run build</arguments>
                         </configuration>
+                        <phase>generate-resources</phase>
                     </execution>
-
                 </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.2.2</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <!-- Add frontend folder to war package -->
+                    <webResources>
+                        <resource>
+                            <directory>src/main/extractor-ui/dist/extractor-ui/</directory>
+                        </resource>
+                    </webResources>
+                </configuration>
             </plugin>
 
             <!--
@@ -462,91 +575,6 @@
                                         <include>index.adoc</include>
                                         <include>gobii-api.adoc</include>
                                         <include>gobii-system.adoc</include>
-                                    </includes>
-                                    <filtering>false</filtering>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>prepare-package-nodemodules</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <!-- Copy all generated javascript files into the final directory structure -->
-                            <!--<outputDirectory>${project.build.outputDirectory}/${project.artifactId}</outputDirectory>-->
-                            <outputDirectory>${project.build.directory}/${project.build.finalName}/js/node_modules
-                            </outputDirectory>
-                            <resources>
-                                <resource>
-                                    <!-- Take the node-module code from where npm puts it -->
-                                    <directory>${project.basedir}/node_modules</directory>
-                                    <includes>
-                                        <!-- *************************************************-->
-                                        <!-- packageed javascript libraries to support angular2-->
-                                        <!-- ***** GROUP 1: supporting libraries -->
-                                        <include>es6-shim/es6-shim.min.js</include>
-                                        <include>systemjs/dist/system-polyfills.js</include>
-                                        <include>systemjs/dist/system.src.js</include>
-                                        <include>rx/dist/rx.js</include>
-                                        <include>bootstrap/dist/css/bootstrap.min.css</include>
-                                        <include>bootswatch/cerulean/bootstrap.min.css</include>
-                                        <include>bootswatch/cosmo/bootstrap.min.css</include>
-                                        <include>bootswatch/cyborg/bootstrap.min.css</include>
-                                        <include>bootswatch/darkly/bootstrap.min.css</include>
-                                        <include>bootswatch/flatly/bootstrap.min.css</include>
-                                        <include>bootswatch/fonts/bootstrap.min.css</include>
-                                        <include>bootswatch/journal/bootstrap.min.css</include>
-                                        <include>bootswatch/lumen/bootstrap.min.css</include>
-                                        <include>bootswatch/paper/bootstrap.min.css</include>
-                                        <include>bootswatch/readable/bootstrap.min.css</include>
-                                        <include>bootswatch/sandstone/bootstrap.min.css</include>
-                                        <include>bootswatch/simplex/bootstrap.min.css</include>
-                                        <include>bootswatch/slate/bootstrap.min.css</include>
-                                        <include>bootswatch/spacelab/bootstrap.min.css</include>
-                                        <include>bootswatch/superhero/bootstrap.min.css</include>
-                                        <include>bootswatch/united/bootstrap.min.css</include>
-                                        <include>bootswatch/yeti/bootstrap.min.css</include>
-                                        <include>zone.js/dist/zone.js</include>
-                                        <include>core-js/client/shim.min.js</include>
-                                        <include>reflect-metadata/Reflect.js</include>
-                                        <include>rxjs/**</include>
-                                        <include>rxjs-compat/**</include>
-                                        <include>ng2-uploader/**</include>
-                                        <include>ng2-file-upload/**</include>
-                                        <include>primeng/**</include>
-                                        <include>primeicons/**</include>
-
-
-                                        <!-- ***** GROUP 2: angular bundle files-->
-                                        <include>@angular/core/bundles/core.umd.js</include>
-                                        <include>@angular/common/bundles/common.umd.js</include>
-                                        <include>@angular/compiler/bundles/compiler.umd.js</include>
-                                        <include>@angular/router/bundles/router.umd.js</include>
-                                        <include>@angular/http/bundles/http.umd.js</include>
-                                        <include>@angular/platform-browser/bundles/platform-browser.umd.js</include>
-                                        <include>@angular/platform-browser/bundles/platform-browser-animations.umd.js
-                                        </include>
-                                        <include>
-                                            @angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js
-                                        </include>
-                                        <include>@angular/forms/bundles/forms.umd.js</include>
-                                        <include>@angular/animations/bundles/animations.umd.js</include>
-                                        <include>@angular/animations/bundles/animations-browser.umd.js</include>
-                                        <include>@angular/animations/bundles/animations-browser.umd.js</include>
-
-                                        <!-- ***** GROUP 3: angular bundle files-->
-                                        <include>deep-freeze-strict/index.js</include>
-                                        <include>ngrx-store-freeze/dist/index.js</include>
-                                        <include>reselect/dist/reselect.js</include>
-                                        <include>@ngrx/db/bundles/db.umd.js</include>
-                                        <include>@ngrx/effects/bundles/effects.umd.js</include>
-                                        <include>@ngrx/router-store/bundles/router-store.umd.js</include>
-                                        <include>@ngrx/store/bundles/store.umd.js</include>
-                                        <include>@ngrx/store-devtools/bundles/store-devtools.umd.js</include>
                                     </includes>
                                     <filtering>false</filtering>
                                 </resource>
@@ -597,7 +625,7 @@
                         <apiSource>
                             <springmvc>true</springmvc>
                             <locations>
-                                <location>org.gobiiproject.gobiiweb.controllers.GOBIIControllerV1</location>
+                                <location>org.gobiiproject.gobiiweb.controllers.gdm.GOBIIControllerV1</location>
                             </locations>
                             <outputFormats>json,yaml</outputFormats>
                             <schemes><schema>http</schema></schemes>
@@ -629,40 +657,7 @@
                             <springmvc>true</springmvc>
                             <locations>
                                 <location>
-                                    org.gobiiproject.gobiiweb.controllers.SampleTrackingController
-                                </location>
-                            </locations>
-                            <outputFormats>json,yaml</outputFormats>
-                            <schemes><schema>http</schema></schemes>
-                            <host>cbsugobiixvm11.biohpc.cornell.edu:8081</host>
-                            <basePath>/gobii-dev</basePath>
-                            <descriptionFile>${doc-location-source}/overview.txt</descriptionFile>
-                            <info>
-                                <title>GDM Sample Tracking</title>
-                                <version>1.0</version>
-                                <license>
-                                    <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-                                    <name>Apache 2.0</name>
-                                </license>
-                            </info>
-                            <securityDefinitions>
-                                <securityDefinition>
-                                    <name>basicAuth</name>
-                                    <type>basic</type>
-                                </securityDefinition>
-                                <securityDefinition>
-                                    <name>X-Auth-Token</name>
-                                    <type>apiKey</type>
-                                    <in>header</in>
-                                </securityDefinition>
-                            </securityDefinitions>
-                            <swaggerDirectory>${doc-location-generated}/swagger/sampletracking</swaggerDirectory>
-                        </apiSource>
-                        <apiSource>
-                            <springmvc>true</springmvc>
-                            <locations>
-                                <location>
-                                    org.gobiiproject.gobiiweb.controllers.BRAPIIControllerV2
+                                    org.gobiiproject.gobiiweb.controllers.brapi.v2
                                 </location>
                             </locations>
                             <outputFormats>json,yaml</outputFormats>
@@ -711,6 +706,16 @@
                     </execution>
                 </executions>
             </plugin> <!-- swagger-maven-->
+                        <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <configuration>
+                  <excludes>
+                    <exclude>**/**Test.java</exclude>
+                  </excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

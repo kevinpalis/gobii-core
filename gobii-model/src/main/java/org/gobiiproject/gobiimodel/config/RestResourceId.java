@@ -69,8 +69,47 @@ public enum RestResourceId {
     BRAPI_STUDIES_SEARCH("studies-search", ServerType.BRAPI),
     BRAPI_STUDIES("studies", ServerType.BRAPI),
     BRAPI_CALLS("calls", ServerType.BRAPI),
+
+
+    BRAPI_SERVER_INFO("serverinfo", ServerType.BRAPI),
+
     BRAPI_MAPS_CALLS("maps", ServerType.BRAPI),
-    BRAPI_CALLSETS("callsets", ServerType.BRAPI);
+
+    BRAPI_MARKER_POSITIONS("markerpositions", ServerType.BRAPI),
+
+    BRAPI_CALLSETS("callsets", ServerType.BRAPI),
+
+    BRAPI_CALLSETS_BY_ID("callsets/{callSetDbId}", ServerType.BRAPI),
+
+    BRAPI_VARIANTS("variants", ServerType.BRAPI),
+
+    BRAPI_VARIANTS_BY_ID("variants/{variantDbId}", ServerType.BRAPI),
+
+    BRAPI_VARIANTSETS("variantsets", ServerType.BRAPI),
+
+    BRAPI_GENOTYPES_BY_VARIANTSET(
+            "variantsets/{variantSetDbId}/calls",
+            ServerType.BRAPI),
+
+    BRAPI_DOWNLOAD_GENOTYPES_BY_VARIANTSET(
+            "variantsets/{variantSetDbId}/calls/download",
+            ServerType.BRAPI),
+
+    BRAPI_VARIANTS_BY_VARIANTSET(
+            "variantsets/{variantSetDbId}/variants",
+            ServerType.BRAPI),
+
+    BRAPI_CALLSETS_BY_VARIANTSET(
+            "variantsets/{variantSetDbId}/callsets",
+            ServerType.BRAPI),
+
+    BRAPI_SEARCH_GENOTYPES(
+            "search/calls",
+            ServerType.BRAPI),
+
+    BRAPI_GENOTYPES_BY_SEARCH_QUERY(
+            "search/calls/{searchResultDbId}",
+            ServerType.BRAPI);
 
     private String requestPath;
     private ServerType serverType;
@@ -92,7 +131,7 @@ public enum RestResourceId {
         return this.serverType;
     }
 
-    public String getRequestUrl(String contextRoot, String secondaryPath) throws Exception {
+    public String getRequestUrl(String contextRoot, String secondaryPath, String cropType) throws Exception {
 
         String returnVal = "";
 
@@ -106,6 +145,11 @@ public enum RestResourceId {
         }
 
         returnVal += this.getResourcePath();
+
+        if(!LineUtils.isNullOrEmpty(cropType)) {
+            returnVal = returnVal.replace("{cropType}", cropType);
+
+        }
 
         return returnVal;
     }

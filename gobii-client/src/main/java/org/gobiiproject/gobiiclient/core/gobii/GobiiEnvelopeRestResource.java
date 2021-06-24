@@ -42,7 +42,7 @@ public class GobiiEnvelopeRestResource<T_REQUEST_BODY_TYPE, T_RESPONSE_BODY_TYPE
         restUri.setParamValue(paramName, value);
     }
 
-
+    @SuppressWarnings("unused")
     private GobiiClientContext getClientContext() throws Exception {
 
         return GobiiClientContext.getInstance(null, false);

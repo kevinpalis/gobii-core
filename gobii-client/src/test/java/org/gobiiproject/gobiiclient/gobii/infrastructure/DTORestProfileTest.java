@@ -14,14 +14,13 @@ import org.gobiiproject.gobiiclient.gobii.dbops.crud.DtoCrudRequestMarkerTest;
 import org.gobiiproject.gobiiclient.gobii.dbops.crud.DtoCrudRequestNameIdListTest;
 import org.gobiiproject.gobiiclient.gobii.dbops.readonly.DtoRequestNameIdListTest;
 import org.gobiiproject.gobiimodel.config.RestResourceId;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.MarkerDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.MarkerDTO;
 import org.gobiiproject.gobiimodel.dto.rest.RestProfileDTO;
 import org.gobiiproject.gobiimodel.types.*;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;

@@ -1,21 +1,19 @@
 package org.gobiiproject.gobiidao.resultset.access.impl;
 
+import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.gobiiproject.gobiidao.GobiiDaoException;
 import org.gobiiproject.gobiidao.resultset.access.RsMapsetBrapiDao;
-import org.gobiiproject.gobiidao.resultset.access.RsMarkerBrapiDao;
 import org.gobiiproject.gobiidao.resultset.core.StoredProcExec;
 import org.gobiiproject.gobiidao.resultset.sqlworkers.read.sp.SpGetMapsetByMapsetIdBrapi;
-import org.gobiiproject.gobiidao.resultset.sqlworkers.read.sp.SpGetMarkerByMarkerIdBrapi;
 import org.hibernate.exception.SQLGrammarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.ResultSet;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class RsMapsetBrapiDaoImpl implements RsMapsetBrapiDao {

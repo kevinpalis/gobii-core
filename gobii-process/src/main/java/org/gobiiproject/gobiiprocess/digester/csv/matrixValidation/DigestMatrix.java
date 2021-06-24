@@ -1,6 +1,7 @@
 package org.gobiiproject.gobiiprocess.digester.csv.matrixValidation;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.gobiiproject.gobiimodel.types.DataSetType;
@@ -15,7 +16,7 @@ class DigestMatrix {
             case NUCLEOTIDE_2_LETTER:
             case IUPAC:
             case VCF:
-                allowedEntities = new AllowedEntitiesSet(new HashSet<String>(initNucleotide2letterList()));
+                allowedEntities = new AllowedNucleotides(2); //TODO - VCF 4 letter?
                 break;
             case CO_DOMINANT_NON_NUCLEOTIDE:
                 allowedEntities = new AllowedEntitiesSet(new HashSet<String>(initCoDominantList()));
@@ -89,11 +90,27 @@ class DigestMatrix {
         @Override
         public boolean isAllowed(String entity) {
             //There are the right number of elements
-            if(entity.length()!=numberOfElements) return false;
-            //Each element is a valid element
-            for(String s: entity.split("")){
-                if(!allowedSet.contains(s)){
-                    return false;
+            if(!entity.contains("/")) {
+                if (entity.length() != numberOfElements) return false;
+                //Each element is a valid element
+                for (String s : entity.split("")) {
+                    if (!allowedSet.contains(s)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            String[] subEntities = entity.split(Pattern.quote("/"),-1);
+            if(subEntities.length != numberOfElements){
+                return false;
+            }
+            for(String subEntity:subEntities){
+                if(subEntity.length()>0) {
+                    for (String s : subEntity.split("")) {
+                        if (!allowedSet.contains(s)) {
+                            return false;
+                        }
+                    }
                 }
             }
             return true;

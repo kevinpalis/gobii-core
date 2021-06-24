@@ -1,14 +1,12 @@
 package org.gobiiproject.gobiimodel.entity.JpaConverters;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.gobiiproject.gobiimodel.config.GobiiException;
-import org.postgresql.jdbc.PgArray;
-import org.postgresql.util.PGobject;
+import java.sql.Array;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
-import java.sql.Array;
+
+import org.gobiiproject.gobiimodel.config.GobiiException;
+import org.postgresql.jdbc.PgArray;
 
 /**
  * JPA convertor class to convert Postgresql Database text array to string array and vice versa.
@@ -40,7 +38,6 @@ public class StringArrayConverter implements AttributeConverter<String[], Object
             return (String[])pgObject;
 
         try {
-
 
             Array databaseArray = ((PgArray) pgObject);
 

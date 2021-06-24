@@ -1,17 +1,38 @@
+/**
+ * ProjectDao.java
+ * 
+ * V3 API Project DAO interface
+ * @author Rodolfo N. Duldulao, Jr.
+ */
 package org.gobiiproject.gobiisampletrackingdao;
 
-
-import org.gobiiproject.gobiimodel.entity.Project;
-
 import java.util.List;
-import java.util.Map;
+
+import org.gobiiproject.gobiimodel.entity.Cv;
+import org.gobiiproject.gobiimodel.entity.Project;
 
 public interface ProjectDao {
 
-    Integer createProject(Project newProject);
-    Project getProjectById(Integer projectId);
-    Project getProjectByName(String projectName);
-    List<Project> listProjects(Integer pageNum, Integer pageSize, Map<String, String> projectQuery);
-    Integer updateProject(Project newProject);
+    List<Project> getProjects(
+        Integer pageNum,
+        Integer pageSize,
+        String piContactUserName
+    );
 
+    Project createProject(
+        Project projectToBeCreated
+    ) throws Exception;
+
+    Project patchProject(
+        Project projectToBePatched
+    ) throws Exception;
+    
+    List<Cv> getCvProperties(
+        Integer pageNum,
+        Integer pageSize  
+    );
+
+    Project getProject(Integer projectId) throws GobiiDaoException;
+    
+    void deleteProject(Project project) throws Exception;
 }

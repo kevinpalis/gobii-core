@@ -1,14 +1,13 @@
 package org.gobiiproject.gobiidao.resultset.sqlworkers.read.liststatement.discrete;
 
-import org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId;
-import org.gobiiproject.gobiidao.resultset.core.listquery.ListStatement;
-import org.gobiiproject.gobiimodel.config.GobiiException;
-import org.gobiiproject.gobiimodel.cvnames.CvGroup;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
+
+import org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId;
+import org.gobiiproject.gobiidao.resultset.core.listquery.ListStatement;
+import org.gobiiproject.gobiimodel.config.GobiiException;
 
 public class ListStatementLinkageGroupBrapi implements ListStatement {
 

@@ -50,7 +50,8 @@ public class DtoRequestAuthorizationTest {
         String currentCropDomain = GobiiClientContext.getInstance(null, false).getCurrentCropDomain();
         Integer currentCropPort = GobiiClientContext.getInstance(null, false).getCurrentCropPort();
         String currentCropContextRoot = GobiiClientContext.getInstance(null, false).getCurrentCropContextRoot();
-        String url = RestResourceId.GOBII_AUTH.getRequestUrl(currentCropContextRoot, GobiiControllerType.GOBII.getControllerPath());
+        String currentGobiiCropType = GobiiClientContext.getInstance(null, false).getCurrentClientCropType();
+        String url = RestResourceId.GOBII_AUTH.getRequestUrl(currentCropContextRoot, GobiiControllerType.GOBII.getControllerPath(), currentGobiiCropType);
         Assert.assertTrue(GobiiClientContextAuth.deAuthenticate());
 
         URI uri = new URIBuilder().setScheme("http")
@@ -183,7 +184,7 @@ public class DtoRequestAuthorizationTest {
                 tokenFromBodyResponse.equals(tokenHeader.getValue()));
 
         Assert.assertNotNull("Crop type was not returned", dtoHeaderAuth.getGobiiCropType());
-        String gobiiCropTypeReceived = dtoHeaderAuth.getGobiiCropType();
+        //String gobiiCropTypeReceived = dtoHeaderAuth.getGobiiCropType();
 
 
         // now test we can do a request with the token we got

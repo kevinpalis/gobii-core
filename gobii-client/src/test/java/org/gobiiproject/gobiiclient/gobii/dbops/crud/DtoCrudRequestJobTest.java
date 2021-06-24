@@ -18,11 +18,11 @@ import org.gobiiproject.gobiiclient.gobii.Helpers.TestUtils;
 import org.gobiiproject.gobiimodel.cvnames.JobPayloadType;
 import org.gobiiproject.gobiimodel.cvnames.JobProgressStatusType;
 import org.gobiiproject.gobiimodel.cvnames.JobType;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.AnalysisDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ProjectDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.DataSetDTO;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.JobDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.AnalysisDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ProjectDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.DataSetDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.JobDTO;
 import org.gobiiproject.gobiimodel.headerlesscontainer.DnaSampleDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiFilterType;
@@ -339,7 +339,8 @@ public class DtoCrudRequestJobTest implements DtoCrudRequestTest {
 
         for (Integer currentIdx : itemToTest) {
 
-            JobDTO currentJobDto = jobDTOList.get(currentIdx);
+            //JobDTO currentJobDto = 
+            jobDTOList.get(currentIdx);
 
             Link currentLink = linkCollection.getLinksPerDataItem().get(currentIdx);
 

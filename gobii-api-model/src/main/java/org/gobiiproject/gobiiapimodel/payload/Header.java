@@ -14,6 +14,7 @@ import java.util.Date;
 /**
  * Created by Phil on 3/24/2016.
  */
+@SuppressWarnings("serial")
 public class Header implements Serializable {
 
     public Header() {

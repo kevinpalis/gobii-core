@@ -1,16 +1,37 @@
 package org.gobiiproject.gobiimodel.entity;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.gobiiproject.gobiimodel.entity.JpaConverters.JsonbConverter;
+import java.io.Serializable;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Type;
+
+import lombok.Data;
 
 @Entity
 @Table(name = "cv")
-public class Cv {
+@SuppressWarnings("serial")
+@Data
+@NamedEntityGraph(name = "graph.cv",
+    attributeNodes = {
+        @NamedAttributeNode(value="cvGroup")
+    }
+)
+public class Cv implements Serializable{
 
     @Id
     @Column(name = "cv_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer cvId;
 
     @Column(name="term")
@@ -22,8 +43,9 @@ public class Cv {
     @Column(name = "rank")
     private Integer rank;
 
-    @Column(name = "cvgroup_id")
-    private Integer cvGroupId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cvgroup_id")
+    private CvGroup cvGroup;
 
     @Column(name = "abbreviation")
     private String abbreviation;
@@ -32,11 +54,16 @@ public class Cv {
     private Integer dbxrefId;
 
     @Column(name = "status")
-    private String status;
+    private Integer status;
+
+
+    // @Column(name="props", columnDefinition = "jsonb")
+    // @Convert(converter = JsonbConverter.class)
+    // private JsonNode props;
 
     @Column(name="props", columnDefinition = "jsonb")
-    @Convert(converter = JsonbConverter.class)
-    private JsonNode props;
+    @Type(type = "CvPropertiesType")
+    private java.util.Map<String, String> properties;
 
     public Integer getCvId() {
         return cvId;
@@ -46,68 +73,5 @@ public class Cv {
         this.cvId = cvId;
     }
 
-    public String getTerm() {
-        return term;
-    }
-
-    public void setTerm(String term) {
-        this.term = term;
-    }
-
-    public String getDefinition() {
-        return definition;
-    }
-
-    public void setDefinition(String definition) {
-        this.definition = definition;
-    }
-
-    public Integer getRank() {
-        return rank;
-    }
-
-    public void setRank(Integer rank) {
-        this.rank = rank;
-    }
-
-    public Integer getCvGroupId() {
-        return cvGroupId;
-    }
-
-    public void setCvGroupId(Integer cvGroupId) {
-        this.cvGroupId = cvGroupId;
-    }
-
-    public String getAbbreviation() {
-        return abbreviation;
-    }
-
-    public void setAbbreviation(String abbreviation) {
-        this.abbreviation = abbreviation;
-    }
-
-    public Integer getDbxrefId() {
-        return dbxrefId;
-    }
-
-    public void setDbxrefId(Integer dbxrefId) {
-        this.dbxrefId = dbxrefId;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public JsonNode getProps() {
-        return props;
-    }
-
-    public void setProps(JsonNode props) {
-        this.props = props;
-    }
 
 }

@@ -10,7 +10,7 @@ import org.gobiiproject.gobiidao.resultset.core.ParamExtractor;
 import org.gobiiproject.gobiidao.resultset.core.ResultColumnApplicator;
 import org.gobiiproject.gobiidtomapping.core.GobiiDtoMappingException;
 import org.gobiiproject.gobiidtomapping.entity.auditable.DtoMapManifest;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ManifestDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ManifestDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -16,6 +16,7 @@ import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+@SuppressWarnings("unused")
 public class NucleotideSeparatorSplitterTest {
 
     static boolean runnerHadError = false;
@@ -54,7 +55,7 @@ public class NucleotideSeparatorSplitterTest {
     @Test
     public void testNormalCase(){
         List<String> input = Arrays.asList("AAAA","ACGT","CCGT","GTTT","ACGT");
-        List<String> expectedOutput = Arrays.asList("AAAA","ACGT","CCGT","GTTT","ACGT");
+        List<String> expectedOutput = Arrays.asList("A/A/A/A","A/C/G/T","C/C/G/T","G/T/T/T","A/C/G/T");
 
         List<String> output = runSplitter(input);
         noErrorsExpected();
@@ -65,7 +66,7 @@ public class NucleotideSeparatorSplitterTest {
     @Test
     public void testNormalSeparatorsCase(){
         List<String> input = Arrays.asList("A/A/A/A","A/C/G/T","C/C/G/T","G/T/T/T","A/C/G/T");
-        List<String> expectedOutput = Arrays.asList("AAAA","ACGT","CCGT","GTTT","ACGT");
+        List<String> expectedOutput = Arrays.asList("A/A/A/A","A/C/G/T","C/C/G/T","G/T/T/T","A/C/G/T");
 
         List<String> output = runSplitter(input);
         noErrorsExpected();
@@ -75,7 +76,7 @@ public class NucleotideSeparatorSplitterTest {
     @Test
     public void testPipeSeparatorsCase(){
         List<String> input = Arrays.asList("A|A|A|A","A|C|G|T","C|C|G|T","G|T|T|T","A|C|G|T");
-        List<String> expectedOutput = Arrays.asList("AAAA","ACGT","CCGT","GTTT","ACGT");
+        List<String> expectedOutput = Arrays.asList("A/A/A/A","A/C/G/T","C/C/G/T","G/T/T/T","A/C/G/T");
 
         List<String> output = runSplitter(input);
         noErrorsExpected();
@@ -95,10 +96,11 @@ public class NucleotideSeparatorSplitterTest {
     @Test
     public void testMissingAlleleCase(){
         List<String> input = Arrays.asList("A/A/A/A","A/C//T","C/C/G/T","G/T/T/T","A/C/G/T");
-        // List<String> expectedOutput = Arrays.asList("AAAA","ACGT","CCGT","GTTT","ACGT");
+        List<String> expectedOutput = Arrays.asList("A/A/A/A","A/C//T","C/C/G/T","G/T/T/T","A/C/G/T");
 
         List<String> output = runSplitter(input);
-        expectedError("Unexpected Length Element A/C//T  in row 0");
+        noErrorsExpected();
+        assertEquals("Transform equals input",expectedOutput,output);
     }
 
     @Test
@@ -116,13 +118,13 @@ public class NucleotideSeparatorSplitterTest {
         //List<String> expectedOutput = Arrays.asList("AAAA","ACGT","CCGT","GTTT","ACGT");
 
         List<String> output = runSplitter(input);
-        expectedError("Unexpected character in separator slot in A/C|G|T: | Expected:/  in row 0");
+        expectedError("Unexpected Length Element A/C|G|T  in row 0");
     }
 
     @Test
     public void testUnknownElementCase(){
         List<String> input = Arrays.asList("A/A/A/A","A/C/G/T","?","G/T/T/T","A/C/G/T");
-        List<String> expectedOutput = Arrays.asList("AAAA","ACGT","NNNN","GTTT","ACGT");
+        List<String> expectedOutput = Arrays.asList("A/A/A/A","A/C/G/T","N/N/N/N","G/T/T/T","A/C/G/T");
 
         List<String> output = runSplitter(input);
         noErrorsExpected();
@@ -132,7 +134,7 @@ public class NucleotideSeparatorSplitterTest {
     @Test
     public void testLongUnknownElementCase(){
         List<String> input = Arrays.asList("A/A/A/A","A/C/G/T","Uncallable","G/T/T/T","A/C/G/T");
-        List<String> expectedOutput = Arrays.asList("AAAA","ACGT","NNNN","GTTT","ACGT");
+        List<String> expectedOutput = Arrays.asList("A/A/A/A","A/C/G/T","N/N/N/N","G/T/T/T","A/C/G/T");
 
         List<String> output = runSplitter(input);
         noErrorsExpected();
@@ -143,7 +145,21 @@ public class NucleotideSeparatorSplitterTest {
     @Test
     public void testUnknownInAlleleCase(){
         List<String> input = Arrays.asList("A/A/A/A","A/?/G/T","C/C/G/T","G/T/T/T","A/C/G/T");
-        List<String> expectedOutput = Arrays.asList("AAAA","A?GT","CCGT","GTTT","ACGT");
+        List<String> expectedOutput = Arrays.asList("A/A/A/A","A/?/G/T","C/C/G/T","G/T/T/T","A/C/G/T");
+
+        List<String> output = runSplitter(input);
+        //expectedError("Unexpected allele ? in A?GT  in row 0");
+        //This case now caught downstream
+
+        noErrorsExpected();
+        assertEquals("Transform equals input",expectedOutput,output);
+
+    }
+
+    @Test
+    public void testInsertionAlleleCase(){
+        List<String> input = Arrays.asList("ACCAC/A/A/A","A/?/CCAT/T","C/C/G/TAA","G/T/T/T","A/C/G/T");
+        List<String> expectedOutput = Arrays.asList("ACCAC/A/A/A","A/?/CCAT/T","C/C/G/TAA","G/T/T/T","A/C/G/T");
 
         List<String> output = runSplitter(input);
         //expectedError("Unexpected allele ? in A?GT  in row 0");
@@ -157,7 +173,7 @@ public class NucleotideSeparatorSplitterTest {
     @Test
     public void testUnknownInAlleleStartCase(){
         List<String> input = Arrays.asList("?/A/A/A","A/C/G/T","C/C/G/T","G/T/T/T","A/C/G/T");
-        List<String> expectedOutput = Arrays.asList("?AAA","ACGT","CCGT","GTTT","ACGT");
+        List<String> expectedOutput = Arrays.asList("?/A/A/A","A/C/G/T","C/C/G/T","G/T/T/T","A/C/G/T");
 
         List<String> output = runSplitter(input);
 
@@ -172,7 +188,7 @@ public class NucleotideSeparatorSplitterTest {
     @Test
     public void testAllUnknownElementsCase(){
         List<String> input = Arrays.asList("?","?","Uncallable","uNcAlLAblE","UNC");
-        List<String> expectedOutput = Arrays.asList("NNNN","NNNN","NNNN","NNNN","NNNN");
+        List<String> expectedOutput = Arrays.asList("N/N/N/N","N/N/N/N","N/N/N/N","N/N/N/N","N/N/N/N");
 
         List<String> output = runSplitter(input);
         noErrorsExpected();
@@ -182,7 +198,7 @@ public class NucleotideSeparatorSplitterTest {
     @Test
     public void test2LetterColonAndSingleLetter(){
         List<String> input = Arrays.asList("?","A:C","C","A/C","C");
-        List<String> expectedOutput = Arrays.asList("NN","AC","CC","AC","CC");
+        List<String> expectedOutput = Arrays.asList("N/N","A/C","C/C","A/C","C/C");
         //Reset error flag and values
         runnerHadError=false;
         runnerErrorMessage = new ArrayList<String>();
@@ -206,7 +222,7 @@ public class NucleotideSeparatorSplitterTest {
     @Test
     public void test2LetterSemicolons(){
         List<String> input = Arrays.asList("?","Unc","C;C","A:C","C;G");
-        List<String> expectedOutput = Arrays.asList("NN","NN","CC","AC","CG");
+        List<String> expectedOutput = Arrays.asList("N/N","N/N","C/C","A/C","C/G");
         //Reset error flag and values
         runnerHadError=false;
         runnerErrorMessage = new ArrayList<String>();
@@ -230,7 +246,7 @@ public class NucleotideSeparatorSplitterTest {
     @Test
     public void test2LetterINS(){
         List<String> input = Arrays.asList("?","INS","INS:INS","INSINS","A:INS");
-        List<String> expectedOutput = Arrays.asList("NN","++","++","++","A+");
+        List<String> expectedOutput = Arrays.asList("N/N","+/+","+/+","+/+","A/+");
         //Reset error flag and values
         runnerHadError=false;
         runnerErrorMessage = new ArrayList<String>();

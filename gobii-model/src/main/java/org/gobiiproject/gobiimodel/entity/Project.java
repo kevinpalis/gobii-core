@@ -1,21 +1,36 @@
 package org.gobiiproject.gobiimodel.entity;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import org.gobiiproject.gobiimodel.entity.JpaConverters.JsonbConverter;
+import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Model for Project Entity.
  * Represents the database table project.
  *
- * props - is a jsonb column. It is converted to jackson.fasterxml JsonNode using a
- * user defined hibernate converter class.
  */
 @Entity
 @Table(name = "project")
+@NamedEntityGraph(name = "project.contact",
+    attributeNodes = @NamedAttributeNode("contact")
+)
+@Data
+@EqualsAndHashCode(callSuper=false)
 public class Project extends BaseEntity {
 
     @Id
@@ -26,8 +41,9 @@ public class Project extends BaseEntity {
     @Column(name="name")
     private String projectName;
 
-    @Column(name="pi_contact")
-    private Integer piContactId;
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name="pi_contact", referencedColumnName="contact_id")
+    private Contact contact;
 
     @Column(name="code")
     private String projectCode;
@@ -35,71 +51,21 @@ public class Project extends BaseEntity {
     @Column(name="description")
     private String projectDescription;
 
+    @Column(name="props")
+    @Type(type = "CvPropertiesType")
+    private java.util.Map<String, String> properties;
 
-    @Column(name="props", columnDefinition = "jsonb")
-    @Convert(converter = JsonbConverter.class)
-    private JsonNode properties = JsonNodeFactory.instance.objectNode();
-
-    public Integer getProjectId() {
-        return this.projectId;
-    }
-
-    public void setProjectId(Integer projectId) {
-        this.projectId = projectId;
-    }
-
-    public String getProjectName() {
-        return this.projectName;
-    }
-
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
-
-
-    public Integer getPiContactId() {
-        return this.piContactId;
-    }
-
-    public void setPiContactId(Integer piContactId) {
-        this.piContactId = piContactId;
-    }
-
-    public String getProjectCode() {
-
-        return this.projectCode;
-    }
-
-    public void setProjectCode(String projectCode) {
-        this.projectCode = projectCode;
-    }
-
-    public String getProjectDescription() {
-        return this.projectDescription;
-    }
-
-    public void  setProjectDescription(String projectDescription) {
-        this.projectDescription = projectDescription;
-    }
-
-    public JsonNode getProperties() {
-        return this.properties;
-    }
-
-    public void setProperties(JsonNode properties) {
-        this.properties = properties;
-    }
-
-    public Cv getStatus() {
-        return status;
-    }
-
-    public void setStatus(Cv status) {
-        this.status = status;
-    }
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status", referencedColumnName = "cv_id")
     private Cv status = new Cv();
+
+    public Integer getPiContactId() {
+        if (this.getContact() != null) return this.getContact().getContactId();
+        return null;
+    }
+
+    @OneToOne(mappedBy = "project")
+    private ProjectStats projectStats;
+    
 
 }

@@ -13,7 +13,7 @@ public class MailMessage{
 	private String footer;
 	private String confidentialityMessage;
 	private String img = "GobiiWebImg.png"; // Note: This is full sized logo from the main page
-	private List<String> fileAttachments = new ArrayList();
+	private List<String> fileAttachments = new ArrayList<>();
 	
 	MailMessage(){
 		header = "<b><i>"+getHeaderSalutation()+"</i></b><br><br> Here is a summary of your transaction <br> <br>";

@@ -28,6 +28,7 @@ import org.springframework.cache.annotation.Cacheable;
 public class TableTrackingCache {
 
     @Autowired
+    @SuppressWarnings("unused")
     private DtoListQueryColl dtoListQueryColl;
 
     @Cacheable(cacheNames = "tableLastUpdateCache", key = "#gobiiEntityNameType")

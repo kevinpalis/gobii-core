@@ -1,22 +1,39 @@
+/**
+ * Platform.java
+ * 
+ * Platform Entity for GDMV3
+ */
 package org.gobiiproject.gobiimodel.entity;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import org.gobiiproject.gobiimodel.entity.JpaConverters.JsonbConverter;
+import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-/**
- * Model for Platform Entity.
- * Represents database table platform.
- *
- * props - is a jsonb column. It is converted to jackson.fasterxml JsonNode using a
- * user defined hibernate converter class.
- */
+@Data
 @Entity
 @Table(name = "platform")
+@EqualsAndHashCode(callSuper=false)
+@NamedEntityGraph(name="graph.platform",
+    attributeNodes = {
+        @NamedAttributeNode( value = "type")
+    }
+)
 public class Platform extends BaseEntity{
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "platform_id")
@@ -31,71 +48,19 @@ public class Platform extends BaseEntity{
     @Column(name="description")
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_id", referencedColumnName = "cv_id")
     private Cv type;
 
     @Column(name="props", columnDefinition = "jsonb")
-    @Convert(converter = JsonbConverter.class)
+    @Type(type = "jsonb")
     private JsonNode properties;
 
-    public Integer getPlatformId() {
-        return platformId;
-    }
-
-    public void setPlatformId(Integer platformId) {
-        this.platformId = platformId;
-    }
-
-    public String getPlatformName() {
-        return platformName;
-    }
-
-    public void setPlatformName(String platformName) {
-        this.platformName = platformName;
-    }
-
-    public String getPlatformCode() {
-        return platformCode;
-    }
-
-    public void setPlatformCode(String platformCode) {
-        this.platformCode = platformCode;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Cv getType() {
-        return type;
-    }
-
-    public void setType(Cv type) {
-        this.type = type;
-    }
-
-    public JsonNode getProperties() {
-        return properties;
-    }
-
-    public void setProperties(JsonNode properties) {
-        this.properties = properties;
-    }
-    public Cv getStatus() {
-        return status;
-    }
-
-    public void setStatus(Cv status) {
-        this.status = status;
-    }
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status", referencedColumnName = "cv_id")
-    private Cv status = new Cv();
+    private Cv status;
+
+    @OneToOne(mappedBy = "platform")
+    private PlatformStats platformStats;
 
 }

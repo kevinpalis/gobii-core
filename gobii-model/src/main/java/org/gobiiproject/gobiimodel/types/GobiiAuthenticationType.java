@@ -8,5 +8,6 @@ public enum GobiiAuthenticationType {
     LDAP_CONNECT_WITH_MANAGER,
     ACTIVE_DIRECTORY,
     ACTIVE_DIRECTORY_CONNECT_WITH_MANAGER,
+    KEYCLOAK,
     TEST
 }

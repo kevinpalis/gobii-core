@@ -3,6 +3,7 @@ package org.gobiiproject.gobiimodel.entity;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.gobiiproject.gobiimodel.entity.JpaConverters.JsonbConverter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 
@@ -20,6 +21,7 @@ public class DnaSample extends BaseEntity {
     @Id
     @Column(name="dnasample_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Access(AccessType.PROPERTY)
     private Integer dnaSampleId;
 
     @Column(name="name")
@@ -44,16 +46,21 @@ public class DnaSample extends BaseEntity {
     @Column(name="well_col")
     private String wellCol;
 
-    @Column(name="project_id")
-    private Integer projectId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="project_id")
+    private Project project;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "germplasm_id")
-    private Germplasm germplasm = new Germplasm();
+    private Germplasm germplasm;
 
     @Column(name="props", columnDefinition = "jsonb")
-    @Convert(converter = JsonbConverter.class)
+    @Type(type = "jsonb")
     private JsonNode properties;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status", referencedColumnName = "cv_id")
+    private Cv status;
 
     public Integer getDnaSampleId() {
         return dnaSampleId;
@@ -111,12 +118,12 @@ public class DnaSample extends BaseEntity {
         this.wellCol = wellCol;
     }
 
-    public Integer getProjectId() {
-        return projectId;
+    public Project getProject() {
+        return project;
     }
 
-    public void setProjectId(Integer projectId) {
-        this.projectId = projectId;
+    public void setProject(Project project) {
+        this.project = project;
     }
 
     public Germplasm getGermplasm() {
@@ -150,9 +157,5 @@ public class DnaSample extends BaseEntity {
     public void setStatus(Cv status) {
         this.status = status;
     }
-
-    @ManyToOne
-    @JoinColumn(name = "status", referencedColumnName = "cv_id")
-    private Cv status = new Cv();
 
 }

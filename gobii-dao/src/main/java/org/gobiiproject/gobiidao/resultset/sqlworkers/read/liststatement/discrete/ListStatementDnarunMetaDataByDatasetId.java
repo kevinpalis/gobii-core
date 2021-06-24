@@ -40,7 +40,7 @@ public class ListStatementDnarunMetaDataByDatasetId implements ListStatement {
             throws SQLException, GobiiException {
 
         Integer pageOffset = 0;
-        Integer pageSize = 0;
+        //Integer pageSize = 0;
 
         if(sqlParamVals != null) {
 

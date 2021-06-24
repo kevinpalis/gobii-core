@@ -1,9 +1,6 @@
 package org.gobiiproject.gobiimodel.dto.instructions.loader;
 
 
-import lombok.Data;
-import lombok.experimental.Accessors;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,8 +9,6 @@ import java.util.List;
  * See {@link GobiiFile} and {@link GobiiFileColumn}
  * Created by Phil on 4/12/2016.
  */
-@Data
-@Accessors(chain = true)
 public class GobiiLoaderInstruction {
 
 
@@ -22,4 +17,19 @@ public class GobiiLoaderInstruction {
     //List of GobiiFileColumn columns, left to right ordering
     private List<GobiiFileColumn> gobiiFileColumns = new ArrayList<>();
 
+    public String getTable() {
+        return table;
+    }
+
+    public void setTable(String table) {
+        this.table = table;
+    }
+
+    public List<GobiiFileColumn> getGobiiFileColumns() {
+        return gobiiFileColumns;
+    }
+
+    public void setGobiiFileColumns(List<GobiiFileColumn> gobiiFileColumns) {
+        this.gobiiFileColumns = gobiiFileColumns;
+    }
 }

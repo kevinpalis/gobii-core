@@ -24,6 +24,7 @@ public class RsProjectDaoImpl extends org.gobiiproject.gobiidao.resultset.access
     private StoredProcExec storedProcExec = null;
 
     @Autowired
+    @SuppressWarnings("unused")
     private SpRunnerCallable spRunnerCallable;
 
     @Transactional(propagation = Propagation.REQUIRED)

@@ -1,6 +1,6 @@
 package org.gobiiproject.gobiiweb.controllers;
 
-import org.gobiiproject.gobiiapimodel.payload.sampletracking.ErrorPayload;
+import org.gobiiproject.gobiimodel.dto.brapi.envelope.ErrorPayload;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 public class ErrorController {
 
     @RequestMapping(value = "error", method = RequestMethod.GET)
-    public ResponseEntity error(HttpServletRequest request) {
+    public ResponseEntity<ErrorPayload> error(HttpServletRequest request) {
 
         ErrorPayload errorPayload = new ErrorPayload();
 
@@ -25,6 +25,7 @@ public class ErrorController {
             return ResponseEntity.status(httpStatus).body(errorPayload);
         }
         catch (Exception e) {
+            e.printStackTrace();
             errorPayload.setError("Internal server error");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorPayload);
         }

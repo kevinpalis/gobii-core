@@ -1,17 +1,15 @@
 package org.gobiiproject.gobiidao.resultset.sqlworkers.read.sp;
 
-import org.gobiiproject.gobiidao.GobiiDaoException;
-import org.gobiiproject.gobiimodel.cvnames.CvGroup;
-import org.gobiiproject.gobiimodel.types.GobiiCvGroupType;
-import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
-import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
-import org.hibernate.jdbc.Work;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+
+import org.gobiiproject.gobiidao.GobiiDaoException;
+import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
+import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
+import org.hibernate.jdbc.Work;
 
 public class SpGetMapsetByMapsetIdBrapi implements Work {
 

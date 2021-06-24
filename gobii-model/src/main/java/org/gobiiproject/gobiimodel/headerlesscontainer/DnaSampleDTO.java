@@ -3,8 +3,8 @@ package org.gobiiproject.gobiimodel.headerlesscontainer;
 
 
 import org.gobiiproject.gobiimodel.dto.base.DTOBase;
-import org.gobiiproject.gobiimodel.dto.entity.annotations.GobiiEntityColumn;
-import org.gobiiproject.gobiimodel.dto.entity.annotations.GobiiEntityParam;
+import org.gobiiproject.gobiimodel.dto.annotations.GobiiEntityColumn;
+import org.gobiiproject.gobiimodel.dto.annotations.GobiiEntityParam;
 
 public class DnaSampleDTO extends DTOBase {
 

@@ -19,9 +19,9 @@ import org.gobiiproject.gobiiclient.gobii.Helpers.TestUtils;
 import org.gobiiproject.gobiiclient.gobii.dbops.crud.DtoCrudRequestContactTest;
 import org.gobiiproject.gobiimodel.config.ConfigSettings;
 import org.gobiiproject.gobiimodel.config.GobiiCropConfig;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.AnalysisDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.AnalysisDTO;
 import org.gobiiproject.gobiiapimodel.types.GobiiControllerType;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ContactDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ContactDTO;
 import org.gobiiproject.gobiimodel.types.GobiiAutoLoginType;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiProcessType;
@@ -35,6 +35,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public class DtoRequestAuthenticationTest {
 
 
@@ -70,9 +71,10 @@ public class DtoRequestAuthenticationTest {
         AnalysisDTO analysisDTORequest = new AnalysisDTO();
         analysisDTORequest.setAnalysisId(1);
 
+        String currentGobiiCropType = GobiiClientContext.getInstance(null, false).getCurrentClientCropType();
 
         String url = RestResourceId.GOBII_ANALYSIS.getRequestUrl(GobiiClientContext.getInstance(null, false).getCurrentCropContextRoot(),
-                GobiiControllerType.GOBII.getControllerPath());
+                GobiiControllerType.GOBII.getControllerPath(), currentGobiiCropType);
 
 //        DtoRequestProcessor<AnalysisDTO> dtoDtoRequestProcessor = new DtoRequestProcessor<>();
 
@@ -107,7 +109,7 @@ public class DtoRequestAuthenticationTest {
             String cropIdOne = gobiiCropConfigOne.getGobiiCropType();
             String cropContextRootOne = gobiiCropConfigOne.getServer(ServerType.GOBII_WEB).getContextPath();
             Integer cropPortOne = gobiiCropConfigOne.getServer(ServerType.GOBII_WEB).getPort();
-            GobiiUriFactory gobiiUriFactoryServerOne = new GobiiUriFactory(cropContextRootOne);
+            GobiiUriFactory gobiiUriFactoryServerOne = new GobiiUriFactory(cropContextRootOne, cropIdOne);
             RestUri restUriContactServerOne = gobiiUriFactoryServerOne
                     .resourceByUriIdParam(RestResourceId.GOBII_CONTACTS);
 
@@ -116,7 +118,7 @@ public class DtoRequestAuthenticationTest {
             String cropIdTwo = gobiiCropConfigTwo.getGobiiCropType();
             String cropContextRootTwo = gobiiCropConfigTwo.getServer(ServerType.GOBII_WEB).getContextPath();
             Integer cropPortTwo = gobiiCropConfigTwo.getServer(ServerType.GOBII_WEB).getPort();
-            GobiiUriFactory gobiiUriFactoryServeTwo = new GobiiUriFactory(cropContextRootTwo);
+            GobiiUriFactory gobiiUriFactoryServeTwo = new GobiiUriFactory(cropContextRootTwo, cropIdTwo);
             RestUri restUriContactServerTwo = gobiiUriFactoryServeTwo
                     .resourceByUriIdParam(RestResourceId.GOBII_CONTACTS);
 
@@ -283,7 +285,7 @@ public class DtoRequestAuthenticationTest {
 
         // now break the test user login
         String testLoginUser = gobiiTestConfiguration.getConfigSettings().getTestExecConfig().getLdapUserForUnitTest();
-        RestUri restUriContactSearch = gobiiClientContext.getInstance(null, false)
+        RestUri restUriContactSearch = GobiiClientContext.getInstance(null, false)
                 .getUriFactory()
                 .contactsByQueryParams();
         restUriContactSearch.setParamValue("userName", testLoginUser);
@@ -295,7 +297,7 @@ public class DtoRequestAuthenticationTest {
         ContactDTO contactDTOFromGet = resultEnvelope.getPayload().getData().get(0);
         contactDTOFromGet.setUserName("not");
 
-        RestUri restUriContactUpdate = gobiiClientContext.getInstance(null, false)
+        RestUri restUriContactUpdate = GobiiClientContext.getInstance(null, false)
                 .getUriFactory()
                 .resourceColl(RestResourceId.GOBII_CONTACTS)
                 .addUriParam("id")
@@ -308,7 +310,7 @@ public class DtoRequestAuthenticationTest {
 
 
         // now test that we get the correct borken response
-        GobiiClientContext newGobiiClientContext = gobiiClientContext.getInstance(serviceUrl, true);
+        GobiiClientContext newGobiiClientContext = GobiiClientContext.getInstance(serviceUrl, true);
 
         String testUserName = gobiiTestConfiguration.getConfigSettings().getTestExecConfig().getLdapUserForUnitTest();
         String testPassword = gobiiTestConfiguration.getConfigSettings().getTestExecConfig().getLdapPasswordForUnitTest();

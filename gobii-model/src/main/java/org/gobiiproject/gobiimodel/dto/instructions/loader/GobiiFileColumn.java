@@ -1,8 +1,5 @@
 package org.gobiiproject.gobiimodel.dto.instructions.loader;
 
-import org.codehaus.jackson.map.util.BeanUtil;
-import org.gobiiproject.gobiimodel.types.DataSetType;
-import org.gobiiproject.gobiimodel.types.DatasetOrientationType;
 import org.gobiiproject.gobiimodel.types.GobiiColumnType;
 import org.springframework.beans.BeanUtils;
 

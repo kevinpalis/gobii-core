@@ -13,8 +13,8 @@ import org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId;
 import org.gobiiproject.gobiidtomapping.DtoMapSample;
 import org.gobiiproject.gobiidtomapping.core.GobiiDtoMappingException;
 import org.gobiiproject.gobiidtomapping.entity.noaudit.DtoMapJob;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.DataSetDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.JobDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.DataSetDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.JobDTO;
 import org.gobiiproject.gobiimodel.headerlesscontainer.DnaSampleDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Created by Phil on 3/29/2016.
  */
+@SuppressWarnings("serial")
 public class DtoMapSampleImpl implements DtoMapSample {
 
     Logger LOGGER = LoggerFactory.getLogger(DtoMapSampleImpl.class);

@@ -41,7 +41,7 @@ public class ConfigSettings {
     ConfigValues configValues = null;
 
     public ConfigSettings(String configFileWebPath) {
-
+        Logger.logDebug("ConfigSettings", "configFileWebPath: " + configFileWebPath);
         try {
             configValues = ConfigValuesReader.read(configFileWebPath);
             this.configFileFqpn = configFileWebPath;
@@ -408,6 +408,14 @@ public class ConfigSettings {
     }
     public void setEmailSvrFrom(String emailSvrFrom){
         this.configValues.setEmailSvrFrom(emailSvrFrom);
+    }
+
+	public KeycloakConfig getKeycloakConfig() {
+		return this.configValues.getKeycloakConfig();
+    }
+    
+    public void setKeycloakConfig(KeycloakConfig config) {
+        this.configValues.setKeycloakConfig(config);
     }
 
 }

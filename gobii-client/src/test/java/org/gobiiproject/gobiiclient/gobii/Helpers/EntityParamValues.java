@@ -1,6 +1,6 @@
 package org.gobiiproject.gobiiclient.gobii.Helpers;
 
-import org.gobiiproject.gobiimodel.dto.entity.children.EntityPropertyDTO;
+import org.gobiiproject.gobiimodel.dto.children.EntityPropertyDTO;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -146,8 +146,7 @@ public class RsMapSetDaoImpl implements RsMapSetDao {
     @Override
     public Integer createUpdateMapSetProperty(Map<String, Object> parameters) throws GobiiDaoException {
 
-        Integer returnVal = null;
-
+        //Integer returnVal = null;
         try {
 
             return spRunnerCallable.run(new SpInsMapsetProperties(), parameters);

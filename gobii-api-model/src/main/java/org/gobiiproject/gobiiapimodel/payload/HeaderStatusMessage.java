@@ -5,11 +5,10 @@ import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class HeaderStatusMessage implements Serializable {
 
-
     private GobiiStatusLevel gobiiStatusLevel;
-
 
     private GobiiValidationStatusType gobiiValidationStatusType;
     private String message;

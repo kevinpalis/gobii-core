@@ -185,6 +185,13 @@ public class HelperFunctions {
         return true;
     }
 
+    public static String getDestinationFile(GobiiLoaderProcedure procedure, GobiiLoaderInstruction instruction) {
+        String destination = procedure.getMetadata().getGobiiFile().getDestination();
+        char last = destination.charAt(destination.length() - 1);
+        if (last == '\\' || last == '/') {
+            return destination + "digest." + instruction.getTable();
+        } else return destination + "/" + "digest." + instruction.getTable();
+    }
 
     /**
      * Returns a string from the output of a process
@@ -214,13 +221,6 @@ public class HelperFunctions {
     }
 
     //For a folder destination, returns /digest.<tablename>
-    public static String getDestinationFile(GobiiLoaderProcedure procedure, GobiiLoaderInstruction instruction) {
-        String destination = procedure.getMetadata().getGobiiFile().getDestination();
-        char last = destination.charAt(destination.length() - 1);
-        if (last == '\\' || last == '/') {
-            return destination + "digest." + instruction.getTable();
-        } else return destination + "/" + "digest." + instruction.getTable();
-    }
 
     /***
      * Returns a valid postgres connection string, including username and password

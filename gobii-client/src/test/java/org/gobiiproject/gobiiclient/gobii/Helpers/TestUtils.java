@@ -7,7 +7,7 @@ import org.gobiiproject.gobiimodel.config.RestResourceId;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContext;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContextAuth;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiEnvelopeRestResource;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
 import org.gobiiproject.gobiiapimodel.payload.Header;
 import org.gobiiproject.gobiiapimodel.payload.HeaderStatusMessage;
 import org.gobiiproject.gobiimodel.dto.system.ConfigSettingsDTO;

@@ -1,29 +1,46 @@
 listMergedBranches.sh
 
+.vscode/
 .idea
 *.iml
 gobii-client/target
+gobii-client/.factorypath 
 gobii-dao/target
+gobii-dao/.factorypath 
 gobii-domain/target
+gobii-domain/.factorypath 
 gobii-dtomapping/target
+gobii-dtomapping/.factorypath
+gobii-dtomappint/bin
 gobii-model/target
+gobii-model/bin
+gobii-model/.factorypath 
 gobii-api-model/target
+gobii-api-model/.factorypath 
 gobii-brapi/target
+gobii-brapi/.factorypath
 gobii-process/target
+gobii-process/.factorypath 
 gobii-web/target
+gobii-web/.factorypath 
 gobii-sampletracking-dao/target
-/bin/
+gobii-sampletracking-dao/.factorypath 
+bin/
 
+.factorypath
 .settings
 .classpath
 .project
 *.log
+*.class
 gobii-web/src/main/ts/*.js
 gobii-web/src/main/ts/*.map
 gobii-web/src/main/webapp/js/gobii_modules/**/*.js
 gobii-web/src/main/webapp/js/gobii_modules/**/*.js.map
 gobii-web/src/main/ts/.baseDir.ts
 gobii-web/node_modules
+gobii-web/src/main/extractor-ui/node_modules
+gobii-web/src/main/extractor-ui/dist
 gobii-web/.tscache
 gobii-web/node_modules
 gobii-web/node
@@ -35,3 +52,4 @@ gobii-client/gobii-web.xml
 gobii-web/package-lock.json
 
 gobii-web/src/main/resources/docs/generated/**
+gobii-web/src/main/extractor-ui/node

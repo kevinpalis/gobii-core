@@ -1,0 +1,12 @@
+<!-- <select class="nameIdListBox" 
+                       (change)="handleFileItemSelected($event)"
+                       id="{{controlId}}">
+        <option *ngFor="let fileItem of fileItems$ | async"
+                [value]="fileItem.getFileItemUniqueId()"
+                [selected]="fileItem.getSelected()"
+                title="{{fileItem.getItemName()}}">
+            {{fileItem.getItemName().length < 34 ? fileItem.getItemName() : fileItem.getItemName().substr(0,30).concat(" . . .")}}
+            
+        </option>
+    </select> -->
+    <p-dropdown [options] = "options" [(ngModel)] = "selectedItem" (onChange)="handleFileItemSelected($event)"></p-dropdown>

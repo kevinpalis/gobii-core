@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+
 import org.gobiiproject.gobiimodel.utils.error.Logger;
 
 public class FileSystemInterface {

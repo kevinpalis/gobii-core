@@ -12,6 +12,7 @@ import org.gobiiproject.gobiidao.resultset.core.listquery.ParameterizedSql;
 /**
  * Created by VCalaminos on 2/20/2018.
  */
+@SuppressWarnings("serial")
 public class ListStatementDatasetForSamplesByDatasetType implements ListStatement {
 
     private final String PARAM_NAME_DATASET_TYPE = "datasetType";

@@ -9,6 +9,7 @@ import org.gobiiproject.gobiiapimodel.hateos.Link;
 import org.gobiiproject.gobiiapimodel.hateos.LinkCollection;
 import org.gobiiproject.gobiiapimodel.payload.PayloadEnvelope;
 import org.gobiiproject.gobiiapimodel.restresources.common.RestUri;
+import org.gobiiproject.gobiiclient.gobii.Helpers.GlobalPkColl;
 import org.gobiiproject.gobiimodel.config.RestResourceId;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContext;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContextAuth;
@@ -16,8 +17,8 @@ import org.gobiiproject.gobiiclient.core.gobii.GobiiEnvelopeRestResource;
 import org.gobiiproject.gobiiclient.gobii.Helpers.DtoRestRequestUtils;
 import org.gobiiproject.gobiiclient.gobii.Helpers.GlobalPkValues;
 import org.gobiiproject.gobiiclient.gobii.Helpers.TestUtils;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ProjectDTO;
-import org.gobiiproject.gobiimodel.dto.entity.children.EntityPropertyDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ProjectDTO;
+import org.gobiiproject.gobiimodel.dto.children.EntityPropertyDTO;
 import org.gobiiproject.gobiiapimodel.payload.HeaderStatusMessage;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiProcessType;
@@ -108,7 +109,8 @@ public class DtoCrudRequestProjectTest implements DtoCrudRequestTest {
 
         RestUri projectsUri = GobiiClientContext.getInstance(null, false).getUriFactory()
                 .resourceByUriIdParam(RestResourceId.GOBII_PROJECTS);
-        projectsUri.setParamValue("id", "1");
+        Integer projectId = (new GlobalPkColl<DtoCrudRequestProjectTest>().getAPkVal(DtoCrudRequestProjectTest.class, GobiiEntityNameType.PROJECT));
+        projectsUri.setParamValue("id", projectId.toString());
         GobiiEnvelopeRestResource<ProjectDTO,ProjectDTO> gobiiEnvelopeRestResourceForProjects = new GobiiEnvelopeRestResource<>(projectsUri);
         PayloadEnvelope<ProjectDTO> resultEnvelope = gobiiEnvelopeRestResourceForProjects
                 .get(ProjectDTO.class);
@@ -153,7 +155,8 @@ public class DtoCrudRequestProjectTest implements DtoCrudRequestTest {
 
         RestUri projectsUri = GobiiClientContext.getInstance(null, false).getUriFactory()
                 .resourceByUriIdParam(RestResourceId.GOBII_PROJECTS);
-        projectsUri.setParamValue("id", "1");
+        Integer projectId = (new GlobalPkColl<DtoCrudRequestProjectTest>().getAPkVal(DtoCrudRequestProjectTest.class, GobiiEntityNameType.PROJECT));
+        projectsUri.setParamValue("id", projectId.toString());
         GobiiEnvelopeRestResource<ProjectDTO,ProjectDTO> gobiiEnvelopeRestResourceForProjectGet = new GobiiEnvelopeRestResource<>(projectsUri);
         PayloadEnvelope<ProjectDTO> resultEnvelope = gobiiEnvelopeRestResourceForProjectGet
                 .get(ProjectDTO.class);
@@ -194,7 +197,8 @@ public class DtoCrudRequestProjectTest implements DtoCrudRequestTest {
 
         RestUri projectsUri = GobiiClientContext.getInstance(null, false).getUriFactory()
                 .resourceByUriIdParam(RestResourceId.GOBII_PROJECTS);
-        projectsUri.setParamValue("id", "1");
+        Integer projectId = (new GlobalPkColl<DtoCrudRequestProjectTest>().getAPkVal(DtoCrudRequestProjectTest.class, GobiiEntityNameType.PROJECT));
+        projectsUri.setParamValue("id", projectId.toString());
         GobiiEnvelopeRestResource<ProjectDTO,ProjectDTO> gobiiEnvelopeRestResourceForProjectGet = new GobiiEnvelopeRestResource<>(projectsUri);
         PayloadEnvelope<ProjectDTO> resultEnvelope = gobiiEnvelopeRestResourceForProjectGet
                 .get(ProjectDTO.class);
@@ -242,7 +246,8 @@ public class DtoCrudRequestProjectTest implements DtoCrudRequestTest {
 
         RestUri projectsUri = GobiiClientContext.getInstance(null, false).getUriFactory()
                 .resourceByUriIdParam(RestResourceId.GOBII_PROJECTS);
-        projectsUri.setParamValue("id", "1");
+        Integer projectId = (new GlobalPkColl<DtoCrudRequestProjectTest>().getAPkVal(DtoCrudRequestProjectTest.class, GobiiEntityNameType.PROJECT));
+        projectsUri.setParamValue("id", projectId.toString());
         GobiiEnvelopeRestResource<ProjectDTO,ProjectDTO> gobiiEnvelopeRestResourceForProjectGet = new GobiiEnvelopeRestResource<>(projectsUri);
         PayloadEnvelope<ProjectDTO> resultEnvelope = gobiiEnvelopeRestResourceForProjectGet
                 .get(ProjectDTO.class);

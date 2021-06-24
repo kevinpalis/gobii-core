@@ -2,7 +2,7 @@ package org.gobiiproject.gobiidtomapping.entity.auditable.sampletracking;
 
 import org.gobiiproject.gobiidtomapping.core.GobiiDtoMappingException;
 import org.gobiiproject.gobiidtomapping.entity.auditable.DtoMap;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.sampletracking.ExperimentDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.sampletracking.ExperimentDTO;
 
 import java.util.List;
 

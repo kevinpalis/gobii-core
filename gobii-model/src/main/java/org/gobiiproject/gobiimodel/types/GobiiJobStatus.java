@@ -1,6 +1,7 @@
 package org.gobiiproject.gobiimodel.types;
 
 public enum GobiiJobStatus {
+    PENDING("pending"),
     STARTED("started"),
     IN_PROGRESS("in_progress"),
     COMPLETED("completed"),

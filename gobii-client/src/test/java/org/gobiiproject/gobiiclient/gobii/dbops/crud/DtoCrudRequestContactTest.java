@@ -6,31 +6,30 @@
 package org.gobiiproject.gobiiclient.gobii.dbops.crud;
 
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import org.gobiiproject.gobiiapimodel.hateos.Link;
 import org.gobiiproject.gobiiapimodel.hateos.LinkCollection;
 import org.gobiiproject.gobiiapimodel.payload.PayloadEnvelope;
-import org.gobiiproject.gobiimodel.config.RestResourceId;
+import org.gobiiproject.gobiiapimodel.restresources.common.RestUri;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContext;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContextAuth;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiEnvelopeRestResource;
-import org.gobiiproject.gobiiapimodel.restresources.common.RestUri;
 import org.gobiiproject.gobiiclient.gobii.Helpers.DtoRestRequestUtils;
-import org.gobiiproject.gobiiclient.gobii.Helpers.EntityParamValues;
 import org.gobiiproject.gobiiclient.gobii.Helpers.GlobalPkColl;
 import org.gobiiproject.gobiiclient.gobii.Helpers.GlobalPkValues;
 import org.gobiiproject.gobiiclient.gobii.Helpers.TestDtoFactory;
 import org.gobiiproject.gobiiclient.gobii.Helpers.TestUtils;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ContactDTO;
+import org.gobiiproject.gobiimodel.config.RestResourceId;
+import org.gobiiproject.gobiimodel.dto.auditable.ContactDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiProcessType;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 public class DtoCrudRequestContactTest implements DtoCrudRequestTest {
 
@@ -123,7 +122,8 @@ public class DtoCrudRequestContactTest implements DtoCrudRequestTest {
 
 
         // create a new contact for our test
-        EntityParamValues entityParamValues = TestDtoFactory.makeArbitraryEntityParams();
+        //EntityParamValues entityParamValues = 
+        TestDtoFactory.makeArbitraryEntityParams();
         ContactDTO newContactDto = TestDtoFactory
                 .makePopulatedContactDTO(GobiiProcessType.CREATE, UUID.randomUUID().toString());
 

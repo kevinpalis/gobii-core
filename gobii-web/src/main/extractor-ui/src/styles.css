@@ -1,0 +1,103 @@
+@import '~@angular/cdk/overlay-prebuilt.css';
+
+html {
+    font-size: 0.75rem
+}
+
+.p-tree .p-tree-container .p-treenode .p-treenode-content {
+    padding: 0;
+}
+
+.p-checkbox .p-checkbox-box {
+    width: 15px;
+    height: 15px
+}
+
+.p-radiobutton .p-radiobutton-box {
+    width: 15px;
+    height: 15px
+}
+
+.p-checkbox .p-checkbox-box .p-checkbox-icon {
+    font-size: 10px;
+}
+
+.p-radiobutton .p-radiobutton-box .p-radiobutton-icon {
+    width: 0;
+    height: 0;
+    transition-duration: 0.2s;
+    background-color: #ffffff;
+}
+
+.criteria-tree {
+    height: 40%;
+    width: 2000px;
+    margin: 0;
+    overflow: auto;
+    padding: .25em;
+    white-space: nowrap;
+}
+
+.ui-treenode-content-selected {
+    color: #fff;
+    background-color: #416172;
+}
+
+div.ui-datatable-scrollable-body {
+    overflow-y: scroll;
+}
+
+.nameIdListBox{
+    width: 100%;
+    overflow: hidden;
+    max-width: 300px !important;
+    min-width: 100px !important;
+}
+
+.tableTooltip {
+    max-width: 500px !important;
+}
+
+td{
+    width: 300px !important;
+}
+
+button {
+    min-height: 18px;
+    min-width: 18px;
+    cursor: hand;
+    padding:0px;
+}
+
+i{
+    min-height: 16px !important;
+    min-width: 16px !important;
+}
+
+.p-button.p-button-sm {
+    font-size: 0rem;
+    padding: 0rem 0rem;
+}
+
+
+.p-button.p-button-icon-only {
+    width: 0rem;
+}
+
+.p-button.p-button-sm .p-button-icon {
+    font-size: 0.5rem;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+    text-align: center;
+}
+
+.p-datatable .p-datatable-tbody > tr > td.cell-entry {
+    text-align: left;
+}
+
+.p-dropdown {
+    min-width: 150px !important;
+    width: 100%;
+}
+

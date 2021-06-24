@@ -1,0 +1,29 @@
+{
+  "aspects": {
+    "dataset_marker": {
+      "platform_id": "1",
+      "dataset_id": "1",
+      "marker_name": ["COLUMN", { "row": 1, "column": 0}],
+      "marker_idx": ["RANGE", 1]
+    },
+    "dataset_dnarun": {
+      "platform_id": "1",
+      "experiment_id": "1",
+      "dataset_id": "1",
+      "dnarun_name": ["ROW", {"row": 0, "column": 1}],
+      "dataset_dnarun_idx": ["RANGE", 1]
+    }
+  },
+  "matrix": {
+    "size": 4,
+    "aspect": ["TRANSFORM", {
+      "lang": "clj",
+      "script": "#(str 'matrix %)"},
+      [
+        "MATRIX", {
+        "row": 1,
+        "column": 1
+      }]
+    ]
+  }
+}

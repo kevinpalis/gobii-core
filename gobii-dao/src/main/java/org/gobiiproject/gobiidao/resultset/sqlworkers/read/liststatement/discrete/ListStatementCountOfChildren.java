@@ -13,13 +13,14 @@ import static org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId.QUERY
 /**
 
  */
+@SuppressWarnings("serial")
 public class ListStatementCountOfChildren implements ListStatement {
 
     private final String PARAM_NAME_TABLE_PARENT = "tableNameParent";
     private final String PARAM_NAME_PARENT_ID = "parentId";
     private final String PARAM_NAME_TABLE_CHILD = "tableNameChild";
     private final String PARAM_NAME_TABLE_PARENT_DELIMITED = ParameterizedSql.makeDelimitedParamName(PARAM_NAME_TABLE_PARENT);
-    private final String PARAM_NAME_PARENT_ID_DELIMITED = ParameterizedSql.makeDelimitedParamName(PARAM_NAME_PARENT_ID);
+    //private final String PARAM_NAME_PARENT_ID_DELIMITED = ParameterizedSql.makeDelimitedParamName(PARAM_NAME_PARENT_ID);
     private final String PARAM_NAME_TABLE_CHILD_DELIMITED = ParameterizedSql.makeDelimitedParamName(PARAM_NAME_TABLE_CHILD);
 
 

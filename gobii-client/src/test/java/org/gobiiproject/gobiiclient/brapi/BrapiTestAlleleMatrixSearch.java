@@ -71,6 +71,7 @@ public class BrapiTestAlleleMatrixSearch {
      * @return
      * @throws Exception
      */
+    @SuppressWarnings("rawtypes")
     private String makeAlleleMatrixSearchRequest() throws Exception {
 
         String returnVal;
@@ -198,6 +199,7 @@ public class BrapiTestAlleleMatrixSearch {
         return returnVal;
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void getAlleleMatrix() throws Exception {
 

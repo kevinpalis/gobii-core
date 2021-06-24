@@ -21,6 +21,7 @@ import org.gobiiproject.gobiimodel.dto.system.PagedList;
  * The code that calls the
  * getLiset() method will get an unchecked cast warning. The
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DtoListQueryColl {
 
     public void setListQueriesBySqlId(Map<ListSqlId, DtoListQuery> listQueriesBySqlId) {

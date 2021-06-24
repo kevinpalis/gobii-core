@@ -21,8 +21,8 @@ import org.gobiiproject.gobiidao.resultset.core.ParamExtractor;
 import org.gobiiproject.gobiidao.resultset.core.ResultColumnApplicator;
 import org.gobiiproject.gobiidtomapping.core.GobiiDtoMappingException;
 import org.gobiiproject.gobiidtomapping.entity.auditable.DtoMapMarkerGroup;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.MarkerGroupDTO;
-import org.gobiiproject.gobiimodel.dto.entity.children.MarkerGroupMarkerDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.MarkerGroupDTO;
+import org.gobiiproject.gobiimodel.dto.children.MarkerGroupMarkerDTO;
 import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
 import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
 import org.slf4j.Logger;
@@ -129,7 +129,7 @@ public class DtoMapMarkerGroupImpl implements DtoMapMarkerGroup {
 
     }
 
-
+    @SuppressWarnings("unused")
     private List<MarkerGroupMarkerDTO> getMarkerGroupMarkersByMarkerName(String markerName) throws SQLException, GobiiDaoException {
 
         List<MarkerGroupMarkerDTO> returnVal = new ArrayList<>();
@@ -203,7 +203,7 @@ public class DtoMapMarkerGroupImpl implements DtoMapMarkerGroup {
         markerGroupMarkers.addAll(newMarkerDTOsForMarker); // if new markers is empty, we don't care
     }
 
-
+    @SuppressWarnings("unused")
     private void upsertMarkers(Integer markerGroupId, List<MarkerGroupMarkerDTO> markerDTOs) throws SQLException, GobiiDaoException {
 
         for (MarkerGroupMarkerDTO currentMarkerGroupMarkerDTO : markerDTOs) {

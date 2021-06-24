@@ -30,6 +30,7 @@ import static org.gobiiproject.gobiimodel.utils.email.AuthType.PASSWORD;
  * are global to the configuration. There will be one GobiiCropConfig instance for every crop supported
  * by a given deployment.
  */
+@SuppressWarnings("serial")
 class ConfigValues {
 
     public ConfigValues() {
@@ -83,6 +84,18 @@ class ConfigValues {
                         false,
                         null)
         );
+
+        this.globalServersByServerType.put(ServerType.KEY_CLOAK,
+        new ServerConfig(ServerType.KEY_CLOAK,
+                "",
+                "",
+                null,
+                true,
+                "",
+                "",
+                false,
+                null)
+        );
     } // ctor
 
     @Element(required = false)
@@ -120,6 +133,9 @@ class ConfigValues {
         put(GobiiFileNoticeType.CONFIDENTIALITY, "confidentiality.txt");
 
     }};
+
+    @Element(required = true)
+    private KeycloakConfig keycloakConfig = new KeycloakConfig();
 
     private String currentGobiiCropType;
 
@@ -681,4 +697,12 @@ class ConfigValues {
     public void setEmailSvrFrom(String emailSvrFrom){
         this.emailSvrFrom = emailSvrFrom;
     }
+
+	public KeycloakConfig getKeycloakConfig() {
+		return this.keycloakConfig;
+	}
+
+	public void setKeycloakConfig(KeycloakConfig config) {
+        this.keycloakConfig = config;
+	}
 }

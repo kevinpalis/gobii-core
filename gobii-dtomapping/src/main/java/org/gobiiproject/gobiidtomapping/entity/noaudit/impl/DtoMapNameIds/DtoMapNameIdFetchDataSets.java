@@ -8,7 +8,7 @@ import org.gobiiproject.gobiidao.resultset.access.RsDataSetDao;
 import org.gobiiproject.gobiidtomapping.core.GobiiDtoMappingException;
 import org.gobiiproject.gobiidtomapping.entity.noaudit.impl.DtoMapNameIdFetch;
 import org.gobiiproject.gobiimodel.config.GobiiException;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiFilterType;
 import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
@@ -34,7 +34,7 @@ public class DtoMapNameIdFetchDataSets implements DtoMapNameIdFetch {
     }
 
 
-    private List makeMapOfDataSetNames(ResultSet resultSet) throws SQLException {
+    private List<NameIdDTO> makeMapOfDataSetNames(ResultSet resultSet) throws SQLException {
 
         List<NameIdDTO> returnVal = new ArrayList<>();
 

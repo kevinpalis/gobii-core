@@ -3,6 +3,7 @@ package org.gobiiproject.gobiidao.resultset.access.impl;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.gobiiproject.gobiidao.GobiiDaoException;
 import org.gobiiproject.gobiidao.resultset.access.RsProjectDao;
 import org.gobiiproject.gobiidao.resultset.core.SpRunnerCallable;
@@ -10,9 +11,6 @@ import org.gobiiproject.gobiidao.resultset.core.StoredProcExec;
 import org.gobiiproject.gobiidao.resultset.sqlworkers.modify.SpInsProject;
 import org.gobiiproject.gobiidao.resultset.sqlworkers.modify.SpInsProjectProperties;
 import org.gobiiproject.gobiidao.resultset.sqlworkers.modify.SpUpdProject;
-import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
-import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
-import org.hibernate.exception.ConstraintViolationException;
 import org.gobiiproject.gobiidao.resultset.sqlworkers.read.sp.SpGetProjectByNameAndPIContact;
 import org.gobiiproject.gobiidao.resultset.sqlworkers.read.sp.SpGetProjectDetailsByProjectId;
 import org.gobiiproject.gobiidao.resultset.sqlworkers.read.sp.SpGetProjectNames;
@@ -192,12 +190,11 @@ public class RsProjectDaoImpl implements RsProjectDao {
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public ResultSet getProjectNames() throws GobiiDaoException {
-        // TODO Auto-generated method stub
 
         ResultSet returnVal = null;
 
         try {
-            Map<String, Object> parameters = new HashMap<>();
+            //Map<String, Object> parameters = new HashMap<>();
             SpGetProjectNames spGetProjectNames = new SpGetProjectNames();
 
             storedProcExec.doWithConnection(spGetProjectNames);
@@ -223,7 +220,7 @@ public class RsProjectDaoImpl implements RsProjectDao {
 
         try {
 
-            Map<String, Object> parameters = new HashMap<>();
+            //Map<String, Object> parameters = new HashMap<>();
             SpGetProjectsForLoadedDatasets spGetProjectsForLoadedDatasets = new SpGetProjectsForLoadedDatasets();
 
             storedProcExec.doWithConnection(spGetProjectsForLoadedDatasets);

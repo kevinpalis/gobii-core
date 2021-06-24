@@ -1,12 +1,19 @@
 package org.gobiiproject.gobiimodel.entity;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.gobiiproject.gobiimodel.entity.JpaConverters.JsonbConverter;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.FetchProfile;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
-import javax.persistence.*;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import org.hibernate.annotations.Type;
 
 /**
  * Model for Dnarun(dnarun) Entity in database.
@@ -16,10 +23,6 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "dnarun")
-@FetchProfile(name = "dnarun-experiment-dnasample", fetchOverrides = {
-        @FetchProfile.FetchOverride(entity = DnaRun.class, association = "experiment", mode = FetchMode.JOIN),
-        @FetchProfile.FetchOverride(entity = DnaRun.class, association = "dnaSample", mode = FetchMode.JOIN),
-})
 public class DnaRun {
 
     @Id
@@ -29,21 +32,21 @@ public class DnaRun {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "experiment_id")
-    private Experiment experiment  = new Experiment();
+    private Experiment experiment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dnasample_id")
-    private DnaSample dnaSample = new DnaSample();
+    private DnaSample dnaSample;
 
     @Column(name="name")
     private String dnaRunName;
 
     @Column(name="dataset_dnarun_idx", columnDefinition = "jsonb")
-    @Convert(converter = JsonbConverter.class)
+    @Type(type = "jsonb")
     private JsonNode datasetDnaRunIdx;
 
     @Column(name="props", columnDefinition = "jsonb")
-    @Convert(converter = JsonbConverter.class)
+    @Type(type = "jsonb")
     private JsonNode properties;
 
 

@@ -1,11 +1,24 @@
 package org.gobiiproject.gobiimodel.entity;
 
-
-import com.fasterxml.jackson.databind.JsonNode;
-import org.gobiiproject.gobiimodel.entity.JpaConverters.JsonbConverter;
-
-import javax.persistence.*;
 import java.util.Date;
+import java.util.Map;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Type;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Model for Analysis Entity.
@@ -14,6 +27,14 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "analysis")
+@NamedEntityGraph(name = "graph.analysis",
+    attributeNodes = {
+        @NamedAttributeNode(value = "type"),
+        @NamedAttributeNode(value = "reference")
+    }
+)
+@Data
+@EqualsAndHashCode(callSuper=false)
 public class Analysis extends BaseEntity {
 
     @Id
@@ -27,12 +48,18 @@ public class Analysis extends BaseEntity {
     @Column(name = "description")
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_id", referencedColumnName = "cv_id")
     private Cv type = new Cv();
 
     @Column(name = "program")
     private String program;
+
+    @Column(name = "programversion")
+    private String programVersion;
+
+    @Column(name = "algorithm")
+    private String algorithm;
 
     @Column(name = "sourcename")
     private String sourceName;
@@ -43,114 +70,22 @@ public class Analysis extends BaseEntity {
     @Column(name = "sourceuri")
     private String sourceUri;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reference_id", referencedColumnName = "reference_id")
-    private Reference reference = new Reference();
+    private Reference reference;
 
+    //@Column(name="parameters", columnDefinition = "jsonb")
+    //@Convert(converter = JsonbConverter.class)
+    //private JsonNode parameters;
     @Column(name="parameters", columnDefinition = "jsonb")
-    @Convert(converter = JsonbConverter.class)
-    private JsonNode parameters;
+    @Type(type = "CvPropertiesType")
+    private Map<String, String> parameters;
+    
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status", referencedColumnName = "cv_id")
     private Cv status = new Cv();
 
     @Column(name = "timeexecuted")
     private Date timeExecuted;
-
-    public Integer getAnalysisId() {
-        return analysisId;
-    }
-
-    public void setAnalysisId(Integer analysisId) {
-        this.analysisId = analysisId;
-    }
-
-    public String getAnalysisName() {
-        return analysisName;
-    }
-
-    public void setAnalysisName(String analysisName) {
-        this.analysisName = analysisName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Cv getType() {
-        return type;
-    }
-
-    public void setType(Cv type) {
-        this.type = type;
-    }
-
-    public String getProgram() {
-        return program;
-    }
-
-    public void setProgram(String program) {
-        this.program = program;
-    }
-
-    public String getSourceName() {
-        return sourceName;
-    }
-
-    public void setSourceName(String sourceName) {
-        this.sourceName = sourceName;
-    }
-
-    public String getSourceVersion() {
-        return sourceVersion;
-    }
-
-    public void setSourceVersion(String sourceVersion) {
-        this.sourceVersion = sourceVersion;
-    }
-
-    public String getSourceUri() {
-        return sourceUri;
-    }
-
-    public void setSourceUri(String sourceUri) {
-        this.sourceUri = sourceUri;
-    }
-
-    public Reference getReference() {
-        return reference;
-    }
-
-    public void setReference(Reference reference) {
-        this.reference = reference;
-    }
-
-    public JsonNode getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(JsonNode parameters) {
-        this.parameters = parameters;
-    }
-
-    public Cv getStatus() {
-        return status;
-    }
-
-    public void setStatus(Cv status) {
-        this.status = status;
-    }
-
-    public Date getTimeExecuted() {
-        return timeExecuted;
-    }
-
-    public void setTimeExecuted(Date timeExecuted) {
-        this.timeExecuted = timeExecuted;
-    }
 }

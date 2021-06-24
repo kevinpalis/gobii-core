@@ -1,0 +1,83 @@
+<div class="container-fluid">
+
+    <div class="row">
+
+        <p-radioButton
+                (click)="handleOnClickBrowse($event)"
+                name="listType"
+                value="ITEM_FILE_TYPE"
+                [(ngModel)]="selectedListType"
+                [id]="viewIdGeneratorService.makeMarkerSampleListModeRadioButtonId(makeLabel(ITEM_FILE_TYPE))">
+        </p-radioButton>
+        <label class="the-legend">File&nbsp;</label>
+        <p-radioButton
+                (click)="handleTextBoxChanged($event)"
+                name="listType"
+                value="ITEM_LIST_TYPE"
+                [(ngModel)]="selectedListType"
+                [id]="viewIdGeneratorService.makeMarkerSampleListModeRadioButtonId(makeLabel(ITEM_LIST_TYPE))">
+        </p-radioButton>
+        <label class="the-legend">List&nbsp;</label>
+        <p-radioButton *ngIf="displayMarkerGroupRadio"
+                       (click)="handleMarkerGroupChanged($event)"
+                       name="listType"
+                       value="MARKER_GROUP_TYPE"
+                       [(ngModel)]="selectedListType"
+                       [id]="viewIdGeneratorService.makeMarkerSampleListModeRadioButtonId(makeLabel(MARKER_GROUP_TYPE))">
+        </p-radioButton>
+        <label *ngIf="displayMarkerGroupRadio"
+               class="the-legend">Marker Groups&nbsp;</label>
+
+    </div>
+
+    <div class="row">
+
+        <div *ngIf="displayUploader" class="col-md-8">
+            <uploader
+                    [gobiiExtractFilterType]="gobiiExtractFilterType"
+                    (onUploaderError)="handleStatusHeaderMessage($event)"></uploader>
+        </div>
+
+        <div *ngIf="displayListBox" class="col-md-8">
+            <text-area
+                    (onTextboxDataComplete)="handleTextBoxDataSubmitted($event)"></text-area>
+        </div>
+        <div *ngIf="displayListBox" class="col-md-4">
+            <p class="text-warning">{{maxListItems}} maximum</p>
+        </div>
+
+        <div *ngIf="selectedListType == MARKER_GROUP_TYPE" class="col-md-8">
+            <checklist-box
+                    [filterParamName]="nameIdFilterParamTypesMarkerGroup"
+                    [gobiiExtractFilterType]="gobiiExtractFilterType">
+            </checklist-box>
+        </div>
+
+    </div>
+
+    <div>
+        <p-dialog header="{{extractTypeLabelExisting}} Already Selelected" [(visible)]="displayChoicePrompt"
+                  modal="modal" width="300" height="200" responsive="true">
+            <p>{{extractTypeLabelExisting}} already selected. Specify {{extractTypeLabelProposed}}
+                instead?</p>
+            <p-footer>
+                    <button type="button" pButton icon="pi pi-times" (click)="handleUserChoice(false)"
+                            label="No"></button>
+                    <button type="button" pButton icon="pi pi-check" (click)="handleUserChoice(true)"
+                            label="Yes"></button>
+            </p-footer>
+        </p-dialog>
+    </div>
+    
+        <p-dialog header="Maximum {{maxExceededTypeLabel}} Items Exceeded" [(visible)]="displayMaxItemsExceeded"
+                  modal="modal" [dismissableMask]="true" width="300" height="200" [responsive]="true">
+            <p>You attempted to paste more than {{maxListItems}} {{maxExceededTypeLabel}} items; Please reduce
+                the size of the list</p>
+
+            <p-footer>
+                <button type="button" pButton icon="pi pi-check" (click)="displayMaxItemsExceeded=false"
+                        label="OK"></button>
+            </p-footer>
+        </p-dialog>
+   
+</div>

@@ -1,13 +1,9 @@
 package org.gobiiproject.gobiibrapi.core.common;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import org.gobiiproject.gobiiapimodel.payload.Pagination;
-import org.gobiiproject.gobiiapimodel.payload.Status;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Created by Phil on 12/15/2016.

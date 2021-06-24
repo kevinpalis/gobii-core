@@ -1,13 +1,13 @@
 package org.gobiiproject.gobiimodel.entity.JpaConverters;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.gobiiproject.gobiimodel.config.GobiiException;
-import org.postgresql.util.PGobject;
-
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
-import java.sql.Types;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.gobiiproject.gobiimodel.config.GobiiException;
+import org.postgresql.util.PGobject;
 
 /**
  * JPA convertor class to convert Postgresql Database json string to jackson Json Node and vice versa.

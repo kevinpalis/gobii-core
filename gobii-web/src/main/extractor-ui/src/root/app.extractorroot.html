@@ -1,0 +1,305 @@
+<div class="card container-fluid" style="width: 95%">
+    <div class="card-header">
+        <img src="assets/gdm_logo.png" alt="GDM Logo" style="height: 100px; width: auto"/>
+    </div> <!-- panel heading -->
+    <div class="card-body">
+        <div class="card">
+            <div class="card-header">
+                <span class="panel-title">{{currentStatus}}</span>
+                <div style="float:right;vertical-align:middle">
+                <span class="panel-title">
+                <p-button label="{{loggedInUser}}" styleClass="p-button-text p-button-plain"></p-button>
+                <p-button label="Sign out" styleClass="p-button-text" (onClick)="logout()" *ngIf="isProfileOk() === true"></p-button>
+                </span>
+                </div>
+            </div> <!-- panel heading  -->
+            <p-dialog header="System Message"
+                    modal="modal"
+                    visible="true"
+                    [contentStyle]="{'width': '400px'}"
+                    *ngIf="isProfileOk() === false"
+                    >
+                    <div class="panel-body" style="text-align:center">
+                        Email id not found. Please contact your system administrator to update email id for your account.
+                        <a href="javascript: void(0)" (click)="logout()">Go to login page.</a>
+                    </div> 
+            </p-dialog>
+
+            <p-dialog header="System Message"
+                    modal="modal"
+                    visible="true"
+                    [contentStyle]="{'width': '400px'}"
+                    *ngIf="isCropsOk() === false"
+                    >
+                    <div class="panel-body" style="text-align:center">
+                        Please contact below Admin to get access: <br/>
+                        <table style="margin-left:auto;margin-right:auto">
+                            <tr *ngFor="let admin of admins">
+                                <td>{{admin.firstName}} {{admin.lastName}} &lt;<a href="mailto:{{admin.email}}">{{admin.email}}</a>&gt;</td>
+                            </tr>
+
+                        </table> 
+                        <a href="javascript: void(0)" (click)="logout()">Go to login page.</a>
+                    </div> 
+            </p-dialog>
+            <div class="card-body container-fluid" *ngIf="isProfileOk() === true">
+                <div class="row">
+                    <div  style="margin-left: 15px;margin-top:20px;margin-bottom:20px;display:flex;align-items:center">
+                        <span style="vertical-align: middle;color: #007ad9">
+                        <b>Select Crop</b>&nbsp;
+                        </span>
+                        <span style="margin-left:4px">
+                        <name-id-list-box
+                            #cropSelector
+                            [gobiiExtractFilterType]="gobiiExtractFilterType"
+                            [filterParamName]="nameIdFilterParamTypes.CROP_TYPE"
+                            [selectedIndex]="0"
+                            (valueChange)="handleResetCrop($event)">
+                        </name-id-list-box>
+                        </span>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-md-8"> <!-- outer grid column 1: Dataset, Sample, Marker Filtering-->
+
+                        <p-panel header="Extract Filtering">
+                            <!--<p-tabView [style]="{'border': '1px solid #336699', 'padding-left': '5px'}">-->
+                            <p-tabView
+                                    (onChange)="handleTabPanelChange($event)"
+                                    styleClass="ui-tabview-panels"
+                            [id]="viewIdGeneratorService.makeStandardId(typeControl.NAVIGATION_TABS)">
+                                <p-tabPanel header="By Dataset">
+                                    <ng-template pTemplate="content"> <!-- lazy-load controls -->
+                                        <div class="container-fluid" *ngIf="gobiiExtractFilterType === gobiiExtractFilterTypeForExpressions.WHOLE_DATASET">
+                                            <div class="row">
+                                                <div class="col-md-12"> <!-- inner column 2 of main column 1 -->
+                                                    <p-panel header="Datasets">
+                                                        <table class="table">
+                                                            <tbody>
+                                                            <tr>
+                                                                <td>
+                                                                    <label class="the-label">Principal
+                                                                        Investigator:</label><BR>
+                                                                    <name-id-list-box
+                                                                            #piSelector
+                                                                            [gobiiExtractFilterType]="gobiiExtractFilterType"
+                                                                            [filterParamName]="nameIdFilterParamTypes.CONTACT_PI_FILTER_OPTIONAL">
+                                                                    </name-id-list-box>
+                                                                </td>
+                                                                <td>
+                                                                    <label class="the-label">Project:</label><BR>
+                                                                    <name-id-list-box
+                                                                            #projSelector
+                                                                            [gobiiExtractFilterType]="gobiiExtractFilterType"
+                                                                            [filterParamName]="nameIdFilterParamTypes.PROJECT_FILTER_OPTIONAL">
+                                                                    </name-id-list-box>
+                                                                </td>
+                                                                <td>
+                                                                    <label class="the-label">Experiment:</label><BR>
+                                                                    <name-id-list-box
+                                                                            #expSelector
+                                                                            [gobiiExtractFilterType]="gobiiExtractFilterType"
+                                                                            [filterParamName]="nameIdFilterParamTypes.EXPERIMENT_FILTER_OPTIONAL">
+                                                                    </name-id-list-box>
+                                                                </td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <p-footer>
+                                                        <dataset-datatable #dataTable
+                                                            [gobiiExtractFilterType]="gobiiExtractFilterType">
+                                                        </dataset-datatable>
+                                                        </p-footer>
+                                                    
+                                                    </p-panel> <!-- panel primary dataset datatable -->
+                                                </div> <!-- data table column -->
+                                            </div> <!-- ROW  -->
+                                        </div> <!-- container  -->
+                                    </ng-template> <!-- lazy-load controls -->
+                                </p-tabPanel> <!-- tab panel -- dataset -->
+                                <p-tabPanel header="By Samples">
+                                    <ng-template pTemplate="content"> <!-- lazy-load controls -->
+                                        <div class="container-fluid" *ngIf="gobiiExtractFilterType === gobiiExtractFilterTypeForExpressions.BY_SAMPLE">
+                                            <div class="row">
+                                                <div class="col-md-4"> <!-- inner column 1 of main column 1 -->
+                                                    <p-panel header="Filters">
+                                                        
+                                                        <label class="the-label">Principal Investigator:</label><BR>
+                                                        <name-id-list-box
+                                                                #piSelector
+                                                                [gobiiExtractFilterType]="gobiiExtractFilterType"
+                                                                [filterParamName]="nameIdFilterParamTypes.CONTACT_PI_HIERARCHY_ROOT">
+                                                        </name-id-list-box>
+
+                                                        <BR>
+                                                        <BR>
+                                                        <label class="the-label">Projects:</label><BR>
+                                                        <name-id-list-box
+                                                                #projSelector
+                                                                [gobiiExtractFilterType]="gobiiExtractFilterType"
+                                                                [filterParamName]="nameIdFilterParamTypes.PROJECTS_BY_CONTACT">
+                                                        </name-id-list-box>
+
+
+                                                        <BR>
+                                                        <BR>
+                                                        <label class="the-label">Dataset Types:</label><BR>
+                                                        <name-id-list-box
+                                                                #typeSelector
+                                                                [gobiiExtractFilterType]="gobiiExtractFilterType"
+                                                                [filterParamName]="nameIdFilterParamTypes.CV_DATATYPE">
+                                                        </name-id-list-box>
+
+                                                        <BR>
+                                                        <BR>
+                                                        <label class="the-label">Platforms:</label><BR>
+                                                        <checklist-box
+                                                                #platSelector
+                                                                [filterParamName]="nameIdFilterParamTypes.PLATFORMS"
+                                                                [gobiiExtractFilterType]="gobiiExtractFilterType">
+                                                        </checklist-box>
+
+                                                    
+                                                    </p-panel> <!-- panel by sample filters -->
+                                                </div> <!-- by sample filter column-->
+                                                <div class="col-md-8"> <!-- inner column 2 of main column 1 -->
+                                                    <p-panel header="Included Samples">
+                                                        <sample-list-type
+                                                                [gobiiExtractFilterType]="gobiiExtractFilterType"
+                                                                (onHeaderStatusMessage)="handleHeaderStatusMessage($event)">
+                                                        </sample-list-type>
+                                                        <hr style="width: 100%; color: black; height: 1px; background-color:black;"/>
+                                                        <sample-marker-box
+                                                                [gobiiExtractFilterType]="gobiiExtractFilterType"
+                                                                (onSampleMarkerError)="handleHeaderStatusMessage($event)">
+                                                        </sample-marker-box>
+                                                    
+                                                    </p-panel> <!-- panel primary dataset datatable -->
+                                                </div> <!-- data table column -->
+                                            </div> <!-- ROW  -->
+                                        </div> <!-- container  -->
+                                    </ng-template> <!-- lazy-load controls -->
+                                </p-tabPanel> <!-- tab panel -- samples -->
+                                <p-tabPanel header="By Markers">
+                                    <ng-template pTemplate="content"> <!-- lazy-load controls -->
+                                        <div class="container-fluid" *ngIf="gobiiExtractFilterType === gobiiExtractFilterTypeForExpressions.BY_MARKER">
+                                            <div class="row">
+                                                <div class="col-md-4"> <!-- inner column 1 of main column 1 -->
+                                                    <p-panel header="Filters">
+                                                       
+                                                        <label class="the-label">Dataset Types:</label><BR>
+                                                        <name-id-list-box
+                                                                #typeSelector
+                                                                [gobiiExtractFilterType]="gobiiExtractFilterType"
+                                                                [filterParamName]="nameIdFilterParamTypes.CV_DATATYPE">
+                                                        </name-id-list-box>
+
+                                                        <BR>
+                                                        <BR>
+                                                        <label class="the-label">Platforms:</label><BR>
+                                                        <checklist-box
+                                                                #platSelector
+                                                                [filterParamName]="nameIdFilterParamTypes.PLATFORMS"
+                                                                [gobiiExtractFilterType]="gobiiExtractFilterType">
+                                                        </checklist-box>
+
+                                                       
+                                                    </p-panel> <!-- panel by sample filters -->
+                                                </div> <!-- by sample filter column-->
+                                                <div class="col-md-8"> <!-- inner column 2 of main column 1 -->
+                                                    <p-panel header="Included Markers">
+                                                        
+                                                        <sample-marker-box
+                                                                [gobiiExtractFilterType]="gobiiExtractFilterType"
+                                                                (onSampleMarkerError)="handleHeaderStatusMessage($event)">
+                                                        </sample-marker-box>
+                                                       
+                                                    </p-panel> <!-- panel primary dataset datatable -->
+                                                </div> <!-- data table column -->
+                                            </div> <!-- ROW  -->
+                                        </div> <!-- container  -->
+                                    </ng-template> <!-- lazy-load controls -->
+                                </p-tabPanel> <!-- tab panel -- markers -->
+                            </p-tabView> <!-- tabview -->
+                        </p-panel> <!-- panel -->
+
+                    </div>  <!-- outer grid column 1: Dataset, Sample, Marker Filtering-->
+
+
+                    <p-dialog header="System Message"
+                            modal="modal"
+                            [(visible)]="display"
+                            (onHide)="onHideMessageDialog($event)"
+                            [contentStyle]="{'width': '400px'}">
+
+                            <div class="panel-body" [id]="viewIdGeneratorService.makeStandardId(typeControl.SYSTEM_STATUS_MESSAGE_BODY)">
+                                {{currentStatusMessage}}
+                                <!--<status-display [messages$]="messages$"></status-display>-->
+                            </div> <!-- panel body -->
+
+                        <p-footer>
+                            <button type="button" pButton icon="pi pi-check" (click)="display=false"
+                                    label="OK"></button>
+                        </p-footer>
+                    </p-dialog>
+
+
+                    <div class="col-md-4"> <!-- outer grid column 2: Criteria summary -->
+
+                        <div class="well">
+                            <table>
+                                <tr>
+                                    <td colspan="2">
+                                        <export-format
+                                                [fileFormat$]="selectedExtractFormat$"
+                                                [gobiiExtractFilterType]="gobiiExtractFilterType">
+                                        </export-format>
+                                    </td>
+                                    <td style="vertical-align: top; padding-top:10px">
+                                        <name-id-list-box
+                                                [gobiiExtractFilterType]="gobiiExtractFilterType"
+                                                [filterParamName]="nameIdFilterParamTypes.MAPSETS">
+                                        </name-id-list-box>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </div>
+
+                        <p-panel header="Extraction Criteria">
+                            
+                            <status-display-tree
+                                    [fileItemEventChange]="treeFileItemEvent"
+                                    [gobiiExtractFilterTypeEvent]="gobiiExtractFilterType"
+                                    (onAddMessage)="handleHeaderStatusMessage($event)">
+                            </status-display-tree>
+
+                            <BR>
+
+                            <button type="submit"
+                                    [class]="submitButtonStyle"
+                                    [disabled]="submitButtonStyle === buttonStyleSubmitNotReady"
+                                    (mouseenter)="handleOnMouseOverSubmit($event,true)"
+                                    (mouseleave)="handleOnMouseOverSubmit($event,false)"
+                                    (click)="handleExtractSubmission()"
+                                    [id]="viewIdGeneratorService.makeStandardId(typeControl.SUBMIT_BUTTON_EXTRACT)">Submit
+                            </button>
+
+                            <button type="clear"
+                                    [class]="clearButtonStyle"
+                                    (click)="handleClearTree()">Clear
+                            </button>
+
+                            
+                        </p-panel> <!-- panel primary -->
+
+                    </div>  <!-- outer grid column 2: Criteria summary -->
+
+
+                </div> <!-- .row of outer grid -->
+
+            </div>
+        </div>
+    </div> <!-- panel primary -->
+</div> <!-- panel-default  -->

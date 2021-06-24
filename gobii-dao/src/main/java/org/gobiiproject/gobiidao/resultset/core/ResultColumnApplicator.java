@@ -2,7 +2,7 @@ package org.gobiiproject.gobiidao.resultset.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.gobiiproject.gobiidao.GobiiDaoException;
-import org.gobiiproject.gobiimodel.dto.entity.annotations.GobiiEntityColumn;
+import org.gobiiproject.gobiimodel.dto.annotations.GobiiEntityColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +27,10 @@ public class ResultColumnApplicator {
 
     private static Logger LOGGER = LoggerFactory.getLogger(ResultColumnApplicator.class);
 
+    @SuppressWarnings("unchecked")
     public static void applyColumnValues(ResultSet resultSet, Object dtoInstance) throws GobiiDaoException {
 
-        Map<String, Object> returnVal = new HashMap<>();
-
+        //Map<String, Object> returnVal = new HashMap<>();
         String currentColumnName = null;
         String currentParameterName = null;
         Type currentColumnType = null;

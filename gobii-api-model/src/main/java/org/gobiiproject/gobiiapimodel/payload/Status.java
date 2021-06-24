@@ -1,21 +1,21 @@
 package org.gobiiproject.gobiiapimodel.payload;
 
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.gobiiproject.gobiimodel.config.GobiiException;
-import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
-import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
-import org.gobiiproject.gobiimodel.utils.ExceptionUtils;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.gobiiproject.gobiimodel.config.GobiiException;
+import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
+import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
+import org.gobiiproject.gobiimodel.utils.ExceptionUtils;
+
 /**
  * Created by MrPhil on 6/18/2015.
  */
+@SuppressWarnings("serial")
 public class Status implements Serializable {
 
     private boolean succeeded = true;

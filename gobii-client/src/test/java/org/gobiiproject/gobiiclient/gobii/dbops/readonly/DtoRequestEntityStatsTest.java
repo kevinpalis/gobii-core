@@ -16,8 +16,8 @@ import org.gobiiproject.gobiiclient.gobii.dbops.crud.DtoCrudRequestOrganizationT
 import org.gobiiproject.gobiiclient.gobii.dbops.crud.DtoCrudRequestProjectTest;
 import org.gobiiproject.gobiiclient.gobii.dbops.crud.DtoCrudRequestProtocolTest;
 import org.gobiiproject.gobiiclient.gobii.dbops.crud.DtoCrudRequestReferenceTest;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ExperimentDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.OrganizationDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ExperimentDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.OrganizationDTO;
 import org.gobiiproject.gobiimodel.dto.system.EntityStatsDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiProcessType;
@@ -86,6 +86,7 @@ public class DtoRequestEntityStatsTest {
     }
 
     @Test
+    @SuppressWarnings("unused")
     public void testGetLastModified() throws Exception {
 
 

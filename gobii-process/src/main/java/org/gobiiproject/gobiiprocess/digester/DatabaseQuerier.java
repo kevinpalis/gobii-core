@@ -65,8 +65,9 @@ public class DatabaseQuerier {
         ColReader reader=new ColReader(markerFile,"marker_name");
         while(reader.hasNext()){
             String marker=reader.next();
-            if(!connector.hasDNARuninExperiment(marker,platform)){
-                Logger.logError("Validation","Marker "+marker+" does not exist in platform "+platform);
+            if(!connector.hasDNARuninExperiment(marker, platform)){
+                Logger.logError("Validation",
+                    "Marker "+marker+" does not exist in platform "+platform);
                 return false;
             }
         }

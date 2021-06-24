@@ -26,6 +26,7 @@ import java.util.List;
 /**
  * Created by Phil on 12/15/2016.
  */
+@SuppressWarnings("unused")
 public class BrapiTestAlleleMatrices {
 
     private static TestExecConfig testExecConfig = null;
@@ -69,7 +70,7 @@ public class BrapiTestAlleleMatrices {
                         ObjectUtils.Null.class,
                         ObjectUtils.Null.class,
                         BrapiResponseAlleleMatrices.class,
-                        this.httpCore);
+                        BrapiTestAlleleMatrices.httpCore);
 
         BrapiResponseEnvelopeMasterDetail<BrapiResponseAlleleMatrices> matricesResult = brapiEnvelopeRestResource.getFromListResource();
         BrapiTestResponseStructure.validatateBrapiResponseStructure(matricesResult.getBrapiMetaData());

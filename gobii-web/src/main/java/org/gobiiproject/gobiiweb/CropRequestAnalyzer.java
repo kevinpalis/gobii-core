@@ -1,9 +1,13 @@
 package org.gobiiproject.gobiiweb;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+import org.gobiiproject.gobiiapimodel.types.GobiiControllerType;
 import org.gobiiproject.gobiimodel.config.ConfigSettings;
 import org.gobiiproject.gobiimodel.config.GobiiCropConfig;
 import org.gobiiproject.gobiimodel.types.ServerType;
+import org.gobiiproject.gobiimodel.utils.URLUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestAttributes;
@@ -47,53 +51,35 @@ public class CropRequestAnalyzer {
 
                 GobiiCropConfig currentCropConfig = CONFIG_SETTINGS.getActiveCropConfigs().get(idx);
 
-                String rawContextPath = currentCropConfig
-                        .getServer(ServerType.GOBII_WEB)
-                        .getContextPath();
-
-                // double check that context paths are unique
-                if (CONFIG_SETTINGS
-                        .getActiveCropConfigs()
-                        .stream()
-                        .filter(cc -> {
-                            return cc.getServer(ServerType.GOBII_WEB)
-                                    .getContextPath().equals(rawContextPath);
-                        })
-                        .count() < 2) {
-
-                    String contextPathWithoutSlashes = rawContextPath
-                            .replace("/", "");
+                // remove context path from the url
+                String servicePath =
+                    httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
 
 
-                    String candidateSegment = requestUrl
-                            .replace("/", "")
-                            .substring(0, contextPathWithoutSlashes.length());
+                if(StringUtils.isNotEmpty(servicePath)) {
 
-                    if (candidateSegment.toLowerCase().equals(contextPathWithoutSlashes.toLowerCase())) {
+                    // split url into parts after removing the start and end slashes
+                    String[] servicePathParts = URLUtils
+                        .stripStartAndEndPathSeparator(servicePath)
+                        .split(URLUtils.pathSeparator);
 
-                        returnVal = currentCropConfig.getGobiiCropType();
+                    // check if the url parent resource is crops
+                    // and crop type is the child resource and matches with crop type in config.
+                    if(servicePathParts.length > 1
+                        && servicePathParts[0].equals(
+                            URLUtils.stripStartAndEndPathSeparator(
+                                GobiiControllerType.CROPS.getControllerPath()))
+                        && servicePathParts[1].equals(currentCropConfig.getGobiiCropType())) {
+
+                        return currentCropConfig.getGobiiCropType();
                     }
-
-
-                } else {
-
-                    errorMessage = "The context path is repeated in the configuration; " +
-                            "context paths must be unique: " + rawContextPath;
-
                 }
+
             } // iterate configurations
 
-            // this is the condition if we simply couldn't find a config
-            if( errorMessage == null && returnVal == null ) {
-                errorMessage = "There is no active crop with the context path of th specified URL; ";
-            }
+            errorMessage = " the cropId corresponding to the request url " +
+                "could not be set: " + requestUrl;
 
-            if (returnVal == null) {
-
-                errorMessage += "; the cropId corresponding to the context path of the " +
-                        "request url could not be set: " + requestUrl;
-
-            }
 
         } else {
             errorMessage = "Unable to retreive servlet request for crop type analysis";

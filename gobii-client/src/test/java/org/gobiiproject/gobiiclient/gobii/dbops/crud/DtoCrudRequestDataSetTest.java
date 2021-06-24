@@ -21,11 +21,11 @@ import org.gobiiproject.gobiiclient.gobii.Helpers.GlobalPkColl;
 import org.gobiiproject.gobiiclient.gobii.Helpers.GlobalPkValues;
 import org.gobiiproject.gobiiclient.gobii.Helpers.TestDtoFactory;
 import org.gobiiproject.gobiiclient.gobii.Helpers.TestUtils;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.AnalysisDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.DataSetDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.AnalysisDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.DataSetDTO;
 
 
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiFilterType;
 import org.gobiiproject.gobiimodel.types.GobiiProcessType;

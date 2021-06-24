@@ -10,12 +10,13 @@ import java.util.Map;
 import org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId;
 import org.gobiiproject.gobiidao.resultset.core.listquery.ListStatement;
 import org.gobiiproject.gobiidao.resultset.core.listquery.ParameterizedSql;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
 import static org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId.QUERY_ID_DNASAMPLE_NAMES_BYLIST;
 
 /**
  * Created by VCalaminos on 9/18/2018.
  */
+@SuppressWarnings("serial")
 public class ListStatementDnaSampleNamesByList implements ListStatement {
 
     private final String PARAM_NAME_NAME_LIST = "nameArray";
@@ -25,6 +26,7 @@ public class ListStatementDnaSampleNamesByList implements ListStatement {
     public ListSqlId getListSqlId() { return QUERY_ID_DNASAMPLE_NAMES_BYLIST; }
 
     @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public PreparedStatement makePreparedStatement(Connection dbConnection, Map<String, Object> jdbcParamVals, Map<String, Object> sqlParamVals) throws SQLException {
 
         List<NameIdDTO> nameArray = (ArrayList) sqlParamVals.get(PARAM_NAME_NAME_LIST);

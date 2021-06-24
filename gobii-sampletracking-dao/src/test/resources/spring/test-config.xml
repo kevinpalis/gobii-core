@@ -16,22 +16,28 @@
 	http://www.springframework.org/schema/security
 	http://www.springframework.org/schema/security/spring-security-4.2.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
-    <bean id="projectDao" class="org.gobiiproject.gobiisampletrackingdao.ProjectDaoImpl"/>
-    <bean id="experimentDao" class="org.gobiiproject.gobiisampletrackingdao.ExperimentDaoImpl"/>
     <bean id="dnaSampleDao" class="org.gobiiproject.gobiisampletrackingdao.DnaSampleDaoImpl"/>
     <bean id="markerLinkageGroupDao" class="org.gobiiproject.gobiisampletrackingdao.MarkerLinkageGroupDaoImpl"/>
     <bean id="markerDao" class="org.gobiiproject.gobiisampletrackingdao.MarkerDaoImpl"/>
     <bean id="dnaRunDao" class="org.gobiiproject.gobiisampletrackingdao.DnaRunDaoImpl"/>
     <bean id="datasetDao" class="org.gobiiproject.gobiisampletrackingdao.DatasetDaoImpl"/>
-
+    <bean id="mapsetDao" class="org.gobiiproject.gobiisampletrackingdao.MapsetDaoImpl"/>
+    <bean id="linkageGroupDao" class="org.gobiiproject.gobiisampletrackingdao.LinkageGroupDaoImpl"/>
     <bean id="cvDao" class="org.gobiiproject.gobiisampletrackingdao.CvDaoImpl"/>
+    <bean id="analysisDao" class="org.gobiiproject.gobiisampletrackingdao.AnalysisDaoImpl"/>
+    <bean id="v3ProjectDao" class="org.gobiiproject.gobiisampletrackingdao.ProjectDaoImpl"/>
+    <bean id="contactDao" class="org.gobiiproject.gobiisampletrackingdao.ContactDaoImpl"/>
+    <bean id="experimentDao" class="org.gobiiproject.gobiisampletrackingdao.ExperimentDaoImpl"/>
+    <bean id="vendorProtocolDao" class="org.gobiiproject.gobiisampletrackingdao.VendorProtocolDaoImpl"/>
+    <bean id="protocolDao" class="org.gobiiproject.gobiisampletrackingdao.ProtocolDaoImpl"/>
+    <bean id="germplasmDao" class="org.gobiiproject.gobiisampletrackingdao.GermplasmDaoImpl"/>
+    <bean id="loaderTemplateDao" class="org.gobiiproject.gobiisampletrackingdao.LoaderTemplateDaoImpl"/>
 
     <bean id="spWorker"
           class="org.gobiiproject.gobiisampletrackingdao.spworkers.SpWorker"/>
-    <bean id="nativerQueryRunner"
-          class="org.gobiiproject.gobiisampletrackingdao.NativerQueryRunner"/>
-
+    <context:annotation-config />
     <context:component-scan base-package="org.gobiiproject.gobiisampletrackingdao.spring"/>
+    <context:component-scan base-package="org.gobiiproject.gobiisampletrackingdao"/>
     <bean id="entityManagerFactory"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="dataSource" ref="dataSourceMulti"/>
@@ -42,7 +48,9 @@
         </property>
         <property name="jpaProperties">
             <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQL9Dialect</prop>
+                 <!--prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQL9Dialect</prop-->
+                <prop key="hibernate.dialect">org.gobiiproject.gobiimodel.entity.pgsql.GobiiPostgresSQLDialect</prop>
+                <prop key="hibernate.show_sql">false</prop>
             </props>
         </property>
     </bean>
@@ -50,7 +58,7 @@
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
         <property name="entityManagerFactory" ref="entityManagerFactory"/>
     </bean>
-    <tx:annotation-driven/>
+    <tx:annotation-driven transaction-manager="transactionManager" />
 
     <bean id="persistenceExceptionTranslationPostProcessor"
           class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>

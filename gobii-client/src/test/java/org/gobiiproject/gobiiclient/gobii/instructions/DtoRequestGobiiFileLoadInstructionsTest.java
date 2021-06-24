@@ -19,12 +19,11 @@ import org.gobiiproject.gobiiclient.gobii.dbops.crud.DtoCrudRequestContactTest;
 import org.gobiiproject.gobiiclient.gobii.dbops.crud.DtoCrudRequestDataSetTest;
 import org.gobiiproject.gobiimodel.cvnames.JobPayloadType;
 import org.gobiiproject.gobiimodel.cvnames.JobProgressStatusType;
-import org.gobiiproject.gobiimodel.dto.entity.children.PropNameId;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.DataSetDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ExperimentDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.JobDTO;
+import org.gobiiproject.gobiimodel.dto.children.PropNameId;
+import org.gobiiproject.gobiimodel.dto.noaudit.DataSetDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ExperimentDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.JobDTO;
 import org.gobiiproject.gobiimodel.dto.instructions.loader.*;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ProtocolDTO;
 import org.gobiiproject.gobiimodel.types.*;
 
 import org.gobiiproject.gobiimodel.utils.DateUtils;
@@ -41,7 +40,9 @@ public class DtoRequestGobiiFileLoadInstructionsTest {
     public static void setUpClass() throws Exception {
         Assert.assertTrue(GobiiClientContextAuth.authenticate());
         String currentCropContextRoot = GobiiClientContext.getInstance(null, false).getCurrentCropContextRoot();
-        DtoRequestGobiiFileLoadInstructionsTest.gobiiUriFactory = new GobiiUriFactory(currentCropContextRoot);
+        DtoRequestGobiiFileLoadInstructionsTest.gobiiUriFactory = new GobiiUriFactory(
+            currentCropContextRoot,
+            GobiiClientContext.getInstance(null, false).getCurrentClientCropType());
 
     }
 
@@ -51,6 +52,7 @@ public class DtoRequestGobiiFileLoadInstructionsTest {
     }
 
     @Test
+    @SuppressWarnings("unused")
     public void testSendLoaderInstructionFile() throws Exception {
 
 

@@ -132,10 +132,10 @@ public class DtoMapLoaderFilesImpl implements DtoMapLoaderFiles {
 
     private List<List<String>> getFilePreview(File file, String fileFormat) {
         List<List<String>> returnVal = new ArrayList<List<String>>();
-        Scanner input = new Scanner(System.in);
+        //Scanner input = new Scanner(System.in);
         try {
             int lineCtr = 0; //count lines read
-            input = new Scanner(file);
+            Scanner input = new Scanner(file);
 
             while (input.hasNextLine() && lineCtr < 50) { //read first 50 lines only
                 int ctr = 0; //count words stored

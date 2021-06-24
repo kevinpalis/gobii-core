@@ -8,6 +8,7 @@ import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
 /**
  * Created by Phil on 4/7/2016.
  */
+@SuppressWarnings("serial")
 public class GobiiDtoMappingException extends GobiiException {
 
     public GobiiDtoMappingException(Exception e) {

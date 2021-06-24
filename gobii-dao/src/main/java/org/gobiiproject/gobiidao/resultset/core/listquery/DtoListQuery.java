@@ -117,6 +117,7 @@ public class DtoListQuery<T> {
      * @throws GobiiException
      */
     @Transactional(propagation = Propagation.REQUIRED)
+    @SuppressWarnings("rawtypes")
     public PagedList<T> getDtoListPaged(Integer pageSize, Integer pageNo,
                                         String pgQueryIdFromUser) throws GobiiException {
 

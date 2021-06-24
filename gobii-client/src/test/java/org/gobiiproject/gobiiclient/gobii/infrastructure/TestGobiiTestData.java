@@ -9,17 +9,17 @@ import org.gobiiproject.gobiiclient.core.gobii.GobiiTestConfiguration;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiEnvelopeRestResource;
 import org.gobiiproject.gobiiclient.gobii.Helpers.TestUtils;
 import org.gobiiproject.gobiimodel.config.TestExecConfig;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.AnalysisDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ContactDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.DataSetDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ExperimentDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ManifestDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.MapsetDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.OrganizationDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.PlatformDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ProjectDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ProtocolDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ReferenceDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.AnalysisDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ContactDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.DataSetDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ExperimentDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ManifestDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.MapsetDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.OrganizationDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.PlatformDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ProjectDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ProtocolDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ReferenceDTO;
 import org.gobiiproject.gobiimodel.utils.HelperFunctions;
 import org.junit.*;
 import org.w3c.dom.Document;
@@ -66,6 +66,7 @@ public class TestGobiiTestData {
         return propName;
     }
 
+    @SuppressWarnings("rawtypes")
     private static void checkFkeys(NodeList fkeys, Class currentClass, Object currentDTO) throws Exception {
 
         if(fkeys != null && fkeys.getLength() > 0) {
@@ -410,6 +411,7 @@ public class TestGobiiTestData {
         return returnVal;
     }
 
+    @SuppressWarnings("unused")
     @Test
     public void testGobiiTestData() throws Exception {
         String commandline = makeCommandLine();

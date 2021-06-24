@@ -1,16 +1,15 @@
 package org.gobiiproject.gobiibrapi.core.json;
 
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+
 import org.gobiiproject.gobiibrapi.core.common.BrapiMetaData;
-import org.gobiiproject.gobiiapimodel.payload.Pagination;
 import org.gobiiproject.gobiibrapi.core.common.BrapiPagination;
 import org.gobiiproject.gobiibrapi.core.common.BrapiStatus;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Phil on 12/15/2016.

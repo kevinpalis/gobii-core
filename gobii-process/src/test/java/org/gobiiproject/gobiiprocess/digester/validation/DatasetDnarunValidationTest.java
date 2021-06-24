@@ -2,13 +2,13 @@ package org.gobiiproject.gobiiprocess.digester.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
+import org.gobiiproject.gobiiprocess.SafePowerMockRunner;
 import org.gobiiproject.gobiiprocess.digester.utils.validation.DigestFileValidator;
 import org.gobiiproject.gobiiprocess.digester.utils.validation.MaximumErrorsValidationException;
-import org.gobiiproject.gobiiprocess.digester.utils.validation.ValidationWebServicesUtil;
-import org.gobiiproject.gobiimodel.dto.instructions.validation.errorMessage.Failure;
-import org.gobiiproject.gobiimodel.dto.instructions.validation.ValidationResult;
+import org.gobiiproject.gobiiprocess.digester.utils.validation.ValidationDataUtil;
+import org.gobiiproject.gobiiprocess.digester.utils.validation.errorMessage.Failure;
+import org.gobiiproject.gobiiprocess.digester.utils.validation.errorMessage.ValidationError;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
@@ -17,6 +17,7 @@ import org.mockito.Matchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 
@@ -35,9 +36,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 
-@Ignore //TODO- Refactor. Powermock static mocking is broken in Java 13
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(ValidationWebServicesUtil.class)
+@RunWith(SafePowerMockRunner.class)
+@PrepareForTest(ValidationDataUtil.class)
 @PowerMockRunnerDelegate(BlockJUnit4ClassRunner.class)
 @PowerMockIgnore({"javax.management.*", "javax.net.ssl.*"})
 public class DatasetDnarunValidationTest {
@@ -71,54 +71,42 @@ public class DatasetDnarunValidationTest {
      */
     @Test
     public void datasetDnarunAllPassTest() throws IOException {
-        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/allPass", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json", "http://192.168.56.101:8081/gobii-dev/", "mcs397", "q");
+        DigestFileValidator digestFileValidator = new DigestFileValidator(
+            tempFolder.getRoot().getAbsolutePath() + "/allPass",
+            tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json");
 
-        PowerMockito.mockStatic(ValidationWebServicesUtil.class);
-        PowerMockito
-                .when(ValidationWebServicesUtil.loginToServer(eq("http://192.168.56.101:8081/gobii-dev/"), eq("mcs397"), eq("q"), eq(null), any()))
-                .thenReturn(true);
 
-        List<NameIdDTO> dnarunNameResponse = new ArrayList<>();
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_1");
-            nameIdDTOResponse.setId(262);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_2");
-            nameIdDTOResponse.setId(226);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_3");
-            nameIdDTOResponse.setId(271);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
+        PowerMockito.mockStatic(ValidationDataUtil.class);
         Map<String, String> experimentForeignKeyReturn = new HashMap<>();
         experimentForeignKeyReturn.put("1", "validationTestExp1");
         try {
             PowerMockito
-                    .when(ValidationWebServicesUtil.getAllowedForeignKeyList(eq("dnarun"), any()))
+                    .when(ValidationDataUtil.getAllowedForeignKeyList(eq("dnarun"), any()))
                     .thenReturn(experimentForeignKeyReturn);
 
             PowerMockito
-                    .when(ValidationWebServicesUtil.getNamesByNameList(Matchers.any(), eq(GobiiEntityNameType.DNARUN.toString()), eq("1"), any(), null))
-                    .thenReturn(dnarunNameResponse);
+                    .when(ValidationDataUtil.validateNames(Matchers.any(),
+                        eq(GobiiEntityNameType.DNARUN.toString()),
+                        eq("1"), any()))
+                    .thenReturn(new ArrayList<>());
         } catch (MaximumErrorsValidationException e) {
             e.printStackTrace();
         }
         digestFileValidator.performValidation(null);
         List<Path> pathList =
                 Files.list(Paths.get(tempFolder.getRoot().getAbsolutePath() + "/allPass"))
-                        .filter(Files::isRegularFile).filter(path -> String.valueOf(path.getFileName()).endsWith(".json")).collect(Collectors.toList());
+                    .filter(Files::isRegularFile).filter(
+                        path -> String.valueOf(path.getFileName()).endsWith(".json")
+                ).collect(Collectors.toList());
         assertEquals("There should be one validation output json file", 1, pathList.size());
 
-        ValidationResult[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationResult[].class);
-        assertEquals("Expected file name is not dataset_dnarun", "dataset_dnarun", fileErrors[0].fileName);
-        assertEquals("Expected STATUS is not success", ValidationTestSuite.SUCCESS_TEXT, fileErrors[0].status);
+        ValidationError[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(),
+            ValidationError[].class);
+        assertEquals("Expected file name is not dataset_dnarun", "dataset_dnarun",
+            fileErrors[0].fileName);
+        assertEquals("Expected STATUS is not success",
+            ValidationTestSuite.SUCCESS_TEXT,
+            fileErrors[0].status);
     }
 
     /**
@@ -127,53 +115,25 @@ public class DatasetDnarunValidationTest {
      */
     @Test
     public void datasetDnarunDnarunNameTest() throws IOException {
-        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/dnarunName/missingNames",
-                tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json", "http://192.168.56.101:8081/gobii-dev/", "mcs397", "q");
 
-        PowerMockito.mockStatic(ValidationWebServicesUtil.class);
-        PowerMockito
-                .when(ValidationWebServicesUtil.loginToServer(eq("http://192.168.56.101:8081/gobii-dev/"), eq("mcs397"), eq("q"), eq(null), any()))
-                .thenReturn(true);
-        List<NameIdDTO> dnarunNameResponse = new ArrayList<>();
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_1");
-            nameIdDTOResponse.setId(262);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_2");
-            nameIdDTOResponse.setId(226);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_3");
-            nameIdDTOResponse.setId(271);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_doma_9");
-            nameIdDTOResponse.setId(0);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_doma_10");
-            nameIdDTOResponse.setId(0);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
+        PowerMockito.mockStatic(ValidationDataUtil.class);
+        DigestFileValidator digestFileValidator = new DigestFileValidator(
+            tempFolder.getRoot().getAbsolutePath() + "/dnarunName/missingNames",
+            tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json");
+
+        List<String> invalidDnaRunNames = new ArrayList<>();
+        invalidDnaRunNames.add("dnarunname_doma_9");
+        invalidDnaRunNames.add("dnarunname_doma_10");
+
         Map<String, String> experimentForeignKeyReturn = new HashMap<>();
         experimentForeignKeyReturn.put("1", "validationTestExp1");
         try {
             PowerMockito
-                    .when(ValidationWebServicesUtil.getAllowedForeignKeyList(eq("dnarun"), any()))
+                    .when(ValidationDataUtil.getAllowedForeignKeyList(eq("dnarun"), any()))
                     .thenReturn(experimentForeignKeyReturn);
             PowerMockito
-                    .when(ValidationWebServicesUtil.getNamesByNameList(Matchers.any(), eq("dnarun"), eq("1"), any(),null))
-                    .thenReturn(dnarunNameResponse);
+                    .when(ValidationDataUtil.validateNames(Matchers.any(), eq("dnarun"), eq("1"), any()))
+                    .thenReturn(invalidDnaRunNames);
         } catch (MaximumErrorsValidationException e) {
             e.printStackTrace();
         }
@@ -183,7 +143,7 @@ public class DatasetDnarunValidationTest {
                         .filter(Files::isRegularFile).filter(path -> String.valueOf(path.getFileName()).endsWith(".json")).collect(Collectors.toList());
         assertEquals("There should be one validation output json file", 1, pathList.size());
 
-        ValidationResult[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationResult[].class);
+        ValidationError[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationError[].class);
         assertEquals("Expected file name is not dataset_dnarun", "dataset_dnarun", fileErrors[0].fileName);
         assertEquals("Expected STATUS is not success", ValidationTestSuite.FAILURE_TEXT, fileErrors[0].status);
 
@@ -201,53 +161,26 @@ public class DatasetDnarunValidationTest {
      */
     @Test
     public void datasetDnarunSkipnarunNameVerificationTest() throws IOException {
-        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/dnarunName/skipdnaNameVerification",
-                tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json", "http://192.168.56.101:8081/gobii-dev/", "mcs397", "q");
+        DigestFileValidator digestFileValidator = new DigestFileValidator(
+            tempFolder.getRoot().getAbsolutePath() + "/dnarunName/skipdnaNameVerification",
+            tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json");
 
-        PowerMockito.mockStatic(ValidationWebServicesUtil.class);
-        PowerMockito
-                .when(ValidationWebServicesUtil.loginToServer(eq("http://192.168.56.101:8081/gobii-dev/"), eq("mcs397"), eq("q"), eq(null), any()))
-                .thenReturn(true);
-        List<NameIdDTO> dnarunNameResponse = new ArrayList<>();
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_1");
-            nameIdDTOResponse.setId(262);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_2");
-            nameIdDTOResponse.setId(226);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_3");
-            nameIdDTOResponse.setId(271);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_doma_9");
-            nameIdDTOResponse.setId(0);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_doma_10");
-            nameIdDTOResponse.setId(0);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
+        PowerMockito.mockStatic(ValidationDataUtil.class);
+        List<String> invalidNames = new ArrayList<>();
+        invalidNames.add("dnarunname_doma_9");
+        invalidNames.add("dnarunname_doma_10");
         Map<String, String> experimentForeignKeyReturn = new HashMap<>();
         experimentForeignKeyReturn.put("1", "validationTestExp1");
         try {
             PowerMockito
-                    .when(ValidationWebServicesUtil.getAllowedForeignKeyList(eq("dnarun"), any()))
+                    .when(ValidationDataUtil.getAllowedForeignKeyList(eq("dnarun"), any()))
                     .thenReturn(experimentForeignKeyReturn);
             PowerMockito
-                    .when(ValidationWebServicesUtil.getNamesByNameList(Matchers.any(), eq("dnarun"), eq("1"), any(),null))
-                    .thenReturn(dnarunNameResponse);
+                    .when(ValidationDataUtil.validateNames(Matchers.any(),
+                        eq("dnarun"),
+                        eq("1"),
+                        any()))
+                    .thenReturn(invalidNames);
         } catch (MaximumErrorsValidationException e) {
             e.printStackTrace();
         }
@@ -257,7 +190,7 @@ public class DatasetDnarunValidationTest {
                         .filter(Files::isRegularFile).filter(path -> String.valueOf(path.getFileName()).endsWith(".json")).collect(Collectors.toList());
         assertEquals("There should be one validation output json file", 1, pathList.size());
 
-        ValidationResult[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationResult[].class);
+        ValidationError[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationError[].class);
         assertEquals("Expected file name is not dataset_dnarun", "dataset_dnarun", fileErrors[0].fileName);
         assertEquals("Expected STATUS is success", ValidationTestSuite.SUCCESS_TEXT, fileErrors[0].status);
     }
@@ -268,40 +201,20 @@ public class DatasetDnarunValidationTest {
      */
     @Test
     public void datasetDnarunMissingRequiredFieldTest() throws IOException {
-        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/missingRequiredColumns", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json", "http://192.168.56.101:8081/gobii-dev/", "mcs397", "q");
+        DigestFileValidator digestFileValidator = new DigestFileValidator(
+            tempFolder.getRoot().getAbsolutePath() + "/missingRequiredColumns",
+            tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json");
 
-        PowerMockito.mockStatic(ValidationWebServicesUtil.class);
-        PowerMockito
-                .when(ValidationWebServicesUtil.loginToServer(eq("http://192.168.56.101:8081/gobii-dev/"), eq("mcs397"), eq("q"), eq(null), any()))
-                .thenReturn(true);
-        List<NameIdDTO> dnarunNameResponse = new ArrayList<>();
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_1");
-            nameIdDTOResponse.setId(262);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_2");
-            nameIdDTOResponse.setId(226);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_3");
-            nameIdDTOResponse.setId(271);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
+        PowerMockito.mockStatic(ValidationDataUtil.class);
         Map<String, String> experimentForeignKeyReturn = new HashMap<>();
         experimentForeignKeyReturn.put("1", "validationTestExp1");
         try {
             PowerMockito
-                    .when(ValidationWebServicesUtil.getAllowedForeignKeyList(eq("dnarun"), any()))
+                    .when(ValidationDataUtil.getAllowedForeignKeyList(eq("dnarun"), any()))
                     .thenReturn(experimentForeignKeyReturn);
             PowerMockito
-                    .when(ValidationWebServicesUtil.getNamesByNameList(Matchers.any(), eq("dnarun"), eq("1"), any(),null))
-                    .thenReturn(dnarunNameResponse);
+                    .when(ValidationDataUtil.validateNames(Matchers.any(), eq("dnarun"), eq("1"), any()))
+                    .thenReturn(new ArrayList<>());
         } catch (MaximumErrorsValidationException e) {
             e.printStackTrace();
         }
@@ -312,7 +225,7 @@ public class DatasetDnarunValidationTest {
                         .filter(Files::isRegularFile).filter(path -> String.valueOf(path.getFileName()).endsWith(".json")).collect(Collectors.toList());
         assertEquals("There should be one validation output json file", 1, pathList.size());
 
-        ValidationResult[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationResult[].class);
+        ValidationError[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationError[].class);
         assertEquals("Expected file name is not dataset_dnarun", "dataset_dnarun", fileErrors[0].fileName);
         assertEquals("Expected STATUS is not FAILURE", ValidationTestSuite.FAILURE_TEXT, fileErrors[0].status);
 
@@ -328,41 +241,21 @@ public class DatasetDnarunValidationTest {
      */
     @Test
     public void datasetDnarunMissingValuesInRequiredFieldTest() throws IOException {
-        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/missingValuesInRequiredColumns", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json", "http://192.168.56.101:8081/gobii-dev/", "mcs397", "q");
+        DigestFileValidator digestFileValidator = new DigestFileValidator(
+            tempFolder.getRoot().getAbsolutePath() + "/missingValuesInRequiredColumns",
+            tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json");
 
-        PowerMockito.mockStatic(ValidationWebServicesUtil.class);
-        PowerMockito
-                .when(ValidationWebServicesUtil.loginToServer(eq("http://192.168.56.101:8081/gobii-dev/"), eq("mcs397"), eq("q"), eq(null), any()))
-                .thenReturn(true);
+        PowerMockito.mockStatic(ValidationDataUtil.class);
 
-        List<NameIdDTO> dnarunNameResponse = new ArrayList<>();
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_1");
-            nameIdDTOResponse.setId(262);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_2");
-            nameIdDTOResponse.setId(226);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("dnarunname_dom_3");
-            nameIdDTOResponse.setId(271);
-            dnarunNameResponse.add(nameIdDTOResponse);
-        }
         Map<String, String> experimentForeignKeyReturn = new HashMap<>();
         experimentForeignKeyReturn.put("1", "validationTestExp1");
         try {
             PowerMockito
-                    .when(ValidationWebServicesUtil.getAllowedForeignKeyList(eq("dnarun"), any()))
-                    .thenReturn(experimentForeignKeyReturn);
+                .when(ValidationDataUtil.getAllowedForeignKeyList(eq("dnarun"), any()))
+                .thenReturn(experimentForeignKeyReturn);
             PowerMockito
-                    .when(ValidationWebServicesUtil.getNamesByNameList(Matchers.any(), eq("dnarun"), eq("1"), any(),null))
-                    .thenReturn(dnarunNameResponse);
+                .when(ValidationDataUtil.validateNames(Matchers.any(), eq("dnarun"), eq("1"), any()))
+                .thenReturn(new ArrayList<>());
         } catch (MaximumErrorsValidationException e) {
             e.printStackTrace();
         }
@@ -372,7 +265,7 @@ public class DatasetDnarunValidationTest {
                         .filter(Files::isRegularFile).filter(path -> String.valueOf(path.getFileName()).endsWith(".json")).collect(Collectors.toList());
         assertEquals("There should be one validation output json file", 1, pathList.size());
 
-        ValidationResult[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationResult[].class);
+        ValidationError[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationError[].class);
         assertEquals("Expected file name is not dataset_dnarun", "dataset_dnarun", fileErrors[0].fileName);
         assertEquals("Expected STATUS is not FAILURE", ValidationTestSuite.FAILURE_TEXT, fileErrors[0].status);
 

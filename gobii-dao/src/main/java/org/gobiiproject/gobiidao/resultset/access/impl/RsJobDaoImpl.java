@@ -22,6 +22,7 @@ public class RsJobDaoImpl implements RsJobDao {
     Logger LOGGER = LoggerFactory.getLogger(RsJobDao.class);
 
     @Autowired
+    @SuppressWarnings("unused")
     private StoredProcExec storedProcExec = null;
 
     @Autowired

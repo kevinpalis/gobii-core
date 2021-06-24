@@ -7,6 +7,7 @@ import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
 /**
  * Created by Phil on 4/7/2016.
  */
+@SuppressWarnings("serial")
 public class GobiiDaoException extends GobiiException {
 
     public GobiiDaoException(Exception e) {

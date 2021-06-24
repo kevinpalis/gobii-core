@@ -12,6 +12,7 @@ import org.gobiiproject.gobiidao.resultset.core.listquery.ParameterizedSql;
 /**
  * Created by VCalaminos on 11/5/2018.
  */
+@SuppressWarnings("serial")
 public class ListStatementDnaSampleNamesAll implements ListStatement {
 
     private final String PARAM_NAME_CALL_LIMIT = "callLimit";

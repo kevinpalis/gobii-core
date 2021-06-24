@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gobiiproject.gobiimodel.config.ConfigSettings;
-import org.gobiiproject.gobiimodel.dto.entity.children.PropNameId;
+import org.gobiiproject.gobiimodel.dto.children.PropNameId;
 import org.gobiiproject.gobiimodel.types.ServerType;
 import org.gobiiproject.gobiimodel.utils.HelperFunctions;
 import org.gobiiproject.gobiimodel.utils.error.Logger;
@@ -27,7 +27,7 @@ public class ProcessMessage extends MailMessage {
     private String identifierLine;
     private String pathsLine;
     private String validationLine;
-    private String confidentialyMessage;
+    //private String confidentialyMessage;
     File fPath;
     private String color;
     final String redColor = "#E74C3C";

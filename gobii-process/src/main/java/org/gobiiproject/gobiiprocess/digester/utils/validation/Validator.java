@@ -6,26 +6,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.gobiiproject.gobiimodel.config.GobiiCropConfig;
-import org.gobiiproject.gobiimodel.dto.instructions.validation.ValidationConstants;
-import org.gobiiproject.gobiimodel.types.DatasetOrientationType;
+import org.gobiiproject.gobiiprocess.digester.GobiiDigester;
 import org.gobiiproject.gobiiprocess.digester.LoaderGlobalConfigs;
-import org.gobiiproject.gobiimodel.dto.instructions.validation.errorMessage.Failure;
-import org.gobiiproject.gobiimodel.dto.instructions.validation.errorMessage.FailureTypes;
+import org.gobiiproject.gobiiprocess.digester.utils.validation.errorMessage.Failure;
+import org.gobiiproject.gobiiprocess.digester.utils.validation.errorMessage.FailureTypes;
+
 
 import static org.gobiiproject.gobiiprocess.digester.utils.validation.ValidationUtil.*;
 
 class Validator {
-
-    @Getter @Setter
-    private DatasetOrientationType datasetOrientationType;
-
-    public Validator(DatasetOrientationType orientation) {
-        this.datasetOrientationType = orientation;
-    }
-
     boolean validate(ValidationUnit validationUnit, String dir, List<Failure> failureList, GobiiCropConfig cropConfig) {
         try {
             if (checkForSingleFileExistence(dir, validationUnit.getDigestFileName(), failureList)) {
@@ -146,7 +136,8 @@ class Validator {
     private List<Failure> validateMatrixSizeColumns(String fileName, List<ConditionUnit> conditions) {
         List<Failure> failureList = new ArrayList<>();
 
-        if(datasetOrientationType == DatasetOrientationType.MARKER_FAST)return failureList;
+        Boolean isMarkerFast= GobiiDigester.isMarkerFast;//AUTHORS NOTE- this check will never run in stand-alone mode
+        if(isMarkerFast==null)return failureList;
         List<String> requiredMatrixMarkerSizeColumns = new ArrayList<>();
         List<String> requiredMatrixSampleSizeColumns = new ArrayList<>();
         for (ConditionUnit condition : conditions){
@@ -167,7 +158,7 @@ class Validator {
         if (requiredMatrixMarkerSizeColumns.size() > 0) {
             try {
                 List<String> matrixCols = getFileColumns(fileName, requiredMatrixMarkerSizeColumns, failureList);
-                verifyEqualMatrixSizeMarker(failureList, matrixCols, datasetOrientationType);
+                verifyEqualMatrixSizeMarker(failureList, matrixCols, isMarkerFast);
             } catch (MaximumErrorsValidationException e) {
                 //Don't do any thing. This implies that particular error list is full.
             }
@@ -176,7 +167,7 @@ class Validator {
         if (requiredMatrixSampleSizeColumns.size() > 0) {
             try {
                 List<String> matrixCols = getFileColumns(fileName, requiredMatrixSampleSizeColumns, failureList);
-                verifyEqualMatrixSizeDnarun(failureList, matrixCols, datasetOrientationType);
+                verifyEqualMatrixSizeDnarun(failureList, matrixCols, isMarkerFast);
             } catch (MaximumErrorsValidationException e) {
                 //Don't do any thing. This implies that particular error list is full.
             }

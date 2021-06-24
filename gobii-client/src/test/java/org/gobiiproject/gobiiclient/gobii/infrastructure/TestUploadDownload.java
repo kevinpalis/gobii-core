@@ -1,5 +1,12 @@
 package org.gobiiproject.gobiiclient.gobii.infrastructure;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpStatus;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
@@ -14,20 +21,13 @@ import org.gobiiproject.gobiimodel.utils.DateUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Created by Phil on 7/7/2017.
  */
-public class TestUploadDownload {
+@SuppressWarnings("rawtypes")
+ public class TestUploadDownload {
 
     private static TestExecConfig testExecConfig = null;
 
@@ -197,7 +197,7 @@ public class TestUploadDownload {
 
     }
 
-
+    @SuppressWarnings("unused")
     private void readXlsFile(File file) throws Exception {
         SpreadsheetMLPackage spread = SpreadsheetMLPackage.load(file);
 //        for (WorksheetPart sheet : spread.) {

@@ -1,9 +1,9 @@
 package org.gobiiproject.gobiidao.resultset.sqlworkers.read.liststatement.discrete;
 
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
+
 import org.gobiiproject.gobiidao.GobiiDaoException;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
 
 /**
  * Created by VCalaminos on 9/21/2018.

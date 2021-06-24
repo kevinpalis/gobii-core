@@ -1,7 +1,5 @@
 package org.gobiiproject.gobiibrapi.core.common;
 
-import java.util.Date;
-
 /**
  * Created by Phil on 9/6/2016.
  */

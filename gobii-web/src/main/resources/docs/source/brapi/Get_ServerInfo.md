@@ -5,13 +5,13 @@ Successful operation will return below response with HTTP Status Code 200 Ok.
 
 **Response Body Example**
 
-```
+```json
 
 {
     "metadata": {
         "pagination": {
-            "totalCount": 0,
-            "pageSize": 0,
+            "totalCount": 1,
+            "pageSize": 1,
             "totalPages": 0,
             "currentPage": 0
         },
@@ -19,52 +19,18 @@ Successful operation will return below response with HTTP Status Code 200 Ok.
         "datafiles": []
     },
     "result": {
-        "data": [
+        "calls": [
             {
-                "call": "serverinfo",
-                "methods": [
+                "service": "callsets/{callSetDbId}",
+                 "dataTypes": [
                     "GET"
-                ],
-                "datatypes": [
-                    "JSON"
-                ]
-            },
-            {
-                "call": "maps",
-                "methods": [
-                    "GET"
-                ],
-                "datatypes": [
-                    "JSON"
-                ]
-            },
-            {
-                "call": "studies-search",
-                "methods": [
-                    "POST"
-                ],
-                "datatypes": [
-                    "JSON"
-                ]
-            },
-            {
-                "call": "allelematrices",
-                "methods": [
-                    "GET"
-                ],
-                "datatypes": [
-                    "JSON"
-                ]
-            },
-            {
-                "call": "allelematrix-search",
-                "methods": [
-                    "GET",
-                    "POST"
-                ],
-                "datatypes": [
-                    "FLAPJACK"
-                ]
+                 ],
+                 "methods": [
+                     "application/json"
+                 ],
+                 "versions": [
+                     "2.0"
+                 ] 
             }
         ]
     }

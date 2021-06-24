@@ -2,8 +2,8 @@ package org.gobiiproject.gobiidtomapping.entity.auditable;
 
 import java.util.List;
 import org.gobiiproject.gobiidtomapping.core.GobiiDtoMappingException;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.DataSetDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.JobDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.DataSetDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.JobDTO;
 import org.gobiiproject.gobiimodel.dto.system.PagedList;
 
 /**

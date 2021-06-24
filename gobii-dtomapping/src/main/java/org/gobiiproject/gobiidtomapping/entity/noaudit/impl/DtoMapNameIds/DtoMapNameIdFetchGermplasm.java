@@ -9,7 +9,7 @@ import org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId;
 import org.gobiiproject.gobiidtomapping.core.GobiiDtoMappingException;
 import org.gobiiproject.gobiidtomapping.entity.noaudit.impl.DtoMapNameIdFetch;
 import org.gobiiproject.gobiimodel.config.GobiiException;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiFilterType;
 import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Created by VCalaminos on 10/10/2018.
  */
+@SuppressWarnings("serial")
 public class DtoMapNameIdFetchGermplasm implements DtoMapNameIdFetch {
 
     @Autowired
@@ -41,7 +42,8 @@ public class DtoMapNameIdFetchGermplasm implements DtoMapNameIdFetch {
                         put("nameArray", nameIdDTOList);
                     }});
 
-            Integer resultSize = DtoMapNameIdUtil.getIdsFromResultSet(nameIdDTOList, resultSet, "external_code", "germplasm_id");
+            //Integer resultSize = 
+            DtoMapNameIdUtil.getIdsFromResultSet(nameIdDTOList, resultSet, "external_code", "germplasm_id");
 
         } catch (Exception e) {
             throw new GobiiDaoException(e);

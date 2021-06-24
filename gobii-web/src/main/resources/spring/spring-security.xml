@@ -1,43 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bean:beans
-        xmlns:bean="http://www.springframework.org/schema/beans"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns="http://www.springframework.org/schema/security"
-        xmlns:context="http://www.springframework.org/schema/context"
-        xsi:schemaLocation="http://www.springframework.org/schema/beans
-		http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-		http://www.springframework.org/schema/security
-		http://www.springframework.org/schema/security/spring-security-4.2.xsd
-		http://www.springframework.org/schema/context
-    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/security
+       http://www.springframework.org/schema/security/spring-security.xsd">
 
-    <!-- The creation of the beans to support security are in SecurityConfig.java. I put it there because we need to
-    conditionally code the authentication manager based on authentication type. It is very possible to also do the
-    http configuration there as well, which would eliminate the need for this namespace configuration altogether.
-    However, this http configuration works, and I am unsure about how exactly to reproduce this in that code.
-    Here are some useful posts:
-    http://docs.spring.io/spring-security/site/migrate/current/3-to-4/html5/migrate-3-to-4-xml.html
-    http://stackoverflow.com/questions/29349881/403-errors-after-upgrading-to-spring-security-4-0-0
-    http://automateddeveloper.blogspot.co.uk/2014/03/securing-your-api-for-mobile-access.html
-    http://automateddeveloper.blogspot.co.uk/2014/03/securing-your-mobile-api-spring-security.html
-    -->
+    <context:component-scan base-package="org.keycloak.adapters.springsecurity" />
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider ref="keycloakAuthenticationProvider" />
+    </security:authentication-manager>
+    <security:global-method-security
+            secured-annotations="enabled" pre-post-annotations="enabled">
+            <security:expression-handler ref="expressionHandler"/>
+    </security:global-method-security>
 
-    <!--<http realm="Protected API"-->
-          <!--auto-config="false"-->
-          <!--use-expressions="true"-->
-          <!--create-session="stateless"-->
-          <!--entry-point-ref="unaAuthenticatedEntryPoint"-->
-          <!--authentication-manager-ref="restAuthenticationManager">-->
+    <bean id="expressionHandler"
+      class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
+        <property name="permissionEvaluator" ref="myPermissionEvaluator"/>
+    </bean>
 
-        <!--&lt;!&ndash;This disabled cross-site forgery protection. If you don't do this, you can't accept ajax requests.&ndash;&gt;-->
-        <!--<csrf disabled="true"/>-->
+    <bean id="myPermissionEvaluator" class="org.gobiiproject.gobiiweb.security.GDMPermissionEvaluator" />
+   
 
-        <!--<custom-filter ref="restAuthenticationFilter" position="FORM_LOGIN_FILTER"/>-->
-        <!--<intercept-url pattern="/gobii/v1/**" access="permitAll"/>-->
-    <!--</http>-->
+    <bean id="customGDMFilter" class="org.gobiiproject.gobiiweb.security.filters.CropUserFilter"/>
+    <bean id="authTokenRewriteFilter" class="org.gobiiproject.gobiiweb.security.filters.AuthBearerConverterFilter" />
 
+    <bean id="adapterDeploymentContext" class="org.gobiiproject.gobiiweb.security.AdapterDeploymentContextFactoryBean">
+         <!--constructor-arg value="WEB-INF/keycloak.json"/-->
+    </bean>
+    <!--bean id="adapterDeploymentContext" class="org.keycloak.adapters.springsecurity.AdapterDeploymentContextFactoryBean" >
+       
+    </bean-->
+    <bean id="authenticationFailureHandler" class="org.gobiiproject.gobiiweb.security.CustomKeycloakAuthFailureHandler" />
 
-    <bean:bean id="unaAuthenticatedEntryPoint" class="org.gobiiproject.gobiiweb.security.UnAuthenticatedEntryPoint"/>
+    <bean id="keycloakAuthenticationEntryPoint" class="org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationEntryPoint">
+        <constructor-arg name="adapterDeploymentContext" ref="adapterDeploymentContext"/>
+    </bean>
+    <bean id="keycloakAuthenticationProvider" class="org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider" />
+    <bean id="keycloakPreAuthActionsFilter" class="org.keycloak.adapters.springsecurity.filter.KeycloakPreAuthActionsFilter" />
+    <bean id="keycloakAuthenticationProcessingFilter" class="org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcessingFilter">
+        <constructor-arg name="authenticationManager" ref="authenticationManager" />
+        <property name="authenticationFailureHandler" ref="authenticationFailureHandler"/> 
+    </bean>
 
+    <bean id="keycloakLogoutHandler" class="org.keycloak.adapters.springsecurity.authentication.KeycloakLogoutHandler">
+        <constructor-arg ref="adapterDeploymentContext" />
+    </bean>
 
-</bean:beans>
+    <bean id="logoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
+        <constructor-arg name="logoutSuccessUrl" value="/" />
+        <constructor-arg name="handlers">
+            <list>
+                <ref bean="keycloakLogoutHandler" />
+                <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
+            </list>
+        </constructor-arg>
+        <property name="logoutRequestMatcher">
+            <bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
+                <constructor-arg name="pattern" value="/sso/logout**" />
+                <constructor-arg name="httpMethod" value="GET" />
+            </bean>
+        </property>
+    </bean>
+
+    <security:http auto-config="false" entry-point-ref="keycloakAuthenticationEntryPoint" use-expressions="true" >
+        <security:headers>
+            <security:frame-options policy="SAMEORIGIN"/>
+        </security:headers>
+        <security:csrf disabled="true"/>
+        <security:custom-filter ref="authTokenRewriteFilter" before="FIRST" />
+        <security:custom-filter ref="keycloakPreAuthActionsFilter" before="LOGOUT_FILTER" />
+        <security:custom-filter ref="keycloakAuthenticationProcessingFilter" before="FORM_LOGIN_FILTER" />
+        <security:custom-filter ref="customGDMFilter" after="LAST" />
+        <security:intercept-url pattern="/**" method="OPTIONS" access="permitAll()"/>
+        <security:intercept-url pattern="/crops" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/crops/*/gobii/v1/auth" access="permitAll"/>
+        <security:intercept-url pattern="/crops/*/gobii/v1/configsettings" access="permitAll"/>
+        <security:intercept-url pattern="/error" access="permitAll"/>
+        <security:intercept-url pattern="/crops/*/gobii/v1/**" access="isAuthenticated()" />
+        <security:intercept-url pattern="/crops/*/brapi/v1/token" access="permitAll"/>
+        <security:intercept-url pattern="/crops/*/brapi/v1/**" access="isAuthenticated()" />
+        <security:intercept-url pattern="/crops/*/brapi/v2/token" access="permitAll"/>
+        <security:intercept-url pattern="/crops/*/brapi/v2/**" access="isAuthenticated()" />
+        <security:intercept-url pattern="/crops/*/gobii/v3/**" access="isAuthenticated()" />
+        <!-- <security:intercept-url pattern="/admin**" access="ROLE_ADMIN" /> -->
+        <security:custom-filter ref="logoutFilter" position="LOGOUT_FILTER" />
+    </security:http>
+
+</beans>

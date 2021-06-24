@@ -7,6 +7,7 @@ import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
 /**
  * Created by Phil on 5/10/2016.
  */
+@SuppressWarnings("serial")
 public class GobiiException extends RuntimeException {
 
 

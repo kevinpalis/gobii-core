@@ -304,7 +304,7 @@
       "conditions": [
         {
           "columnName": "platform_id",
-          "required": "yes"
+          "required": "no"
         },
         {
           "columnName": "name",
@@ -364,7 +364,7 @@
       "conditions": [
         {
           "columnName": "platform_id",
-          "required": "yes"
+          "required": "no"
         },
         {
           "columnName": "map_id",

@@ -2,8 +2,6 @@ package org.gobiiproject.gobiibrapi.calls.login;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.List;
-
 /**
  * Created by Phil on 12/15/2016.
  */

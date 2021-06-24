@@ -51,6 +51,8 @@ public class GenericServerMethodsContextThree {
                             output.write(buf, 0, c);
                             output.flush();
                         }
+
+                        fileInputStream.close();
                     } catch (Exception e) {
                         throw new WebApplicationException(e);
                     }

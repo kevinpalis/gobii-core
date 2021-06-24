@@ -2,10 +2,11 @@ package org.gobiiproject.gobiiprocess.digester.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
+import org.gobiiproject.gobiiprocess.SafePowerMockRunner;
 import org.gobiiproject.gobiiprocess.digester.utils.validation.DigestFileValidator;
-import org.gobiiproject.gobiiprocess.digester.utils.validation.ValidationWebServicesUtil;
-import org.gobiiproject.gobiimodel.dto.instructions.validation.errorMessage.Failure;
-import org.gobiiproject.gobiimodel.dto.instructions.validation.ValidationResult;
+import org.gobiiproject.gobiiprocess.digester.utils.validation.ValidationDataUtil;
+import org.gobiiproject.gobiiprocess.digester.utils.validation.errorMessage.Failure;
+import org.gobiiproject.gobiiprocess.digester.utils.validation.errorMessage.ValidationError;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
@@ -28,9 +29,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 
-@Ignore //TODO- Refactor. Powermock static mocking is broken in Java 13
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(ValidationWebServicesUtil.class)
+@RunWith(SafePowerMockRunner.class)
+@PrepareForTest(ValidationDataUtil.class)
 @PowerMockRunnerDelegate(BlockJUnit4ClassRunner.class)
 @PowerMockIgnore({"javax.management.*", "javax.net.ssl.*"})
 public class LinkageGroupValidationTest {
@@ -64,12 +64,11 @@ public class LinkageGroupValidationTest {
      */
     @Test
     public void linkageGroupAllPassTest() throws IOException {
-        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/allPass", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json", "http://192.168.56.101:8081/gobii-dev/", "mcs397", "q");
+        DigestFileValidator digestFileValidator = new DigestFileValidator(
+            tempFolder.getRoot().getAbsolutePath() + "/allPass",
+            tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json");
 
-        PowerMockito.mockStatic(ValidationWebServicesUtil.class);
-        PowerMockito
-                .when(ValidationWebServicesUtil.loginToServer(eq("http://192.168.56.101:8081/gobii-dev/"), eq("mcs397"), eq("q"), eq(null), any()))
-                .thenReturn(true);
+        PowerMockito.mockStatic(ValidationDataUtil.class);
 
         digestFileValidator.performValidation(null);
         List<Path> pathList =
@@ -77,7 +76,7 @@ public class LinkageGroupValidationTest {
                         .filter(Files::isRegularFile).filter(path -> String.valueOf(path.getFileName()).endsWith(".json")).collect(Collectors.toList());
         assertEquals("There should be one validation output json file", 1, pathList.size());
 
-        ValidationResult[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationResult[].class);
+        ValidationError[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationError[].class);
         assertEquals("Expected file name is not linkage_group", "linkage_group", fileErrors[0].fileName);
         assertEquals("Expected STATUS is not success", ValidationTestSuite.SUCCESS_TEXT, fileErrors[0].status);
     }
@@ -88,12 +87,11 @@ public class LinkageGroupValidationTest {
      */
     @Test
     public void linkageGroupMissingRequiredFieldTest() throws IOException {
-        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/missingRequiredColumns", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json", "http://192.168.56.101:8081/gobii-dev/", "mcs397", "q");
+        DigestFileValidator digestFileValidator = new DigestFileValidator(
+            tempFolder.getRoot().getAbsolutePath() + "/missingRequiredColumns",
+            tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json");
 
-        PowerMockito.mockStatic(ValidationWebServicesUtil.class);
-        PowerMockito
-                .when(ValidationWebServicesUtil.loginToServer(eq("http://192.168.56.101:8081/gobii-dev/"), eq("mcs397"), eq("q"), eq(null), any()))
-                .thenReturn(true);
+        PowerMockito.mockStatic(ValidationDataUtil.class);
 
         digestFileValidator.performValidation(null);
         List<Path> pathList =
@@ -101,7 +99,7 @@ public class LinkageGroupValidationTest {
                         .filter(Files::isRegularFile).filter(path -> String.valueOf(path.getFileName()).endsWith(".json")).collect(Collectors.toList());
         assertEquals("There should be one validation output json file", 1, pathList.size());
 
-        ValidationResult[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationResult[].class);
+        ValidationError[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationError[].class);
         assertEquals("Expected file name is not linkage_group", "linkage_group", fileErrors[0].fileName);
         assertEquals("Expected STATUS is not FAILURE", ValidationTestSuite.FAILURE_TEXT, fileErrors[0].status);
 
@@ -117,12 +115,11 @@ public class LinkageGroupValidationTest {
      */
     @Test
     public void linkageGroupMissingValuesInRequiredFieldTest() throws IOException {
-        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/missingValuesInRequiredColumns", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json", "http://192.168.56.101:8081/gobii-dev/", "mcs397", "q");
+        DigestFileValidator digestFileValidator = new DigestFileValidator(
+            tempFolder.getRoot().getAbsolutePath() + "/missingValuesInRequiredColumns",
+            tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json");
 
-        PowerMockito.mockStatic(ValidationWebServicesUtil.class);
-        PowerMockito
-                .when(ValidationWebServicesUtil.loginToServer(eq("http://192.168.56.101:8081/gobii-dev/"), eq("mcs397"), eq("q"), eq(null), any()))
-                .thenReturn(true);
+        PowerMockito.mockStatic(ValidationDataUtil.class);
 
         digestFileValidator.performValidation(null);
         List<Path> pathList =
@@ -130,7 +127,7 @@ public class LinkageGroupValidationTest {
                         .filter(Files::isRegularFile).filter(path -> String.valueOf(path.getFileName()).endsWith(".json")).collect(Collectors.toList());
         assertEquals("There should be one validation output json file", 1, pathList.size());
 
-        ValidationResult[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationResult[].class);
+        ValidationError[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationError[].class);
         assertEquals("Expected file name is not linkage_group", "linkage_group", fileErrors[0].fileName);
         assertEquals("Expected STATUS is not FAILURE", ValidationTestSuite.FAILURE_TEXT, fileErrors[0].status);
 

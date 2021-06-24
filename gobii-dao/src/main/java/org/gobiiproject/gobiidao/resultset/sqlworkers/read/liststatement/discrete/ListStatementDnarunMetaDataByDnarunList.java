@@ -36,6 +36,7 @@ public class ListStatementDnarunMetaDataByDnarunList implements ListStatement {
      * @throws GobiiException
      */
     @Override
+    @SuppressWarnings("unchecked")
     public PreparedStatement makePreparedStatement(Connection dbConnection,
                                                    Map<String, Object> jdbcParamVals,
                                                    Map<String, Object> sqlParamVals)

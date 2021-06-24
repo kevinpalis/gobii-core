@@ -19,6 +19,7 @@ import org.apache.commons.cli.Options;
  * @author smr337
  *
  */
+@SuppressWarnings("unused")
 public class UserAuthentication {
 	
 	private String domain;

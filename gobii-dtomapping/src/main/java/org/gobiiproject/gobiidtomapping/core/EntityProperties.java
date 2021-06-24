@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.gobiiproject.gobiidao.resultset.core.EntityPropertyParamNames;
-import org.gobiiproject.gobiimodel.dto.entity.children.EntityPropertyDTO;
+import org.gobiiproject.gobiimodel.dto.children.EntityPropertyDTO;
 
 /**
  * Created by Phil on 5/4/2016.

@@ -1,7 +1,5 @@
 package org.gobiiproject.gobiibrapi.calls.germplasm;
 
-import org.gobiiproject.gobiibrapi.core.common.BrapiMetaData;
-
 import java.util.ArrayList;
 import java.util.List;
 

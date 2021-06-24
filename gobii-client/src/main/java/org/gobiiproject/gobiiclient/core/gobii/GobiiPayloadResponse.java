@@ -11,6 +11,7 @@ import org.gobiiproject.gobiimodel.utils.LineUtils;
 /**
  * Created by Phil on 10/19/2016.
  */
+@SuppressWarnings("unused")
 public class GobiiPayloadResponse<T> {
 
     private RestUri restUri;

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.gobiiproject.gobiimodel.dto.entity.children.PropNameId;
+import org.gobiiproject.gobiimodel.dto.children.PropNameId;
 import org.gobiiproject.gobiimodel.utils.error.Logger;
 
 /**

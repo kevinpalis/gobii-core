@@ -20,8 +20,6 @@ public class TestConfigSupplement {
 
     private static String CONFIG_FILE_LOCATION_PROP = "cfgFqpn";
 
-    private static String TEST_CROP_PROP = "cropType";
-
     /**
      * Gets the environment variables for gobii-web.xml location and test crop type.
      * Reads the test configurations and sets the testExecConfig.
@@ -31,21 +29,15 @@ public class TestConfigSupplement {
 
         String configFileLocation = System.getProperty(CONFIG_FILE_LOCATION_PROP);
 
-        String testCropType = System.getProperty(TEST_CROP_PROP);
-
         if (configFileLocation == null) {
             String message = "The the environment does not define the FQPN of " +
                     "configuration in environment variable: " + CONFIG_FILE_LOCATION_PROP;
             throw new Exception(message);
         }
 
-        if(testCropType == null) {
-            String message = "The the environment does not define cropType " +
-                    "in environment variable: " + TEST_CROP_PROP;
-            throw new Exception(message);
-        }
-
         testConfig = new ConfigSettings(configFileLocation);
+
+        String testCropType = testConfig.getTestExecConfig().getTestCrop();
 
         testConfig.setCurrentGobiiCropType(testCropType);
 
@@ -66,25 +58,31 @@ public class TestConfigSupplement {
 
         readTestConfig();
 
-        GobiiCropConfig currentGobiiCropConfig = testConfig.getCurrentCropConfig();
+        GobiiCropConfig currentGobiiCropConfig =
+            testConfig.getCurrentCropConfig();
 
-        returnVal.setTestGobiiCropType(currentGobiiCropConfig.getGobiiCropType());
+        returnVal.setTestGobiiCropType(
+            currentGobiiCropConfig.getGobiiCropType());
 
         Map<Object,Object> targetDataSources = new HashMap<>();
 
-        ServerConfig currentPostGresConfig = currentGobiiCropConfig.getServer(ServerType.GOBII_PGSQL);
+        ServerConfig currentPostGresConfig =
+            currentGobiiCropConfig.getServer(ServerType.GOBII_PGSQL);
 
-        DriverManagerDataSource currentDataSource = new DriverManagerDataSource();
+        DriverManagerDataSource currentDataSource =
+            new DriverManagerDataSource();
 
         currentDataSource.setDriverClassName("org.postgresql.Driver");
 
-        String url = HelperFunctions.getJdbcConnectionString(currentPostGresConfig);
+        String url =
+            HelperFunctions.getJdbcConnectionString(currentPostGresConfig);
 
         currentDataSource.setUrl(url);
         currentDataSource.setUsername(currentPostGresConfig.getUserName());
         currentDataSource.setPassword(currentPostGresConfig.getPassword());
 
-        targetDataSources.put(currentGobiiCropConfig.getGobiiCropType(),currentDataSource);
+        targetDataSources.put(
+            currentGobiiCropConfig.getGobiiCropType(), currentDataSource);
 
         returnVal.setTargetDataSources(targetDataSources);
 

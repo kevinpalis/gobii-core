@@ -15,10 +15,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.gobiiproject.gobidomain.security.TokenInfo;
-import org.gobiiproject.gobidomain.services.AuthenticationService;
-import org.gobiiproject.gobidomain.services.ContactService;
-import org.gobiiproject.gobiiapimodel.payload.sampletracking.ErrorPayload;
+import org.gobiiproject.gobiidomain.security.TokenInfo;
+import org.gobiiproject.gobiidomain.services.AuthenticationService;
+import org.gobiiproject.gobiidomain.services.ContactService;
+import org.gobiiproject.gobiimodel.dto.brapi.envelope.ErrorPayload;
 import org.gobiiproject.gobiiapimodel.types.GobiiControllerType;
 import org.gobiiproject.gobiiapimodel.types.GobiiHttpHeaderNames;
 import org.gobiiproject.gobiibrapi.calls.login.BrapiRequestLogin;
@@ -43,6 +43,7 @@ import org.springframework.web.filter.GenericFilterBean;
  * is configured to be used by Spring Security (configured filter on FORM_LOGIN_FILTER position),
  * but it doesn't really depend on it at all.
  */
+@Deprecated //due to Keycloak integration
 public final class TokenAuthenticationFilter extends GenericFilterBean {
 
     Logger LOGGER = LoggerFactory.getLogger(TokenAuthenticationFilter.class);
@@ -65,8 +66,7 @@ public final class TokenAuthenticationFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
-
-        HttpServletRequest httpRequest = null;
+        //HttpServletRequest httpRequest = null;
         HttpServletResponse httpResponse = null;
 
         try {
@@ -127,7 +127,8 @@ public final class TokenAuthenticationFilter extends GenericFilterBean {
                     String password = null;
 
 
-                    boolean isBrapiRequest = url.toLowerCase().contains(GobiiControllerType.SERVICE_PATH_BRAPI);
+                    boolean isBrapiRequest = url.toLowerCase().contains(GobiiControllerType.SERVICE_PATH_BRAPI)
+                            || url.toLowerCase().contains(GobiiControllerType.SERVICE_PATH_BRAPI_V2);
                     if (!isBrapiRequest) {
                         userName = authenticationRequestWrapper.getHeader(GobiiHttpHeaderNames.HEADER_NAME_USERNAME);
                         password = authenticationRequestWrapper.getHeader(GobiiHttpHeaderNames.HEADER_NAME_PASSWORD);
@@ -260,6 +261,7 @@ public final class TokenAuthenticationFilter extends GenericFilterBean {
         return returnVal;
     }
 
+    @SuppressWarnings("unused")
     private void checkLogout(HttpServletRequest httpRequest) {
         if (currentLink(httpRequest).equals(logoutLink)) {
             String token = httpRequest.getHeader(GobiiHttpHeaderNames.HEADER_NAME_TOKEN);

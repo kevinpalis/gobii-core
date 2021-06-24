@@ -1,17 +1,17 @@
 package org.gobiiproject.gobiimodel.entity;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.gobiiproject.gobiimodel.entity.JpaConverters.IntegerArrayConverter;
-import org.gobiiproject.gobiimodel.entity.JpaConverters.JsonbConverter;
-
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import org.hibernate.annotations.Type;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * Model for Dataset Entity.
+ * Model for Dataset Entity.ß
  * Represents the database table dataset.
  *
  * props - is a jsonb column. It is converted to jackson.fasterxml JsonNode using a
@@ -19,6 +19,30 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "dataset")
+@Data
+@EqualsAndHashCode(callSuper = false)
+@NamedEntityGraph(name = "graph.dataset",
+    attributeNodes = {
+        @NamedAttributeNode(value = "experiment", subgraph = "graph.dataset.experiment"),
+        @NamedAttributeNode(value = "callingAnalysis"),
+        @NamedAttributeNode(value = "status"),
+        @NamedAttributeNode(value = "type")
+    },
+    subgraphs = {
+        @NamedSubgraph(
+            name = "graph.dataset.experiment",
+            attributeNodes = {
+                @NamedAttributeNode(value = "project", subgraph = "graph.dataset.experiment.project")
+            }
+        ),
+        @NamedSubgraph(
+            name = "graph.dataset.experiment.project",
+            attributeNodes = {
+                @NamedAttributeNode(value = "contact")
+            }
+        ),
+    }
+)
 public class Dataset extends BaseEntity {
 
     @Id
@@ -29,20 +53,17 @@ public class Dataset extends BaseEntity {
     @Column(name="name")
     private String datasetName;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "experiment_id")
-    private Experiment experiment = new Experiment();
+    private Experiment experiment;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "callinganalysis_id", referencedColumnName = "analysis_id")
-    private Analysis callingAnalysis = new Analysis();
+    private Analysis callingAnalysis;
 
     @Column(name = "analyses")
-    @Convert(converter = IntegerArrayConverter.class)
+    @Type(type = "IntArrayType")
     private Integer[] analyses;
-
-    @Transient
-    private Set<Analysis> mappedAnalyses = new HashSet<>();
 
     @Column(name="data_table")
     private String dataTable;
@@ -57,153 +78,22 @@ public class Dataset extends BaseEntity {
     private String qualityFile;
 
     @Column(name="scores")
-    @Convert(converter = JsonbConverter.class)
+    @Type(type = "JsonNodeType")
     private JsonNode scores;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status", referencedColumnName = "cv_id")
-    private Cv status = new Cv();
+    private Cv status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_id", referencedColumnName = "cv_id")
-    private Cv type = new Cv();
+    private Cv type;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_id", referencedColumnName = "job_id")
-    private Job job = new Job();
+    private Job job;
 
-    @Transient
-    private Integer markerCount;
+    @OneToOne(mappedBy="dataset")
+    private DatasetStats datasetStats;
 
-    @Transient
-    private Integer dnaRunCount;
-
-    public Integer getDatasetId() {
-        return datasetId;
-    }
-
-    public void setDatasetId(Integer datasetId) {
-        this.datasetId = datasetId;
-    }
-
-    public String getDatasetName() {
-        return datasetName;
-    }
-
-    public void setDatasetName(String datasetName) {
-        this.datasetName = datasetName;
-    }
-
-    public Experiment getExperiment() {
-        return experiment;
-    }
-
-    public void setExperiment(Experiment experiment) {
-        this.experiment = experiment;
-    }
-
-    public Analysis getCallingAnalysis() {
-        return callingAnalysis;
-    }
-
-    public void setCallingAnalysis(Analysis callingAnalysis) {
-        this.callingAnalysis = callingAnalysis;
-    }
-
-
-    public Integer[] getAnalyses() {
-        return analyses;
-    }
-
-    public void setAnalyses(Integer[] analyses) {
-        this.analyses = analyses;
-    }
-
-    public String getDataTable() {
-        return dataTable;
-    }
-
-    public void setDataTable(String dataTable) {
-        this.dataTable = dataTable;
-    }
-
-    public String getDataFile() {
-        return dataFile;
-    }
-
-    public void setDataFile(String dataFile) {
-        this.dataFile = dataFile;
-    }
-
-    public String getQualityTable() {
-        return qualityTable;
-    }
-
-    public void setQualityTable(String qualityTable) {
-        this.qualityTable = qualityTable;
-    }
-
-    public JsonNode getScores() {
-        return scores;
-    }
-
-    public void setScores(JsonNode scores) {
-        this.scores = scores;
-    }
-
-    public Cv getStatus() {
-        return status;
-    }
-
-    public void setStatus(Cv status) {
-        this.status = status;
-    }
-
-    public Cv getType() {
-        return type;
-    }
-
-    public void setType(Cv type) {
-        this.type = type;
-    }
-
-    public Job getJob() {
-        return job;
-    }
-
-    public void setJob(Job job) {
-        this.job = job;
-    }
-
-    public String getQualityFile() {
-        return qualityFile;
-    }
-
-    public void setQualityFile(String qualityFile) {
-        this.qualityFile = qualityFile;
-    }
-
-    public Set<Analysis> getMappedAnalyses() {
-        return mappedAnalyses;
-    }
-
-    public void setMappedAnalyses(Set<Analysis> mappedAnalyses) {
-        this.mappedAnalyses = mappedAnalyses;
-    }
-
-    public Integer getMarkerCount() {
-        return markerCount;
-    }
-
-    public void setMarkerCount(Integer markerCount) {
-        this.markerCount = markerCount;
-    }
-
-    public Integer getDnaRunCount() {
-        return dnaRunCount;
-    }
-
-    public void setDnaRunCount(Integer dnaRunCount) {
-        this.dnaRunCount = dnaRunCount;
-    }
 }

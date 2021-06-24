@@ -2,10 +2,12 @@ package org.gobiiproject.gobiiweb.spring;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.gobiiproject.gobiimodel.config.ConfigSettings;
 import org.gobiiproject.gobiimodel.config.GobiiCropConfig;
+import org.gobiiproject.gobiimodel.config.KeycloakConfig;
 import org.gobiiproject.gobiimodel.config.ServerConfig;
 import org.gobiiproject.gobiimodel.types.GobiiFileProcessDir;
 import org.gobiiproject.gobiimodel.types.ServerType;
@@ -20,7 +22,6 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 /**
  * Created by Phil on 8/16/2016.
  */
-
 @Configuration
 public class ConfigSupplement {
 
@@ -105,5 +106,18 @@ public class ConfigSupplement {
 
         return returnVal;
     }
+
+    @Bean(name="keycloakConfig")
+    public KeycloakConfig keycloakConfig() {
+        return this.configSettings.getKeycloakConfig();
+
+        
+    }
+
+    @Bean(name="configSettings")
+    public ConfigSettings configSettings() {
+        return this.configSettings;
+    }
+
 
 }

@@ -6,9 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang.StringUtils;
 import org.gobiiproject.gobiimodel.utils.FileSystemInterface;
 import org.gobiiproject.gobiimodel.utils.error.Logger;

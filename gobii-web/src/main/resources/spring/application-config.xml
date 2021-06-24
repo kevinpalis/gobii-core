@@ -5,7 +5,8 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
-       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:cache="http://www.springframework.org/schema/cache"
        xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
@@ -14,7 +15,13 @@
     http://www.springframework.org/schema/tx 		
     http://www.springframework.org/schema/tx/spring-tx.xsd
 	http://www.springframework.org/schema/security
-	http://www.springframework.org/schema/security/spring-security-4.2.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+	http://www.springframework.org/schema/security/spring-security-4.2.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/cache
+	http://www.springframework.org/schema/cache/spring-cache.xsd
+	http://www.springframework.org/schema/task
+	http://www.springframework.org/schema/task/spring-task.xsd">
 
 
     <tx:annotation-driven transaction-manager="transactionManager"/>
@@ -27,7 +34,8 @@
         implementions of interfaces as system needs evolve -->
     <context:annotation-config/>
     <context:component-scan base-package="org.gobiiproject.gobiidao.core"/>
-    <context:component-scan base-package="org.gobiiproject.gobidomain.security"/>
+    <!-- <context:component-scan base-package="org.gobiiproject.gobidomain.security"/> -->
+    <context:component-scan base-package="org.gobiiproject.gobiidomain.security"/>
     <context:component-scan base-package="org.gobiiproject.gobiiweb.controllers"/>
 
 
@@ -64,7 +72,7 @@
 
     <!-- ******************** ****************************************** -->
     <!-- ******************** explicitly defined beans **************** -->
-
+    
     <!-- **** Security Beans *************************************** -->
     <bean id="UserDao"
           class="org.gobiiproject.gobiidao.entity.access.impl.mock.UserDaoImpl"/>
@@ -72,9 +80,12 @@
     <bean id="dtoMapSampleTrackingProject"
           class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.sampletracking.DtoMapProjectImpl"/>
     <bean id="projectService"
-          class="org.gobiiproject.gobidomain.services.impl.ProjectServiceImpl"/>
-    <bean id="sampleTrackingProjectService"
-          class="org.gobiiproject.gobidomain.services.impl.sampletracking.ProjectServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.ProjectServiceImpl"/>
+    <bean id="propertiesService"
+          class="org.gobiiproject.gobiidomain.services.impl.PropertiesServiceImpl"/>
+
+    <!-- Keycloak Service Bean-->
+    <bean id="keycloakService" class="org.gobiiproject.gobiidomain.services.gdmv3.KeycloakServiceImpl"/>
 
     <!-- **** Helper Beans *************************************** -->
     <bean id="storedProcExec" class="org.gobiiproject.gobiidao.resultset.core.StoredProcExec"/>
@@ -93,7 +104,7 @@
           class="org.gobiiproject.gobiidao.resultset.access.impl.RsPingDaoImpl"/>
     <bean id="dtoPing" class="org.gobiiproject.gobiidtomapping.system.impl.DtoMapPingImpl"/>
     <bean id="pingService"
-          class="org.gobiiproject.gobidomain.services.impl.PingServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.PingServiceImpl"/>
 
 
     <!-- **** NameIdList Beans *************************************** -->
@@ -260,41 +271,43 @@
 
 
     <bean id="nameIdListService"
-          class="org.gobiiproject.gobidomain.services.impl.NameIdListServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.NameIdListServiceImpl"/>
+
+    <bean id="cropService" class="org.gobiiproject.gobiidomain.services.gdmv3.CropServiceImpl"/>
 
     <!-- **** Loader File Beans *************************************** -->
 
     <bean id="filesService"
-          class="org.gobiiproject.gobidomain.services.impl.FileServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.FileServiceImpl"/>
 
     <bean id="dtoMapLoaderFiles"
           class="org.gobiiproject.gobiidtomapping.instructions.impl.DtoMapLoaderFilesImpl"/>
     <bean id="loaderFilesService"
-          class="org.gobiiproject.gobidomain.services.impl.LoaderFilesServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.LoaderFilesServiceImpl"/>
 
     <!-- **** Loader Instruction File Beans *************************************** -->
     <bean id="dtoMapLoaderInstructions"
           class="org.gobiiproject.gobiidtomapping.instructions.impl.DtoMapLoaderInstructionsImpl"/>
     <bean id="loaderInstructionFilesService"
-          class="org.gobiiproject.gobidomain.services.impl.LoaderInstructionFileServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.LoaderInstructionFileServiceImpl"/>
 
     <!-- **** Extractor File Beans *************************************** -->
     <bean id="dtoMapExtractorInstructions"
           class="org.gobiiproject.gobiidtomapping.instructions.impl.DtoMapExtractorInstructionsImpl"/>
     <bean id="ExtractorInstructionFilesService"
-          class="org.gobiiproject.gobidomain.services.impl.ExtractorInstructionFileServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.ExtractorInstructionFileServiceImpl"/>
 
 
     <!-- **** Contact Beans *************************************** -->
     <bean id="dtoMapContact" class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapContactImpl"/>
-    <bean id="contactService" class="org.gobiiproject.gobidomain.services.impl.ContactServiceImpl"/>
-
+    <bean id="contactService" class="org.gobiiproject.gobiidomain.services.impl.ContactServiceImpl"/>
+    <bean id="contactServiceV3" class="org.gobiiproject.gobiidomain.services.gdmv3.ContactServiceImpl"/>
     <!-- **** Display Beans *************************************** -->
     <bean id="rsDisplayDao"
           class="org.gobiiproject.gobiidao.resultset.access.impl.RsDisplayDaoImpl"/>
     <bean id="dtoMapDisplay" class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapDisplayImpl"/>
     <bean id="displayService"
-          class="org.gobiiproject.gobidomain.services.impl.DisplayServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.DisplayServiceImpl"/>
 
 
     <!-- **** DataSet Beans *************************************** -->
@@ -302,7 +315,7 @@
           class="org.gobiiproject.gobiidao.resultset.access.impl.RsDataSetDaoImpl"/>
     <bean id="dtoMapDataSet" class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapDataSetImpl"/>
     <bean id="DataSetService"
-          class="org.gobiiproject.gobidomain.services.impl.DataSetServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.DataSetServiceImpl"/>
 
     <!-- **** Experiments Beans *************************************** -->
     <bean id="rsExperimentDao"
@@ -312,11 +325,11 @@
     <bean id="dtoMapSampleTrackingExperiment"
           class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.sampletracking.DtoMapExperimentImpl"/>
     <bean id="ExperimentService"
-          class="org.gobiiproject.gobidomain.services.impl.ExperimentServiceImpl"/>
-    <bean id="sampleTrackingExperimentService"
-          class="org.gobiiproject.gobidomain.services.impl.sampletracking.ExperimentServiceImpl"/>
-    <bean id="sampleTrackingDnasampleService"
-          class="org.gobiiproject.gobidomain.services.impl.sampletracking.DnaSampleServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.ExperimentServiceImpl"/>
+
+    <!-- *** Experiment Service V3 -->
+    <bean id="ExperimentServiceV3"
+          class="org.gobiiproject.gobiidomain.services.gdmv3.ExperimentServiceImpl"/>
 
 
     <!-- **** Analysis Beans *************************************** -->
@@ -325,7 +338,17 @@
     <bean id="dtoMapAnalysis"
           class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapAnalysisImpl"/>
     <bean id="AnalysisService"
-          class="org.gobiiproject.gobidomain.services.impl.AnalysisServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.AnalysisServiceImpl"/>
+    
+    <!-- Analysis Service V3 -->
+    <bean id="AnalysisServiceV3"
+          class="org.gobiiproject.gobiidomain.services.gdmv3.AnalysisServiceImpl"/>
+    <bean id="AnalysisDao"
+          class="org.gobiiproject.gobiisampletrackingdao.AnalysisDaoImpl"/>
+    <bean id="ReferenceServiceV3"
+          class="org.gobiiproject.gobiidomain.services.gdmv3.ReferenceServiceImpl"/>
+    <bean id="ReferenceDao"
+          class="org.gobiiproject.gobiisampletrackingdao.ReferenceDaoImpl"/>
 
     <!-- **** Platform Beans *************************************** -->
     <bean id="rsPlatformDao"
@@ -333,7 +356,7 @@
     <bean id="dtoMapPlatform"
           class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapPlatformImpl"/>
     <bean id="platformService"
-          class="org.gobiiproject.gobidomain.services.impl.PlatformServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.PlatformServiceImpl"/>
 
 
     <!-- **** Map Beans *************************************** -->
@@ -342,7 +365,7 @@
     <bean id="dtoMapMapset"
           class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapMapsetImpl"/>
     <bean id="MapsetService"
-          class="org.gobiiproject.gobidomain.services.impl.MapsetServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.MapsetServiceImpl"/>
 
 
     <!-- **** Marker Beans *************************************** -->
@@ -350,8 +373,12 @@
           class="org.gobiiproject.gobiidao.resultset.access.impl.RsMarkerDaoImpl"/>
     <bean id="dtoMapMarker" class="org.gobiiproject.gobiidtomapping.entity.noaudit.impl.DtoMapMarkerImpl"/>
     <bean id="markerService"
-          class="org.gobiiproject.gobidomain.services.impl.MarkerServiceImpl"/>
+          class="org.gobiiproject.gobiidomain.services.impl.MarkerServiceImpl"/>
 
+
+    <!-- **** Marker Group Service/DAO V3-->
+    <bean id="markerGroupService" class="org.gobiiproject.gobiidomain.services.gdmv3.MarkerGroupServiceImpl"/>
+    <bean id="markerGroupDao" class="org.gobiiproject.gobiisampletrackingdao.MarkerGroupDaoImpl"/>
 
     <!-- <bean id="dtoMapMap" class="org.gobiiproject.gobiidtomapping.impl.DtoMapMapImpl"/>
         <bean id="MapService" class="org.gobiiproject.gobidomain.services.impl.MapServiceImpl"/> -->
@@ -360,27 +387,27 @@
     <bean id="rsReferenceDao"
           class="org.gobiiproject.gobiidao.resultset.access.impl.RsReferenceDaoImpl"/>
     <bean id="dtoMapReference" class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapReferenceImpl"/>
-    <bean id="ReferenceService" class="org.gobiiproject.gobidomain.services.impl.ReferenceServiceImpl"/>
+    <bean id="ReferenceService" class="org.gobiiproject.gobiidomain.services.impl.ReferenceServiceImpl"/>
 
     <!-- **** CvTerms Beans *************************************** -->
     <bean id="rsCvDao" class="org.gobiiproject.gobiidao.resultset.access.impl.RsCvDaoImpl"/>
     <bean id="dtoMapCv" class="org.gobiiproject.gobiidtomapping.entity.noaudit.impl.DtoMapCvImpl"/>
-    <bean id="CvService" class="org.gobiiproject.gobidomain.services.impl.CvServiceImpl"/>
+    <bean id="CvService" class="org.gobiiproject.gobiidomain.services.impl.CvServiceImpl"/>
 
     <!-- *** CvGroup Beans ******************************************* -->
     <bean id="rsCvGroupDao" class="org.gobiiproject.gobiidao.resultset.access.impl.RsCvGroupDaoImpl"/>
     <bean id="dtoMapCvGroup" class="org.gobiiproject.gobiidtomapping.entity.noaudit.impl.DtoMapCvGroupImpl"/>
-    <bean id="CvGroupService" class="org.gobiiproject.gobidomain.services.impl.CvGroupServiceImpl"/>
+    <bean id="CvGroupService" class="org.gobiiproject.gobiidomain.services.impl.CvGroupServiceImpl"/>
 
     <!-- **** MarkerGroup Beans *************************************** -->
     <bean id="rsMarkerGroupDao"
           class="org.gobiiproject.gobiidao.resultset.access.impl.RsMarkerGroupDaoImpl"/>
     <bean id="dtoMapMarkerGroup" class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapMarkerGroupImpl"/>
-    <bean id="MarkerGroupService" class="org.gobiiproject.gobidomain.services.impl.MarkerGroupServiceImpl"/>
+    <bean id="MarkerGroupService" class="org.gobiiproject.gobiidomain.services.impl.MarkerGroupServiceImpl"/>
 
     <!-- **** ConfigSetrings Beans *************************************** -->
     <bean id="dtoMapConfigSettings" class="org.gobiiproject.gobiidtomapping.system.impl.DtoMapConfigSettingsImpl"/>
-    <bean id="configSettingsService" class="org.gobiiproject.gobidomain.services.impl.ConfigSettingsServiceImpl"/>
+    <bean id="configSettingsService" class="org.gobiiproject.gobiidomain.services.impl.ConfigSettingsServiceImpl"/>
 
     <!-- **** Role Beans *************************************** -->
     <bean id="rsRoleDao"
@@ -393,106 +420,147 @@
     <bean id="rsSampleTrackingProjectDao"
           class="org.gobiiproject.gobiidao.resultset.access.impl.sampletracking.RsProjectDaoImpl"/>
 
-    <!-- **** New Project DAO for sample tracking use cases -->
+   <!-- **** Projects V3  Beans -->
     <bean id="projectDao" class="org.gobiiproject.gobiisampletrackingdao.ProjectDaoImpl"/>
+    <bean id="contactDao" class="org.gobiiproject.gobiisampletrackingdao.ContactDaoImpl"/>
+    <bean id="gobiiProjectService" class="org.gobiiproject.gobiidomain.services.gdmv3.ProjectServiceImpl"/>
 
-    <!-- **** New Experiment DAO for sample tracking use cases -->
-    <bean id="experimentDao" class="org.gobiiproject.gobiisampletrackingdao.ExperimentDaoImpl"/>
+    <!-- **** VednorProtocol V3  Beans -->
+    <bean id="vendorProtocolDao" class="org.gobiiproject.gobiisampletrackingdao.VendorProtocolDaoImpl"/>
+    <bean id="vendorProtocolService" class="org.gobiiproject.gobiidomain.services.gdmv3.VendorProtocolServiceImpl"/>
 
-    <!-- **** New CV DAO for sample tracking use cases -->
+    <!-- *** Cv Service Bean -->
+    <bean id="cvServiceV3" class="org.gobiiproject.gobiidomain.services.gdmv3.CvServiceImpl"/>
+
+    <!-- *** New Vendor Protocol Dao -->
+    <bean id="vendorProtocolDaoV3" class="org.gobiiproject.gobiisampletrackingdao.VendorProtocolDaoImpl"/>
+
+    <!-- **** New CV DAO -->
     <bean id="cvDao" class="org.gobiiproject.gobiisampletrackingdao.CvDaoImpl"/>
 
-    <!-- **** New CV DAO for sample tracking use cases -->
+    <!-- **** New Dataset Dao -->
+    <bean id="datasetServiceV3" class="org.gobiiproject.gobiidomain.services.gdmv3.DatasetServiceImpl"/>
     <bean id="datasetDao" class="org.gobiiproject.gobiisampletrackingdao.DatasetDaoImpl"/>
 
     <!-- **** New Samples DAO for accessing DNA samples -->
     <bean id="dnaSampleDao" class="org.gobiiproject.gobiisampletrackingdao.DnaSampleDaoImpl"/>
 
+    <!-- **** New Analysis Dao -->
+    <bean id="analysisDao" class="org.gobiiproject.gobiisampletrackingdao.AnalysisDaoImpl"/>
+
+    <!-- **** New Marker Dao -->
+    <bean id="markerDao" class="org.gobiiproject.gobiisampletrackingdao.MarkerDaoImpl"/>
+
+    <!-- **** New DnaRun Dao -->
+    <bean id="dnaRunDao" class="org.gobiiproject.gobiisampletrackingdao.DnaRunDaoImpl"/>
+
+    <!-- **** New Protocol Dao -->
+    <bean id="protocolDao" class="org.gobiiproject.gobiisampletrackingdao.ProtocolDaoImpl"/>
+
+    <!-- **** New Job Dao -->
+    <bean id="jobDao" class="org.gobiiproject.gobiisampletrackingdao.JobDaoImpl"/>
+
+    <bean id="loaderTemplateDao" class="org.gobiiproject.gobiisampletrackingdao.LoaderTemplateDaoImpl"/>
+
+    <!-- gdm v3 marker service -->
+    <bean id="markerServiceV3" class="org.gobiiproject.gobiidomain.services.gdmv3.MarkerServiceImpl"/>
+
+    <!-- gdm v3 dnaRun service -->
+    <bean id="dnaRunServiceV3" class="org.gobiiproject.gobiidomain.services.gdmv3.DnaRunServiceImpl"/>
+
+    <!-- gdm v3 genotypes service -->
+    <bean id="genotypeServiceV3" class="org.gobiiproject.gobiidomain.services.gdmv3.GenotypeServiceImpl"/>
+
+    <!-- gdm v3 files service -->
+    <bean id="fileServiceV3" class="org.gobiiproject.gobiidomain.services.gdmv3.FileServiceImpl"/>
+
+    <!-- gdm v3 job service -->
+    <bean id="jobService" class="org.gobiiproject.gobiidomain.services.gdmv3.JobServiceImpl"></bean>
+
+     <!-- gdm v3 platform service -->
+    <bean id="platformServiceV3" class="org.gobiiproject.gobiidomain.services.gdmv3.PlatformServiceImpl"/>
+    <bean id="platformDaoV3" class="org.gobiiproject.gobiisampletrackingdao.PlatformDaoImpl"/>
 
     <!-- **** Manifests Beans *************************************** -->
     <bean id="rsManifestDao" class="org.gobiiproject.gobiidao.resultset.access.impl.RsManifestDaoImpl"/>
     <bean id="dtoMapManifest" class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapManifestImpl"/>
-    <bean id="ManifestService" class="org.gobiiproject.gobidomain.services.impl.ManifestServiceImpl"/>
+    <bean id="ManifestService" class="org.gobiiproject.gobiidomain.services.impl.ManifestServiceImpl"/>
 
+    <!-- gdm v3 loader template service -->
+    <bean id ="loaderTemplateService" class="org.gobiiproject.gobiidomain.services.gdmv3.LoaderTemplateServiceImpl"></bean>
 
     <!-- **** Organization Beans *************************************** -->
     <bean id="rsOrganizationDao" class="org.gobiiproject.gobiidao.resultset.access.impl.RsOrganizationDaoImpl"/>
     <bean id="dtoMapOrganization"
           class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapOrganizationImpl"/>
-    <bean id="OrganizationService" class="org.gobiiproject.gobidomain.services.impl.OrganizationServiceImpl"/>
+    <bean id="OrganizationService" class="org.gobiiproject.gobiidomain.services.impl.OrganizationServiceImpl"/>
 
+    <!-- **** Organization Beans V3 -->
+    <bean id="OrganizationServiceV3" class="org.gobiiproject.gobiidomain.services.gdmv3.OrganizationServiceImpl"/>
+    <bean id="OrganizationDaoV3" class="org.gobiiproject.gobiisampletrackingdao.OrganizationDaoImpl"/>
 
     <!-- **** Protocol Beans *************************************** -->
     <bean id="rsProtocolDao" class="org.gobiiproject.gobiidao.resultset.access.impl.RsProtocolDaoImpl"/>
     <bean id="dtoMapProtocol" class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapProtocolImpl"/>
-    <bean id="ProtocolService" class="org.gobiiproject.gobidomain.services.impl.ProtocolServiceImpl"/>
+    <bean id="ProtocolService" class="org.gobiiproject.gobiidomain.services.impl.ProtocolServiceImpl"/>
 
+    <!-- **** Protocol Beans V3 *************************************** -->
+    <bean id="protocolDaoV3" class="org.gobiiproject.gobiisampletrackingdao.ProtocolDaoImpl"/>
+    <bean id="protocolServiceV3" class="org.gobiiproject.gobiidomain.services.gdmv3.ProtocolServiceImpl"/>
 
     <!-- **** Job Beans *************************************** -->
-    <bean id="JobService" class="org.gobiiproject.gobidomain.services.impl.JobServiceImpl"/>
+    <bean id="JobService" class="org.gobiiproject.gobiidomain.services.impl.JobServiceImpl"/>
     <bean id="dtoMapJob" class="org.gobiiproject.gobiidtomapping.entity.noaudit.impl.DtoMapJobImpl"/>
     <bean id="rsJobDao" class="org.gobiiproject.gobiidao.resultset.access.impl.RsJobDaoImpl"/>
 
     <!-- **** Entity Status Beans *************************************** -->
-    <bean id="entityStatsService" class="org.gobiiproject.gobidomain.services.impl.EntityStatsServiceImpl"/>
+    <bean id="entityStatsService" class="org.gobiiproject.gobiidomain.services.impl.EntityStatsServiceImpl"/>
     <bean id="dtoMapEntityStatsImpl"
           class="org.gobiiproject.gobiidtomapping.entity.noaudit.impl.DtoMapEntityStatsImpl"/>
     <!-- **** Sample Beans *************************************** -->
-    <bean id="sampleService" class="org.gobiiproject.gobidomain.services.impl.SampleServiceImpl"/>
+    <bean id="sampleService" class="org.gobiiproject.gobiidomain.services.impl.SampleServiceImpl"/>
     <bean id="dtoMapSample" class="org.gobiiproject.gobiidtomapping.impl.DtoMapSampleImpl"/>
     <bean id="rsSampleDao" class="org.gobiiproject.gobiidao.resultset.access.impl.RsSampleDaoImpl"/>
 
     <!-- *** DNA Sample Beans *********************************** -->
-    <bean id="sampleTrackingDnaSampleService" class="org.gobiiproject.gobidomain.services.impl.sampletracking.DnaSampleServiceImpl"/>
     <bean id="dtoMapSampleTrackingDnaSample"
           class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.sampletracking.DtoMapDnaSampleImpl"/>
 
-    <!-- *** DNA RUN Beans ************************************* -->
-    <bean id="dnaRunService" class="org.gobiiproject.gobidomain.services.impl.DnaRunServiceImpl"/>
-    <bean id="dtoMapDnaRun" class="org.gobiiproject.gobiidtomapping.entity.noaudit.impl.DtoMapDnaRunImpl"/>
-    <bean id="rsDnaRunDao" class="org.gobiiproject.gobiidao.resultset.access.impl.RsDnaRunDaoImpl"/>
-
-    <!-- *** DNA RUN Sample Tracking Beans ************************************* -->
-    <bean id="dnaRunDao" class="org.gobiiproject.gobiisampletrackingdao.DnaRunDaoImpl"/>
-
-
-    <!-- *** MARKER BRAPI BEANS ************* -->
-    <bean id="markerBrapiService" class="org.gobiiproject.gobidomain.services.impl.brapi.MarkerBrapiServiceImpl"/>
-    <bean id="dtoMapMarkerBrapi" class="org.gobiiproject.gobiidtomapping.entity.noaudit.impl.DtoMapMarkerBrapiImpl"/>
-    <bean id="rsMarkerBrapiDao" class="org.gobiiproject.gobiidao.resultset.access.impl.RsMarkerBrapiDaoImpl"/>
-
-    <!-- *** Marker Sample Tracking Beans ************************************* -->
-    <bean id="markerDao" class="org.gobiiproject.gobiisampletrackingdao.MarkerDaoImpl"/>
-
-    <!-- *** DATASET BRAPI BEANS *********** -->
-    <bean id="dataSetBrapiService" class="org.gobiiproject.gobidomain.services.impl.brapi.DatasetBrapiServiceImpl"/>
-    <bean id="dtoMapDatasetBrapi" class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapDatasetBrapiImpl"/>
-    <bean id="rsDatasetBrapiDao" class="org.gobiiproject.gobiidao.resultset.access.impl.RsDatasetBrapiDaoImpl"/>
-
-    <!-- *** MAPSET BRAPI BEANS *********** -->
-    <bean id="mapSetBrapiService" class="org.gobiiproject.gobidomain.services.impl.brapi.MapsetBrapiServiceImpl"/>
-    <bean id="dtoMapMapsetBrapi" class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapMapsetBrapiImpl"/>
-    <bean id="rsMapBrapiDao"
-          class="org.gobiiproject.gobiidao.resultset.access.impl.RsMapsetBrapiDaoImpl"/>
+    <!-- ** Studies BRAPI BEANS **-->
+    <bean id="studiesService" class="org.gobiiproject.gobiidomain.services.brapi.StudiesServiceImpl"/>
+    <bean id="experimentDao" class="org.gobiiproject.gobiisampletrackingdao.ExperimentDaoImpl"/>
 
 
     <!-- ** SAMPLE BRAPI BEANS **-->
-    <bean id="sampleBrapiService" class="org.gobiiproject.gobidomain.services.impl.brapi.SamplesBrapiServiceImpl"/>
+    <bean id="sampleBrapiService" class="org.gobiiproject.gobiidomain.services.brapi.SamplesServiceImpl"/>
+
+    <!-- ** Mapset BRAPI BEANS **-->
+    <bean id="mapsetService" class="org.gobiiproject.gobiidomain.services.brapi.MapsetServiceImpl"/>
+    <bean id="mapsetDao" class="org.gobiiproject.gobiisampletrackingdao.MapsetDaoImpl"/>
+
+    <!-- ** Mapset GDMV v3 Bean -->
+    <bean id="mapsetServiceV3" class="org.gobiiproject.gobiidomain.services.gdmv3.MapsetServiceImpl"/>
+
+    <!-- ** Marker Positions BRAPI BEANS **-->
+    <bean id="markerPositionService" class="org.gobiiproject.gobiidomain.services.brapi.MarkerPositionsServiceImpl"/>
+    <bean id="markerLinkageGroupDao" class="org.gobiiproject.gobiisampletrackingdao.MarkerLinkageGroupDaoImpl"/>
 
     <!-- ** VariantSets BRAPI BEANS **-->
-    <bean id="variantSetsBrapiService" class="org.gobiiproject.gobidomain.services.impl.brapi.VariantSetsBrapiServiceImpl"/>
+    <bean id="variantSetsService" class="org.gobiiproject.gobiidomain.services.brapi.VariantSetsServiceImpl"/>
 
     <!-- *** Linkage Groups BRAPI BEANS *********** -->
-    <bean id="linkageGroupBiapiService" class="org.gobiiproject.gobidomain.services.impl.brapi.LinkakgeGroupBrapiServiceImpl"/>
-    <bean id="dtoMapLinkageGroupBrapi" class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapLinkageGroupBrapiImpl"/>
+    <bean id="linkageGroupService" class="org.gobiiproject.gobiidomain.services.brapi.LinkakgeGroupServiceImpl"/>
 
-    <!-- *** ANALYSIS BRAPI BEANS ********** -->
-    <bean id="dtoMapAnalysisBrapi" class="org.gobiiproject.gobiidtomapping.entity.auditable.impl.DtoMapAnalysisBrapiImpl"/>
+    <!-- *** Callsets BRAPI BEANS *********** -->
+    <bean id="callSetService" class="org.gobiiproject.gobiidomain.services.brapi.CallSetServiceImpl"/>
 
-    <!-- *** Genotype Calls Beans ************************************* -->
-    <bean id="genotypeCallsService" class="org.gobiiproject.gobidomain.services.impl.brapi.GenotypeCallsServiceImpl"/>
-    <bean id="dtoMapGenotypeCalls" class="org.gobiiproject.gobiidtomapping.entity.noaudit.impl.DtoMapGenotypeCallsImpl"/>
-    <!--<bean id="rsDnaRunDao" class="org.gobiiproject.gobiidao.resultset.access.impl.RsDnaRunDaoImpl"/>-->
+    <!-- *** Variant BRAPI BEANS *********** -->
+    <bean id="variantService" class="org.gobiiproject.gobiidomain.services.brapi.VariantServiceImpl"/>
+
+    <!-- *** Genotype Calls BRAPI BEANS *********** -->
+    <bean id="genotypeCallsService" class="org.gobiiproject.gobiidomain.services.brapi.GenotypeCallsServiceImpl"/>
+
+
 
     <!-- **** ListStatement queries *************************************** -->
     <bean id="listStatementContactAll"
@@ -595,7 +663,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_DATASET_ALL}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.DataSetDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.noaudit.DataSetDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementDatasetAll"/>
                         <constructor-arg ref="listStatementDatasetAllPaged"/>
@@ -605,7 +673,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_CONTACT_ALL}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.auditable.ContactDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.auditable.ContactDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementContactAll"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -615,7 +683,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_ORGANIZATION_ALL}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.auditable.OrganizationDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.auditable.OrganizationDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementOrganizationAll"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -625,7 +693,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_PLATFORM_ALL}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.auditable.PlatformDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.auditable.PlatformDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementPlatformAll"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -634,7 +702,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_PLATFORM_NAMES_BYLIST}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.auditable.PlatformDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.auditable.PlatformDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementPlatformByList"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -644,7 +712,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_PROJECT_ALL}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.auditable.ProjectDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.auditable.ProjectDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementProjectAll"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -654,7 +722,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_EXPERIMENT_ALL}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.auditable.ExperimentDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.auditable.ExperimentDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementExperimentAll"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -664,7 +732,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_MARKER_ALL}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.MarkerDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.noaudit.MarkerDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementMarkerAll"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -674,7 +742,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_PROTOCOL_ALL}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.auditable.ProtocolDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.auditable.ProtocolDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementProtocolAll"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -684,7 +752,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_CVS_BY_GROUP}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.CvDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.noaudit.CvDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementCvsByGroup"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -724,7 +792,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_JOB_ALL}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.JobDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.noaudit.JobDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementJobAll"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -734,7 +802,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_JOB_BY_DATASET_ID}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.JobDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.noaudit.JobDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementJobByDatasetId"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -744,7 +812,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_JOB_BY_JOBNAME}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.JobDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.noaudit.JobDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementJobByJobName"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -820,70 +888,6 @@
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
                     </bean>
                 </entry>
-                <!-- MARKER BRAPI ALL -->
-                <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_MARKER_ALL_BRAPI}">
-                    <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
-                        <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.MarkerBrapiDTO"/>
-                        <constructor-arg ref="pageFramesTrackingCache"/>
-                        <constructor-arg ref="listStatementMarkerBrapiAll"/>
-                        <constructor-arg name="listStatementPaged"><null/></constructor-arg>
-                    </bean>
-                </entry>
-                <!-- DATASET BRAPI ALL -->
-                <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_DATASET_ALL_BRAPI}">
-                    <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
-                        <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.DataSetBrapiDTO"/>
-                        <constructor-arg ref="pageFramesTrackingCache"/>
-                        <constructor-arg ref="listStatementDatasetBrapiAll"/>
-                        <constructor-arg name="listStatementPaged"><null/></constructor-arg>
-                    </bean>
-                </entry>
-                <!-- ANALYSIS BRAPI BY IDS -->
-                <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_ANALYSES_ALL_BRAPI}">
-                    <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
-                        <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.auditable.AnalysisBrapiDTO"/>
-                        <constructor-arg ref="pageFramesTrackingCache"/>
-                        <constructor-arg ref="listStatementAnalysisBrapiByIds"/>
-                        <constructor-arg name="listStatementPaged"><null/></constructor-arg>
-                    </bean>
-                </entry>
-
-                <!-- MAPSET BRAPI AS LIST-->
-                <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_MAPSET_BRAPI_BYLIST}">
-                    <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
-                        <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.MapsetBrapiDTO"/>
-                        <constructor-arg ref="pageFramesTrackingCache"/>
-                        <constructor-arg ref="listStatementBrapiMapset"/>
-                        <constructor-arg name="listStatementPaged"><null/></constructor-arg>
-                    </bean>
-                </entry>
-
-                <!-- LINKAGE GROUP BRAPI AS LIST-->
-                <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_LINKAGE_GROUP_BRAPI_BYLIST}">
-                    <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
-                        <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.LinkageGroupBrapiDTO"/>
-                        <constructor-arg ref="pageFramesTrackingCache"/>
-                        <constructor-arg ref="listStatementBrapiLinkageGroup"/>
-                        <constructor-arg name="listStatementPaged"><null/></constructor-arg>
-                    </bean>
-                </entry>
-
-                <!-- LINKAGE GROUP BY MAP BRAPI AS LIST-->
-                <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_LINKAGE_GROUP_BY_MAP_BRAPI_BYLIST}">
-                    <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
-                        <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.LinkageGroupBrapiDTO"/>
-                        <constructor-arg ref="pageFramesTrackingCache"/>
-                        <constructor-arg ref="listStatementBrapiLinkageGroupByMap"/>
-                        <constructor-arg name="listStatementPaged"><null/></constructor-arg>
-                    </bean>
-                </entry>
-
                 <!-- DNA RUN NAMES BY LIST -->
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_DNARUN_NAMES_BYLIST}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
@@ -894,83 +898,7 @@
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
                     </bean>
                 </entry>
-                <!-- DNA RUN ALL -->
-                <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_DNARUN_ALL}">
-                    <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
-                        <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.DnaRunDTO"/>
-                        <constructor-arg ref="pageFramesTrackingCache"/>
-                        <constructor-arg ref="listStatementDnaRunAll"/>
-                        <constructor-arg name="listStatementPaged"><null/></constructor-arg>
-                    </bean>
-                </entry>
-                <!-- GENOTYPE CALLS BY MARKER ID -->
-                <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_GENOTYPE_CALLS_MARKER_METADATA}">
-                    <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
-                        <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.GenotypeCallsMarkerMetadataDTO"/>
-                        <constructor-arg ref="pageFramesTrackingCache"/>
-                        <constructor-arg ref="listStatementGenotypeCallsMarkerMetaData"/>
-                        <constructor-arg name="listStatementPaged"><null/></constructor-arg>
-                    </bean>
-                </entry>
 
-                <!-- GENOTYPE CALLS BY DNARUN ID -->
-                <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_GENOTYPE_CALLS_DNARUN_METADATA}">
-                    <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
-                        <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.GenotypeCallsDnarunMetadataDTO"/>
-                        <constructor-arg ref="pageFramesTrackingCache"/>
-                        <constructor-arg ref="listStatementGenotypeCallsDnarunMetaData"/>
-                        <constructor-arg name="listStatementPaged"><null/></constructor-arg>
-                    </bean>
-                </entry>
-
-                <!-- MARKER METADATA BY DATASET ID-->
-                <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_MARKER_METADATA_BY_DATASET}">
-                    <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
-                        <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.GenotypeCallsMarkerMetadataDTO"/>
-                        <constructor-arg ref="pageFramesTrackingCache"/>
-                        <constructor-arg ref="listStatementMarkerMetaDataByDatasetId"/>
-                        <constructor-arg name="listStatementPaged"><null/></constructor-arg>
-                    </bean>
-                </entry>
-
-                <!-- DNARUN METADATA BY DATASET ID-->
-                <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_DNARUN_METADATA_BY_DATASET}">
-                    <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
-                        <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.GenotypeCallsDnarunMetadataDTO"/>
-                        <constructor-arg ref="pageFramesTrackingCache"/>
-                        <constructor-arg ref="listStatementDnarunMetaDataByDatasetId"/>
-                        <constructor-arg name="listStatementPaged"><null/></constructor-arg>
-                    </bean>
-                </entry>
-
-                <!-- MARKER METADATA BY MARKER LIST-->
-                <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_MARKER_METADATA_BY_MARKER_LIST}">
-                    <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
-                        <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.GenotypeCallsMarkerMetadataDTO"/>
-                        <constructor-arg ref="pageFramesTrackingCache"/>
-                        <constructor-arg ref="listStatementMarkerMetaDataByMarkerIdList"/>
-                        <constructor-arg name="listStatementPaged"><null/></constructor-arg>
-                    </bean>
-                </entry>
-
-                <!-- DNARUN METADATA BY DNARUN LIST-->
-                <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_DNARUN_METADATA_BY_DNARUN_LIST}">
-                    <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
-                        <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.noaudit.GenotypeCallsDnarunMetadataDTO"/>
-                        <constructor-arg ref="pageFramesTrackingCache"/>
-                        <constructor-arg ref="listStatementDnarunMetaDataByDnarunIdList"/>
-                        <constructor-arg name="listStatementPaged"><null/></constructor-arg>
-                    </bean>
-                </entry>
-
-                <!-- GERMPLASM NAMES BY LIST -->
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_GERMPLASM_BYLIST}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
@@ -995,7 +923,7 @@
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
                         <constructor-arg
-                                value="org.gobiiproject.gobiimodel.dto.entity.auditable.sampletracking.ProjectDTO"/>
+                                value="org.gobiiproject.gobiimodel.dto.auditable.sampletracking.ProjectDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementProjectAllWithProperties"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -1006,7 +934,7 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).QUERY_ID_EXPERIMENT_ALL}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.auditable.sampletracking.ExperimentDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.auditable.sampletracking.ExperimentDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="listStatementExperimentAll"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
@@ -1016,12 +944,14 @@
                 <entry key="#{T(org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId).CREATE_ID_DNASAMPLES}">
                     <bean class="org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQuery">
                         <constructor-arg ref="storedProcExec"/>
-                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.entity.auditable.sampletracking.DnaSampleDTO"/>
+                        <constructor-arg value="org.gobiiproject.gobiimodel.dto.auditable.sampletracking.DnaSampleDTO"/>
                         <constructor-arg ref="pageFramesTrackingCache"/>
                         <constructor-arg ref="createStatementDnaSamples"/>
                         <constructor-arg name="listStatementPaged"><null/></constructor-arg>
                     </bean>
                 </entry>
+
+
             </map>
         </property>
     </bean>
@@ -1239,7 +1169,8 @@
         </property>
         <property name="jpaProperties">
             <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQL9Dialect</prop>
+                <!--prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQL9Dialect</prop-->
+                <prop key="hibernate.dialect">org.gobiiproject.gobiimodel.entity.pgsql.GobiiPostgresSQLDialect</prop>
             </props>
         </property>
     </bean>
@@ -1254,8 +1185,8 @@
 
     <!-- *********************************************** SECURITY CONFIGURATION
         *********************************************** -->
-    <security:global-method-security
-            secured-annotations="enabled" pre-post-annotations="enabled"/>
+    <!-- <security:global-method-security
+            secured-annotations="enabled" pre-post-annotations="enabled"/> -->
 
 
     <bean id="multipartResolver"
@@ -1281,6 +1212,6 @@
         <constructor-arg index="1" ref="hdf5ProcessPathSelector"/>
     </bean>
 
-    <bean id="searchService" class="org.gobiiproject.gobidomain.services.impl.brapi.SearchServiceImpl"/>
+    <bean id="searchService" class="org.gobiiproject.gobiidomain.services.brapi.SearchServiceImpl"/>
 
 </beans>

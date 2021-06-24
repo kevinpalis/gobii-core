@@ -48,6 +48,7 @@ public class BrapiTestSearchStudies {
     }
 
 
+    @SuppressWarnings("unused")
     @Test
     public void getStudies() throws Exception {
 
@@ -65,7 +66,7 @@ public class BrapiTestSearchStudies {
                         BrapiRequestStudiesSearch.class,
                         ObjectUtils.Null.class,
                         BrapiResponseStudiesSearch.class,
-                        this.httpCore);
+                        BrapiTestSearchStudies.httpCore);
 
         BrapiResponseEnvelopeMasterDetail<BrapiResponseStudiesSearch> studiesResult = brapiEnvelopeRestResource.postToListResource(brapiRequestStudiesSearch);
 

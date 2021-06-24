@@ -12,7 +12,7 @@ import org.gobiiproject.gobiiclient.gobii.Helpers.DtoRestRequestUtils;
 import org.gobiiproject.gobiiclient.gobii.Helpers.GlobalPkValues;
 import org.gobiiproject.gobiiclient.gobii.Helpers.TestDtoFactory;
 import org.gobiiproject.gobiiclient.gobii.Helpers.TestUtils;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.OrganizationDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.OrganizationDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiProcessType;
 import org.junit.AfterClass;
@@ -74,7 +74,8 @@ public class DtoCrudRequestOrganizationTest implements DtoCrudRequestTest {
                 .get(OrganizationDTO.class);
 
         Assert.assertFalse(TestUtils.checkAndPrintHeaderMessages(resultEnvelopeForGetByID.getHeader()));
-        OrganizationDTO organizationDTOResponseForParams = resultEnvelopeForGetByID.getPayload().getData().get(0);
+        //OrganizationDTO organizationDTOResponseForParams = 
+        resultEnvelopeForGetByID.getPayload().getData().get(0); //TODO: convert to assertion
 
         GlobalPkValues.getInstance().addPkVal(GobiiEntityNameType.ORGANIZATION, organizationDTOResponse.getOrganizationId());
     }

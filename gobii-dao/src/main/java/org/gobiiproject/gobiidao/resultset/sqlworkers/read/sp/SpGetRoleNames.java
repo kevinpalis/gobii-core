@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
+
 import org.hibernate.jdbc.Work;
 
 /**
@@ -12,7 +12,7 @@ import org.hibernate.jdbc.Work;
  */
 public class SpGetRoleNames implements Work {
 
-    private Map<String, Object> parameters = null;
+    //private Map<String, Object> parameters = null;
 
     public SpGetRoleNames() {
     }

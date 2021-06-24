@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
+
 import org.hibernate.jdbc.Work;
 
 /**
@@ -14,10 +14,10 @@ public class SpGetCvTerms implements Work {
     /**
      * Created by Angel on 4/26/2016.
      */
-    private Map<String, Object> parameters = null;
+    //private Map<String, Object> parameters = null;
 
     public SpGetCvTerms() {
-        this.parameters = parameters;
+        //this.parameters = parameters;
     }
 
     private ResultSet resultSet = null;

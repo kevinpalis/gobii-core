@@ -1,8 +1,8 @@
 package org.gobiiproject.gobiibrapi.calls.markerprofiles.allelematrices;
 
-import org.gobiiproject.gobidomain.services.ExperimentService;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.DataSetDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.ExperimentDTO;
+import org.gobiiproject.gobiidomain.services.ExperimentService;
+import org.gobiiproject.gobiimodel.dto.noaudit.DataSetDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.ExperimentDTO;
 import org.gobiiproject.gobiimodel.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 

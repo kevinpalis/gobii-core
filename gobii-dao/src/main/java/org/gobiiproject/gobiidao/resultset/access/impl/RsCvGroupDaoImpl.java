@@ -32,6 +32,7 @@ public class RsCvGroupDaoImpl implements RsCvGroupDao {
     private StoredProcExec storedProcExec = null;
 
     @Autowired
+    @SuppressWarnings("unused")
     private SpRunnerCallable spRunnerCallable;
 
     @Transactional(propagation = Propagation.REQUIRED)

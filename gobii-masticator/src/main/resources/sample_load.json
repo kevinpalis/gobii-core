@@ -1,0 +1,24 @@
+{
+  "aspects": {
+    "germplasm": {
+      "status": "57",
+      "type_name": ["COLUMN", {"row": 1, "column": 6}],
+      "species_name": ["COLUMN", {"row": 1, "column": 7}],
+      "name": ["COLUMN", {"row": 1, "column": 0}],
+      "external_code": ["COLUMN", {"row": 1, "column": 1}],
+      "props": ["JSON", {"50": ["COLUMN", {"row": 1, "column": 8}]}]},
+    "dnasample": {
+      "project_id": "1",
+      "num": ["COLUMN", {"row": 1, "column": 4}],
+      "name": ["COLUMN", {"row": 1, "column": 2}],
+      "external_code": ["COLUMN", {"row": 1, "column": 1}],
+      "status": "57",
+      "uuid": ["COLUMN", {"row": 1, "column": 1}],
+      "props": ["JSON", {"86": ["COLUMN", {"row": 1, "column": 9}],
+                         "91": ["COLUMN", {"row": 1, "column": 2}]}]},
+    "dnarun": {
+      "project_id": "1",
+      "experiment_id": "6",
+      "dnasample_name": ["COLUMN", {"row": 1, "column": 2}],
+      "num": ["COLUMN", {"row": 1, "column": 4}],
+      "name": ["COLUMN", {"row": 1, "column": 5}]}}}

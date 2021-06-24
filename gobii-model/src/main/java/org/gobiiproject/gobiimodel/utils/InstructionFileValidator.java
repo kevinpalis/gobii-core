@@ -3,6 +3,8 @@ package org.gobiiproject.gobiimodel.utils;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.gobii.masticator.aspects.*;
 import org.gobiiproject.gobiimodel.dto.instructions.loader.GobiiFileColumn;
 import org.gobiiproject.gobiimodel.dto.instructions.loader.GobiiLoaderInstruction;
 import org.gobiiproject.gobiimodel.dto.instructions.loader.GobiiLoaderProcedure;
@@ -24,11 +26,18 @@ public class InstructionFileValidator {
     private static String statusMessage = null;
 
     private GobiiLoaderProcedure procedure;
+    private FileAspect aspect;
     private HashMap<TableEntryKey, TableEntryValue> instructionMap = new HashMap<>();
 
     public InstructionFileValidator(GobiiLoaderProcedure procedure) {
         this.procedure = procedure;
         statusMessage = null;
+    }
+
+    public InstructionFileValidator(FileAspect aspect){
+        this.aspect = aspect;
+        statusMessage=null;
+
     }
 
 
@@ -48,17 +57,38 @@ public class InstructionFileValidator {
         requiredColumnTypes.add(GobiiColumnType.CSV_COLUMN);
 
 
-        for (GobiiLoaderInstruction instruction : procedure.getInstructions()) {
-            for (GobiiFileColumn fileColumn : instruction.getGobiiFileColumns()) {
-                if (requiredColumnTypes.contains(fileColumn.getGobiiColumnType())) {
-                    TableEntryKey entryKey = new TableEntryKey(instruction.getTable(), fileColumn.getName());
-                    TableEntryValue entryValue = new TableEntryValue(fileColumn.getName(), fileColumn.getrCoord(), fileColumn.getcCoord());
-                    instructionMap.put(entryKey, entryValue);
-                    //Add error if row or column is bad (TODO: Fix statusMessage dual nature as flag/value tuple data type, make this logic non static. Class fails OO consistency.)
-                    if(entryValue.getcCoord() == null) statusMessage="Invalid value in column coordinate for " + instruction.getTable()+ "(" + fileColumn.getName() + ")";
-                    if(entryValue.getrCoord() == null) statusMessage="Invalid value in row coordinate for " + instruction.getTable()+ "(" + fileColumn.getName() + ")";
+        if (procedure != null) {
+            for (GobiiLoaderInstruction instruction : procedure.getInstructions()) {
+                for (GobiiFileColumn fileColumn : instruction.getGobiiFileColumns()) {
+                    if (requiredColumnTypes.contains(fileColumn.getGobiiColumnType())) {
+                        TableEntryKey entryKey = new TableEntryKey(instruction.getTable(), fileColumn.getName());
+                        TableEntryValue entryValue = new TableEntryValue(fileColumn.getName(), fileColumn.getrCoord(), fileColumn.getcCoord());
+                        instructionMap.put(entryKey, entryValue);
+                        //Add error if row or column is bad (TODO: Fix statusMessage dual nature as flag/value tuple data type, make this logic non static. Class fails OO consistency.)
+                        if (entryValue.getcCoord() == null)
+                            statusMessage = "Invalid value in column coordinate for " + instruction.getTable() + "(" + fileColumn.getName() + ")";
+                        if (entryValue.getrCoord() == null)
+                            statusMessage = "Invalid value in row coordinate for " + instruction.getTable() + "(" + fileColumn.getName() + ")";
+                    }
                 }
             }
+        }
+        else if(aspect != null) {
+            for (TableAspect tableAspect : aspect.getAspects().values()) {
+                String tableName = tableAspect.getTable();
+                for (ElementAspect column : tableAspect.getAspects().values()) {
+                    String columnName = column.getName();
+                    TableEntryKey key = new TableEntryKey(tableName, columnName);
+                    if (column instanceof RowAspect) {
+                        RowAspect row = (RowAspect) column;
+                        TableEntryValue value = new TableEntryValue(columnName, row.getRow(), row.getCol());
+                        instructionMap.put(key, value);
+                    }
+                }
+            }
+        }
+        else{
+            statusMessage="Invalid initialization";
         }
     }
 

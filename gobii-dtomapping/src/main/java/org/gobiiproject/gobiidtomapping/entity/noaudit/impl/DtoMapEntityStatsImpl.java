@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Created by Phil on 4/6/2016.
  */
+@SuppressWarnings("serial")
 public class DtoMapEntityStatsImpl implements DtoMapEntityStats {
 
     Logger LOGGER = LoggerFactory.getLogger(DtoMapEntityStatsImpl.class);

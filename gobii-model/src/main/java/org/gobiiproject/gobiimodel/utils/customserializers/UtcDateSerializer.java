@@ -15,6 +15,7 @@ import java.util.TimeZone;
  * Serializes Date String as following yyyy-MM-dd'T'hh:mm:ss.
  * Sets time zone as UTC.
  */
+@SuppressWarnings("serial")
 public class UtcDateSerializer extends StdSerializer<Date> {
 
     private SimpleDateFormat formatter = new SimpleDateFormat(
@@ -24,6 +25,7 @@ public class UtcDateSerializer extends StdSerializer<Date> {
         this(null);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public UtcDateSerializer(Class t) {
         super(t);
     }

@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 @Table(name = "marker_linkage_group")
 public class MarkerLinkageGroup {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "marker_linkage_group_id")
@@ -29,9 +28,9 @@ public class MarkerLinkageGroup {
     @Column(name = "stop")
     private BigDecimal stop;
 
-    // TODO: LinkageGroup entity will be referenced in future
-    @Column(name = "linkage_group_id")
-    private Integer linkageGroupId;
+    @ManyToOne
+    @JoinColumn(name = "linkage_group_id")
+    private LinkageGroup linkageGroup;
 
     public Integer getMakrerLinkageGroupId() {
         return makrerLinkageGroupId;
@@ -66,12 +65,12 @@ public class MarkerLinkageGroup {
         this.stop = stop;
     }
 
-    public Integer getLinkageGroupId() {
-        return linkageGroupId;
+    public LinkageGroup getLinkageGroup() {
+        return linkageGroup;
     }
 
-    public void setLinkageGroupId(Integer linkageGroupId) {
-        this.linkageGroupId = linkageGroupId;
+    public void setLinkageGroup(LinkageGroup linkageGroup) {
+        this.linkageGroup = linkageGroup;
     }
 }
 

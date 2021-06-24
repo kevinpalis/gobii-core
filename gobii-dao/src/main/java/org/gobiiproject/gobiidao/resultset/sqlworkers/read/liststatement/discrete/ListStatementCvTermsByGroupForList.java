@@ -10,12 +10,13 @@ import java.util.Map;
 import org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId;
 import org.gobiiproject.gobiidao.resultset.core.listquery.ListStatement;
 import org.gobiiproject.gobiidao.resultset.core.listquery.ParameterizedSql;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
 import static org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId.QUERY_ID_CV_BY_GROUP_AND_LIST;
 
 /**
  * Created by VCalaminos on 1/10/2018.
  */
+@SuppressWarnings("serial")
 public class ListStatementCvTermsByGroupForList  implements ListStatement {
 
     private final String PARAM_NAME_NAME_LIST = "nameArray";
@@ -25,6 +26,7 @@ public class ListStatementCvTermsByGroupForList  implements ListStatement {
     public ListSqlId getListSqlId() { return QUERY_ID_CV_BY_GROUP_AND_LIST; }
 
     @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public PreparedStatement makePreparedStatement(Connection dbConnection, Map<String, Object> jdbcParamVals, Map<String, Object> sqlParamVals) throws SQLException {
 
         List<NameIdDTO> nameArray = (ArrayList) sqlParamVals.get(PARAM_NAME_NAME_LIST);

@@ -7,16 +7,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.gobiiproject.gobiimodel.dto.instructions.loader.GobiiFile;
 import org.gobiiproject.gobiimodel.dto.instructions.loader.GobiiFileColumn;
-import org.gobiiproject.gobiimodel.dto.instructions.loader.GobiiLoaderInstruction;
 import org.gobiiproject.gobiimodel.dto.instructions.loader.GobiiLoaderProcedure;
-import org.gobiiproject.gobiimodel.types.DatasetOrientationType;
 import org.gobiiproject.gobiimodel.types.DataSetType;
 import org.gobiiproject.gobiimodel.types.GobiiColumnType;
 import org.gobiiproject.gobiimodel.types.GobiiFileType;
-
-import com.google.common.annotations.VisibleForTesting;
 
 class Util {
 

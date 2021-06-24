@@ -31,7 +31,7 @@ public class DtoRequestSansAuthHeadersTest {
         Integer currentCropPort = GobiiClientContext.getInstance(null, false).getCurrentCropPort();
         String currentCropContextRoot = GobiiClientContext.getInstance(null, false).getCurrentCropContextRoot();
         String currentGobiiCropType = GobiiClientContext.getInstance(null, false).getCurrentClientCropType();
-        String url = RestResourceId.GOBII_AUTH.getRequestUrl(currentCropContextRoot, GobiiControllerType.GOBII.getControllerPath());
+        String url = RestResourceId.GOBII_AUTH.getRequestUrl(currentCropContextRoot, GobiiControllerType.GOBII.getControllerPath(), currentGobiiCropType);
         Assert.assertTrue(GobiiClientContextAuth.deAuthenticate());
 
 

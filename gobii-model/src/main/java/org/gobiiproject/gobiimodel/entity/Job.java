@@ -1,22 +1,21 @@
 package org.gobiiproject.gobiimodel.entity;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.gobiiproject.gobiimodel.entity.JpaConverters.IntegerArrayConverter;
-import org.gobiiproject.gobiimodel.entity.JpaConverters.JsonbConverter;
-
-import javax.persistence.*;
 import java.util.Date;
 
-/**
- * Model for Dataset Entity.
- * Represents the database table dataset.
- *
- * props - is a jsonb column. It is converted to jackson.fasterxml JsonNode using a
- * user defined hibernate converter class.
- */
+import javax.persistence.*;
+
 @Entity
 @Table(name = "job")
+@NamedEntityGraph(
+    name = "graph.job",
+    attributeNodes = {
+        @NamedAttributeNode(value = "payloadType"),
+        @NamedAttributeNode(value = "submittedBy"),
+        @NamedAttributeNode(value = "type"),
+        @NamedAttributeNode(value = "status")
+    }
+)
 public class Job {
 
     @Id
@@ -27,23 +26,27 @@ public class Job {
     @Column(name="name")
     private String jobName;
 
-    @ManyToOne
+    @Column(name="message")
+    private String message;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_id", referencedColumnName = "cv_id")
     private Cv type = new Cv();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payload_type_id", referencedColumnName = "cv_id")
     private Cv payloadType = new Cv();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status", referencedColumnName = "cv_id")
     private Cv status = new Cv();
 
-    @Column(name="submitted_by")
-    private Integer submittedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "submitted_by", referencedColumnName = "contact_id")
+    private Contact submittedBy;
 
     @Column(name="submitted_date")
-    private Date submittedData;
+    private Date submittedDate;
 
     public Integer getJobId() {
         return jobId;
@@ -85,19 +88,27 @@ public class Job {
         this.status = status;
     }
 
-    public Integer getSubmittedBy() {
+    public Contact getSubmittedBy() {
         return submittedBy;
     }
 
-    public void setSubmittedBy(Integer submittedBy) {
+    public void setSubmittedBy(Contact submittedBy) {
         this.submittedBy = submittedBy;
     }
 
-    public Date getSubmittedData() {
-        return submittedData;
+    public String getMessage() {
+        return message;
     }
 
-    public void setSubmittedData(Date submittedData) {
-        this.submittedData = submittedData;
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Date getSubmittedDate() {
+        return submittedDate;
+    }
+
+    public void setSubmittedDate(Date submittedDate) {
+        this.submittedDate = submittedDate;
     }
 }

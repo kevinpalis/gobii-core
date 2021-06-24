@@ -15,10 +15,10 @@ import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContextAuth;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContext;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiEnvelopeRestResource;
 import org.gobiiproject.gobiiclient.gobii.Helpers.*;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.MarkerGroupDTO;
-import org.gobiiproject.gobiimodel.dto.entity.children.MarkerGroupMarkerDTO;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.MarkerDTO;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.PlatformDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.MarkerGroupDTO;
+import org.gobiiproject.gobiimodel.dto.children.MarkerGroupMarkerDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.MarkerDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.PlatformDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiProcessType;
 import org.junit.*;
@@ -185,7 +185,8 @@ public class DtoCrudRequestMarkerGroupTest implements DtoCrudRequestTest {
                 .get(MarkerGroupDTO.class);
 
         Assert.assertFalse(TestUtils.checkAndPrintHeaderMessages(resultEnvelopeForGetById.getHeader()));
-        MarkerGroupDTO markerGroupDTOResponseForParams = resultEnvelopeForGetById.getPayload().getData().get(0);
+        //MarkerGroupDTO markerGroupDTOResponseForParams = 
+        resultEnvelopeForGetById.getPayload().getData().get(0); //TODO: i think this should be an assert
 
         GlobalPkValues.getInstance().addPkVal(GobiiEntityNameType.MARKER_GROUP, markerGroupDTOResponse.getMarkerGroupId());
 

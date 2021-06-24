@@ -13,7 +13,9 @@ import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContext;
 
 /**
  * Created by Phil on 12/16/2016.
- */
+ *
+ **/
+@SuppressWarnings({"unused" })
 public class BrapiResourceJson<T_POST_OBJ_TYPE, T_RESPONSE_OBJ_DATA_LIST> {
 
     private RestUri restUri;

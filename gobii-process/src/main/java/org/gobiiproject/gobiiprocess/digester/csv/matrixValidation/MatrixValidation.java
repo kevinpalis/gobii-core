@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.gobiiproject.gobiimodel.utils.error.Logger;
@@ -21,6 +22,7 @@ public class MatrixValidation {
     private RowProcessor diploidProcessor;
     private MatrixErrorUtil matrixErrorUtil;
     private NucleotideSeparatorSplitter tetraploidSplitter;
+    private Iterator<String> vcfRawFileOutput;
 
     public MatrixErrorUtil getMatrixErrorUtil() {
         return matrixErrorUtil;
@@ -57,12 +59,7 @@ public class MatrixValidation {
         //Set of missing file entries, in lowercase to enable easy case insensitive mapping
         Set<String> missingFileSet = missingFileElements.stream().map(String::toLowerCase).collect(Collectors.toSet());
 
-	    if(LoaderGlobalConfigs.isNewTwoLetterNucleotideParse()){
-		    diploidProcessor =  new NucleotideSeparatorSplitter(2,missingFileSet);
-	    }
-	    else {
-		    diploidProcessor = new SNPSepRemoval(missingFileElements);
-	    }
+        diploidProcessor =  new NucleotideSeparatorSplitter(2,missingFileSet);
 
 	    tetraploidSplitter = new NucleotideSeparatorSplitter(4,missingFileSet);
         return true;
@@ -108,45 +105,8 @@ public class MatrixValidation {
             }
 
         if (isVCF) {
-            try (BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(markerFile)))) {
-                int lineNo = 0;
-                int refPos = -1, altPos = -1;
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    if (lineNo == 0) {
-                        List<String> headerLine = Arrays.asList(line.split("\t"));
-                        for (int i = 0; i < headerLine.size(); i++) {
-                            if (headerLine.get(i).equalsIgnoreCase("ref"))
-                                refPos = i;
-                            if (headerLine.get(i).equalsIgnoreCase("alts"))
-                                altPos = i;
-                        }
-                        if (refPos == -1 || altPos == -1) {
-                            matrixErrorUtil.setError("Exception in processing matrix file. Marker file does not contain ref and alt columns.");
-                            return ret.success(false);
-                        }
-                        lineNo++;
-                    }// As data in the vcf file starts from line with is not zero(generally 10). rowNo will be offset by this amount(10). So we substract offset from rowNo for comparison.
-                    // As there is a single header line in digest.marker we are adding one.
-                    else if (lineNo == rowNo - (rowOffset) + 1) {
-                        List<String> dataLine = Arrays.asList(line.split("\t"));
-                        String newLine = dataLine.get(refPos) + "\t" + dataLine.get(altPos);
-                        if (!VCFTransformer.transformVCFLine(newLine, rowNo, inputRowList, outputRowList, matrixErrorUtil)) {
-                            //note, outputRowList here is now a two letter file, which needs to be validated
-                            matrixErrorUtil.setError("Exception in processing matrix file. Failed in VCF Transformer.");
-                            return ret.success(false);
-                        }
-                        lineNo++;
-                    } else lineNo++;
-                }
-
-            } catch (FileNotFoundException e) {
-                matrixErrorUtil.setError("Could not find marker file");
-                return ret.success(false);
-            } catch (IOException e) {
-                matrixErrorUtil.setError("Could not read marker file" + e.getMessage());
-                return ret.success(false);
-            }
+            //Now a passthrough as of HTSJDK
+            outputRowList.addAll(inputRowList);
         }
 
         /*
@@ -168,6 +128,45 @@ public class MatrixValidation {
             boolean datasetValidationStatus=DigestMatrix.validateDatasetList(rowNo + rowOffset, outputRowList, datasetType, matrixErrorUtil);
             return ret.success(datasetValidationStatus);
         } else return ret.success(false);
+    }
+}
+
+/**
+ * Quick method to turn a line reader into an interator. ANY read error effectively equals EoF.
+ */
+class BufferedReaderIteratorReader implements Iterator<String>{
+    BufferedReader br;
+    String nextLine;
+    private String readNextLine(){
+        try{
+            return br.readLine();
+        } catch(Exception e){
+            return null;
+        }
+    }
+    BufferedReaderIteratorReader(BufferedReader br){
+        this.br=br;
+        this.nextLine=readNextLine();
+    }
+    @Override
+    public boolean hasNext() {
+        return nextLine!=null;
+    }
+    @Override
+    public String next() {
+        String ret = nextLine;
+        nextLine=readNextLine();
+        return ret;
+    }
+    @Override
+    public void remove() {
+      nextLine=readNextLine();
+    }
+    @Override
+    public void forEachRemaining(Consumer<? super String> action) {
+        while(hasNext()){
+            action.accept(next());
+        }
     }
 }
 

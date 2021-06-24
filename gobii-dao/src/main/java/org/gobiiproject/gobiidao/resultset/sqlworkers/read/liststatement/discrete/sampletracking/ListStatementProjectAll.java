@@ -1,20 +1,17 @@
 package org.gobiiproject.gobiidao.resultset.sqlworkers.read.liststatement.discrete.sampletracking;
 
-import org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId;
-import org.gobiiproject.gobiidao.resultset.core.listquery.ListStatement;
-import org.gobiiproject.gobiimodel.config.GobiiException;
-import org.gobiiproject.gobiimodel.dto.rest.RestResourceMethodLimit;
-import org.gobiiproject.gobiimodel.dto.rest.RestResourceProfile;
-import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
-import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
-import org.gobiiproject.gobiimodel.types.RestMethodType;
+import static org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId.QUERY_ID_PROJECT_ALL;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 
-import static org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId.QUERY_ID_PROJECT_ALL;
+import org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId;
+import org.gobiiproject.gobiidao.resultset.core.listquery.ListStatement;
+import org.gobiiproject.gobiimodel.config.GobiiException;
+import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
+import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
 
 public class ListStatementProjectAll implements ListStatement {
 

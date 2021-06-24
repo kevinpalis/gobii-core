@@ -27,11 +27,11 @@ public class ListStatementGenotypeCallsDnarunMetaData implements ListStatement {
                                                    Map<String, Object> sqlParamVals)
             throws SQLException, GobiiException {
 
-        String pageCondition = "";
+        //String pageCondition = "";
         String pageSizeCondition = "";
 
         Integer pageSize = 0;
-        Integer dnarunId;
+        //Integer dnarunId;
 
         if(sqlParamVals != null) {
 

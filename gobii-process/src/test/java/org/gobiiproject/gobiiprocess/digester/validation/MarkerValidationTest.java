@@ -2,13 +2,13 @@ package org.gobiiproject.gobiiprocess.digester.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
+import org.gobiiproject.gobiiprocess.SafePowerMockRunner;
 import org.gobiiproject.gobiiprocess.digester.utils.validation.DigestFileValidator;
 import org.gobiiproject.gobiiprocess.digester.utils.validation.MaximumErrorsValidationException;
-import org.gobiiproject.gobiiprocess.digester.utils.validation.ValidationWebServicesUtil;
-import org.gobiiproject.gobiimodel.dto.instructions.validation.errorMessage.Failure;
-import org.gobiiproject.gobiimodel.dto.instructions.validation.ValidationResult;
+import org.gobiiproject.gobiiprocess.digester.utils.validation.ValidationDataUtil;
+import org.gobiiproject.gobiiprocess.digester.utils.validation.errorMessage.Failure;
+import org.gobiiproject.gobiiprocess.digester.utils.validation.errorMessage.ValidationError;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
@@ -33,9 +33,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 
-@Ignore //TODO- Refactor. Powermock static mocking is broken in Java 13
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(ValidationWebServicesUtil.class)
+@RunWith(SafePowerMockRunner.class)
+@PrepareForTest(ValidationDataUtil.class)
 @PowerMockRunnerDelegate(BlockJUnit4ClassRunner.class)
 @PowerMockIgnore({"javax.management.*", "javax.net.ssl.*"})
 public class MarkerValidationTest {
@@ -69,26 +68,11 @@ public class MarkerValidationTest {
      */
     @Test
     public void markerAllPassTest() throws IOException {
-        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/allPass", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json", "http://192.168.56.101:8081/gobii-dev/", "mcs397", "q");
+        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/allPass", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json");
 
-        PowerMockito.mockStatic(ValidationWebServicesUtil.class);
-        PowerMockito
-                .when(ValidationWebServicesUtil.loginToServer(eq("http://192.168.56.101:8081/gobii-dev/"), eq("mcs397"), eq("q"), eq(null), any()))
-                .thenReturn(true);
+        PowerMockito.mockStatic(ValidationDataUtil.class);
 
-        List<NameIdDTO> referenceResponse = new ArrayList<>();
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("5fa68c87-6331-4fa7-a5f2-7a5428567eb5");
-            nameIdDTOResponse.setId(5);
-            referenceResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("cb5d4d35-512a-46fc-a053-7855f7701d27");
-            nameIdDTOResponse.setId(4);
-            referenceResponse.add(nameIdDTOResponse);
-        }/*
+        /*
         {
             NameIdDTO nameIdDTOResponse = new NameIdDTO();
             nameIdDTOResponse.setName("5fa68c87-6331-4fa7-a5f2-7a5428567eb5s");
@@ -96,26 +80,13 @@ public class MarkerValidationTest {
             typeResponse.add(nameIdDTOResponse);
         }*/
 
-        List<NameIdDTO> strandResponse = new ArrayList<>();
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("TOP");
-            nameIdDTOResponse.setId(62);
-            strandResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("BOT");
-            nameIdDTOResponse.setId(63);
-            strandResponse.add(nameIdDTOResponse);
-        }
         try {
             PowerMockito
-                    .when(ValidationWebServicesUtil.getNamesByNameList(Matchers.any(), eq(GobiiEntityNameType.REFERENCE.toString()), eq("reference_name"), any(),null))
-                    .thenReturn(referenceResponse);
+                    .when(ValidationDataUtil.validateNames(Matchers.any(), eq(GobiiEntityNameType.REFERENCE.toString()), eq("reference_name"), any()))
+                    .thenReturn(new ArrayList<>());
             PowerMockito
-                    .when(ValidationWebServicesUtil.getNamesByNameList(Matchers.any(), eq(GobiiEntityNameType.CV.toString()), eq("strand_name"), any(),null))
-                    .thenReturn(strandResponse);
+                    .when(ValidationDataUtil.validateNames(Matchers.any(), eq(GobiiEntityNameType.CV.toString()), eq("strand_name"), any()))
+                    .thenReturn(new ArrayList<>());
         } catch (MaximumErrorsValidationException e) {
             e.printStackTrace();
         }
@@ -125,7 +96,7 @@ public class MarkerValidationTest {
                         .filter(Files::isRegularFile).filter(path -> String.valueOf(path.getFileName()).endsWith(".json")).collect(Collectors.toList());
         assertEquals("There should be one validation output json file", 1, pathList.size());
 
-        ValidationResult[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationResult[].class);
+        ValidationError[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationError[].class);
         assertEquals("Expected file name is not marker", "marker", fileErrors[0].fileName);
         assertEquals("Expected STATUS is not success", ValidationTestSuite.SUCCESS_TEXT, fileErrors[0].status);
     }
@@ -136,54 +107,23 @@ public class MarkerValidationTest {
      */
     @Test
     public void markerCvFailTest() throws IOException {
-        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/cvFail", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json", "http://192.168.56.101:8081/gobii-dev/", "mcs397", "q");
+        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/cvFail", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json");
 
-        PowerMockito.mockStatic(ValidationWebServicesUtil.class);
-        PowerMockito
-                .when(ValidationWebServicesUtil.loginToServer(eq("http://192.168.56.101:8081/gobii-dev/"), eq("mcs397"), eq("q"), eq(null), any()))
-                .thenReturn(true);
+        PowerMockito.mockStatic(ValidationDataUtil.class);
 
-        List<NameIdDTO> referenceResponse = new ArrayList<>();
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("5fa68c87-6331-4fa7-a5f2-7a5428567eb5");
-            nameIdDTOResponse.setId(5);
-            referenceResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("cb5d4d35-512a-46fc-a053-7855f7701d27");
-            nameIdDTOResponse.setId(4);
-            referenceResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("5fa68c87-6331-4fa7-a5f2-7a5428567eb5s");
-            nameIdDTOResponse.setId(0);
-            referenceResponse.add(nameIdDTOResponse);
-        }
+        List<String> invalidReferences = new ArrayList<>();
+        invalidReferences.add("5fa68c87-6331-4fa7-a5f2-7a5428567eb5s");
 
-        List<NameIdDTO> strandResponse = new ArrayList<>();
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("TOP");
-            nameIdDTOResponse.setId(62);
-            strandResponse.add(nameIdDTOResponse);
-        }
-        {
-            NameIdDTO nameIdDTOResponse = new NameIdDTO();
-            nameIdDTOResponse.setName("BOTTOM");
-            nameIdDTOResponse.setId(0);
-            strandResponse.add(nameIdDTOResponse);
-        }
+        List<String> invalidStrands = new ArrayList<>();
+        invalidStrands.add("BOTTOM");
 
         try {
             PowerMockito
-                    .when(ValidationWebServicesUtil.getNamesByNameList(Matchers.any(), eq("reference"), eq("reference_name"), any(),null))
-                    .thenReturn(referenceResponse);
+                    .when(ValidationDataUtil.validateNames(Matchers.any(), eq("reference"), eq("reference_name"), any()))
+                    .thenReturn(invalidReferences);
             PowerMockito
-                    .when(ValidationWebServicesUtil.getNamesByNameList(Matchers.any(), eq(GobiiEntityNameType.CV.toString()), eq("strand_name"), any(),null))
-                    .thenReturn(strandResponse);
+                    .when(ValidationDataUtil.validateNames(Matchers.any(), eq(GobiiEntityNameType.CV.toString()), eq("strand_name"), any()))
+                    .thenReturn(invalidStrands);
         } catch (MaximumErrorsValidationException e) {
             e.printStackTrace();
         }
@@ -193,7 +133,7 @@ public class MarkerValidationTest {
                         .filter(Files::isRegularFile).filter(path -> String.valueOf(path.getFileName()).endsWith(".json")).collect(Collectors.toList());
         assertEquals("There should be one validation output json file", 1, pathList.size());
 
-        ValidationResult[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationResult[].class);
+        ValidationError[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationError[].class);
         assertEquals("Expected file name is not marker", "marker", fileErrors[0].fileName);
         assertEquals("Expected STATUS is not FAILURE", ValidationTestSuite.FAILURE_TEXT, fileErrors[0].status);
 
@@ -223,12 +163,9 @@ public class MarkerValidationTest {
      */
     @Test
     public void markerMissingRequiredFieldTest() throws IOException {
-        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/missingRequiredColumns", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json", "http://192.168.56.101:8081/gobii-dev/", "mcs397", "q");
+        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/missingRequiredColumns", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json");
 
-        PowerMockito.mockStatic(ValidationWebServicesUtil.class);
-        PowerMockito
-                .when(ValidationWebServicesUtil.loginToServer(eq("http://192.168.56.101:8081/gobii-dev/"), eq("mcs397"), eq("q"), eq(null), any()))
-                .thenReturn(true);
+        PowerMockito.mockStatic(ValidationDataUtil.class);
 
         digestFileValidator.performValidation(null);
         List<Path> pathList =
@@ -236,7 +173,7 @@ public class MarkerValidationTest {
                         .filter(Files::isRegularFile).filter(path -> String.valueOf(path.getFileName()).endsWith(".json")).collect(Collectors.toList());
         assertEquals("There should be one validation output json file", 1, pathList.size());
 
-        ValidationResult[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationResult[].class);
+        ValidationError[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationError[].class);
         assertEquals("Expected file name is not marker", "marker", fileErrors[0].fileName);
         assertEquals("Expected STATUS is not FAILURE", ValidationTestSuite.FAILURE_TEXT, fileErrors[0].status);
 
@@ -252,12 +189,9 @@ public class MarkerValidationTest {
      */
     @Test
     public void markerMissingValuesInRequiredFieldTest() throws IOException {
-        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/missingValuesInRequiredColumns", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json", "http://192.168.56.101:8081/gobii-dev/", "mcs397", "q");
+        DigestFileValidator digestFileValidator = new DigestFileValidator(tempFolder.getRoot().getAbsolutePath() + "/missingValuesInRequiredColumns", tempFolder.getRoot().getAbsolutePath() + "/validationConfig.json");
 
-        PowerMockito.mockStatic(ValidationWebServicesUtil.class);
-        PowerMockito
-                .when(ValidationWebServicesUtil.loginToServer(eq("http://192.168.56.101:8081/gobii-dev/"), eq("mcs397"), eq("q"), eq(null), any()))
-                .thenReturn(true);
+        PowerMockito.mockStatic(ValidationDataUtil.class);
 
         digestFileValidator.performValidation(null);
         List<Path> pathList =
@@ -265,7 +199,7 @@ public class MarkerValidationTest {
                         .filter(Files::isRegularFile).filter(path -> String.valueOf(path.getFileName()).endsWith(".json")).collect(Collectors.toList());
         assertEquals("There should be one validation output json file", 1, pathList.size());
 
-        ValidationResult[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationResult[].class);
+        ValidationError[] fileErrors = new ObjectMapper().readValue(pathList.get(0).toFile(), ValidationError[].class);
 
         assertEquals("Expected file name is not marker", "marker", fileErrors[0].fileName);
         assertEquals("Expected STATUS is not FAILURE", ValidationTestSuite.FAILURE_TEXT, fileErrors[0].status);

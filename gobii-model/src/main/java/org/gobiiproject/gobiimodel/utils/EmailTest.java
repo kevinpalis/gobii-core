@@ -10,6 +10,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 public class EmailTest {
+	 @SuppressWarnings("unused")
 	 private static void sendEmail(String jobName, String fileLocation,boolean success,String errorLogLoc, String host,String port, String emailAddress,String fromUser,String password,String username, String protocol) throws Exception{
 		 	if(emailAddress==null || emailAddress.equals(""))return;
 		     Properties props = new Properties();

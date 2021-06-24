@@ -17,7 +17,7 @@ public class ResultSetFromSqlPaged<T> implements Work {
     private ListStatementPaged listStatementPaged;
     private Integer pageSize;
     private Integer pageNo;
-    private String pgQueryId;
+    //private String pgQueryId;
     private PageFrameState pageFrameState;
 
     public ResultSetFromSqlPaged(ListStatementPaged listStatementPaged,

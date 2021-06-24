@@ -12,7 +12,7 @@ import org.gobiiproject.gobiidao.resultset.core.listquery.DtoListQueryColl;
 import org.gobiiproject.gobiidao.resultset.core.listquery.ListSqlId;
 import org.gobiiproject.gobiidtomapping.core.GobiiDtoMappingException;
 import org.gobiiproject.gobiidtomapping.entity.noaudit.DtoMapMarker;
-import org.gobiiproject.gobiimodel.dto.entity.noaudit.MarkerDTO;
+import org.gobiiproject.gobiimodel.dto.noaudit.MarkerDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,16 +1,39 @@
 package org.gobiiproject.gobiisampletrackingdao;
 
 
-import org.gobiiproject.gobiimodel.entity.Dataset;
-import org.gobiiproject.gobiimodel.entity.Project;
-
 import java.util.List;
-import java.util.Map;
+
+import org.gobiiproject.gobiimodel.entity.Dataset;
 
 public interface DatasetDao {
 
-    List<Dataset> listDatasets(Integer pageSize, Integer rowOffset, Integer datasetId);
-    List<Dataset> listDatasetsByPageCursor(String pageCursor, Integer pageSize);
-    Dataset getDatasetById(Integer datasetId);
+    List<Dataset> getDatasets(Integer pageSize, Integer rowOffset,
+                              Integer datasetId, String datasetName,
+                              Integer datasetTypeId,
+                              Integer experimentId, String experimentName);
 
+    Dataset getDataset(Integer datasetId);
+
+    List<Object[]> getDatasetWithAnalysesAndStats(
+        Integer pageSize,
+        Integer rowOffset,
+        Integer datasetId,
+        String datasetName,
+        Integer datasetTypeId,
+        Integer experimentId,
+        String experimentName
+    ) throws Exception;
+
+    List<Object[]> getDatasetsWithAnalysesAndCounts(Integer pageSize, Integer rowOffset,
+                                                    Integer datasetId, String datasetName,
+                                                    Integer experimentId, String experimentName);
+
+    int getDatasetCountByAnalysisId(Integer id); //this is for callinganalyses
+    
+    int getDatasetCountWithAnalysesContaining(Integer id);
+
+    Dataset saveDataset(Dataset dataset) throws Exception;
+    Dataset updateDataset(Dataset dataset) throws Exception;
+
+	void deleteDataset(Dataset dataset);
 }

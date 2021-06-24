@@ -32,8 +32,9 @@ public class BrapiClientContextAuth {
         GobiiCropConfig gobiiCropConfig = (new GobiiTestConfiguration()).getConfigSettings().getCropConfig(testCrop);
 
 
-        returnVal = new HttpCore(gobiiCropConfig.getServer(ServerType.GOBII_WEB).getHost(),
-                gobiiCropConfig.getServer(ServerType.GOBII_WEB).getPort());
+        returnVal = new HttpCore(
+            gobiiCropConfig.getServer(ServerType.GOBII_WEB).getHost(),
+            gobiiCropConfig.getServer(ServerType.GOBII_WEB).getPort());
 
         // this method assumes we've already initialized the context with the server URL
         String testUserName = testExecConfig.getLdapUserForUnitTest();
@@ -44,8 +45,10 @@ public class BrapiClientContextAuth {
         brapiRequestLogin.setUserName(testUserName);
         brapiRequestLogin.setPassword(testPassword);
 
-        GobiiUriFactory gobiiUriFactory = new GobiiUriFactory(gobiiCropConfig
-                .getServer(ServerType.GOBII_WEB).getContextPath(), GobiiControllerType.BRAPI);
+        GobiiUriFactory gobiiUriFactory = new GobiiUriFactory(
+            gobiiCropConfig.getServer(ServerType.GOBII_WEB).getContextPath(),
+            GobiiControllerType.BRAPI,
+            gobiiCropConfig.getGobiiCropType());
 
         RestUri restUriToken = gobiiUriFactory
                 .resourceColl(RestResourceId.BRAPI_LOGIN);

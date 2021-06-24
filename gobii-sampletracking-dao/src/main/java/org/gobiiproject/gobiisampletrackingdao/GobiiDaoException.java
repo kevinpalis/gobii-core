@@ -4,6 +4,7 @@ import org.gobiiproject.gobiimodel.config.GobiiException;
 import org.gobiiproject.gobiimodel.types.GobiiStatusLevel;
 import org.gobiiproject.gobiimodel.types.GobiiValidationStatusType;
 
+@SuppressWarnings("serial")
 public class GobiiDaoException extends GobiiException {
 
     public GobiiDaoException(Exception e) {

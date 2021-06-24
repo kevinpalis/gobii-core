@@ -10,8 +10,8 @@ import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContextAuth;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiClientContext;
 import org.gobiiproject.gobiiclient.core.gobii.GobiiEnvelopeRestResource;
 import org.gobiiproject.gobiiclient.gobii.Helpers.*;
-import org.gobiiproject.gobiimodel.dto.entity.auditable.MapsetDTO;
-import org.gobiiproject.gobiimodel.dto.entity.children.NameIdDTO;
+import org.gobiiproject.gobiimodel.dto.auditable.MapsetDTO;
+import org.gobiiproject.gobiimodel.dto.children.NameIdDTO;
 import org.gobiiproject.gobiimodel.types.GobiiEntityNameType;
 import org.gobiiproject.gobiimodel.types.GobiiFilterType;
 import org.gobiiproject.gobiimodel.types.GobiiProcessType;
@@ -136,7 +136,8 @@ public class DtoCrudRequestMapsetTest implements DtoCrudRequestTest {
                 .get(MapsetDTO.class);
 
         Assert.assertFalse(TestUtils.checkAndPrintHeaderMessages(resultEnvelopeForGetById.getHeader()));
-        MapsetDTO mapsetDTOResponseForParams = resultEnvelopeForGetById.getPayload().getData().get(0);
+        //MapsetDTO mapsetDTOResponseForParams = 
+        resultEnvelopeForGetById.getPayload().getData().get(0);
 
         GlobalPkValues.getInstance().addPkVal(GobiiEntityNameType.MAPSET, mapsetDTOResponse.getMapsetId());
     }

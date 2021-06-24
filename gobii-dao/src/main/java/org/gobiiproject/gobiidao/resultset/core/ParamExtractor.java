@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import org.gobiiproject.gobiidao.GobiiDaoException;
-import org.gobiiproject.gobiimodel.dto.entity.annotations.GobiiEntityParam;
+import org.gobiiproject.gobiimodel.dto.annotations.GobiiEntityParam;
 
 /**
  * Created by Phil on 4/18/2016.

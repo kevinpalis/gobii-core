@@ -1,11 +1,24 @@
 package org.gobiiproject.gobiimodel.entity;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.gobiiproject.gobiimodel.entity.JpaConverters.JsonbConverter;
-import org.gobiiproject.gobiimodel.entity.JpaConverters.StringArrayConverter;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.Table;
 
-import javax.persistence.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.vladmihalcea.hibernate.type.array.StringArrayType;
+
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 /**
  * Model for Marker Entity.
@@ -16,6 +29,16 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "marker")
+@NamedEntityGraph(name = "graph.marker",
+    attributeNodes = 
+        @NamedAttributeNode("platform")
+)
+@TypeDefs({
+    @TypeDef(
+        name = "string-array",
+        typeClass = StringArrayType.class
+    )
+})
 public class Marker {
 
     @Id
@@ -23,7 +46,7 @@ public class Marker {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer markerId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "platform_id")
     private Platform platform = new Platform();
 
@@ -36,42 +59,40 @@ public class Marker {
     @Column(name="ref")
     private String ref;
 
-    @Column(name="alts")
-    @Convert(converter = StringArrayConverter.class)
+    @Column(name="alts", columnDefinition = "text[]")
+    @Type(type = "string-array")
     private String[] alts;
 
     @Column(name="sequence")
     private String sequence;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reference_id")
-    private Reference reference = new Reference();
+    private Reference reference;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "strand_id", referencedColumnName = "cv_id")
-    private Cv strand = new Cv();
+    private Cv strand;
 
     @Column(name="primers", columnDefinition = "jsonb")
-    @Convert(converter = JsonbConverter.class)
+    @Type(type = "jsonb")
     private JsonNode primers;
 
     @Column(name="probsets", columnDefinition = "jsonb")
-    @Convert(converter = JsonbConverter.class)
+    @Type(type = "jsonb")
     private JsonNode probsets;
 
     @Column(name="dataset_marker_idx", columnDefinition = "jsonb")
-    @Convert(converter = JsonbConverter.class)
+    @Type(type = "jsonb")
     private JsonNode datasetMarkerIdx;
 
     @Column(name="props", columnDefinition = "jsonb")
-    @Convert(converter = JsonbConverter.class)
+    @Type(type = "jsonb")
     private JsonNode properties;
 
-    @Transient
-    private Integer markerStart;
-
-    @Transient
-    private Integer markerStop;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status", referencedColumnName = "cv_id")
+    private Cv status;
 
     public Integer getMarkerId() {
         return markerId;
@@ -184,26 +205,5 @@ public class Marker {
     public void setStatus(Cv status) {
         this.status = status;
     }
-
-    public Integer getMarkerStart() {
-        return markerStart;
-    }
-
-    public void setMarkerStart(Integer markerStart) {
-        this.markerStart = markerStart;
-    }
-
-    public Integer getMarkerStop() {
-        return markerStop;
-    }
-
-    public void setMarkerStop(Integer markerStop) {
-        this.markerStop = markerStop;
-    }
-
-    @ManyToOne
-    @JoinColumn(name = "status", referencedColumnName = "cv_id")
-    private Cv status = new Cv();
-
 
 }

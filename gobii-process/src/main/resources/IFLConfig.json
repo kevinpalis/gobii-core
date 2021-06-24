@@ -1,0 +1,31 @@
+{
+  "MARKER": {
+    "loadOrder" : [
+       "marker",
+       "linkage_group",
+       "marker_linkage_group"
+     ],
+     "requiredFields": {}
+  },
+  "SAMPLES" : {
+    "loadOrder" : [
+       "germplasm",
+       "dnasample",
+       "dnarun"
+     ]
+  },
+  "MATRIX": {
+    "loadOrder" : [
+       "marker",
+       "linkage_group",
+       "marker_linkage_group",
+       "germplasm",
+       "dnasample",
+       "dnarun",
+       "dataset_marker",
+       "dataset_dnarun",
+       "matrix"
+     ],
+     "requiredFields": {}
+  }
+}

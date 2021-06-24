@@ -3,6 +3,9 @@ package org.gobiiproject.gobiimodel.entity;
 
 import javax.persistence.*;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 /**
  * Model for Reference Entity.
  * Represents database table reference.
@@ -10,8 +13,9 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "reference")
+@Data
+@EqualsAndHashCode(callSuper=false)
 public class Reference extends BaseEntity{
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,43 +34,4 @@ public class Reference extends BaseEntity{
     @Column(name="file_path")
     private String filePath;
 
-    public Integer getReferenceId() {
-        return referenceId;
-    }
-
-    public void setReferenceId(Integer referenceId) {
-        this.referenceId = referenceId;
-    }
-
-    public String getReferenceName() {
-        return referenceName;
-    }
-
-    public void setReferenceName(String referenceName) {
-        this.referenceName = referenceName;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public String getLink() {
-        return link;
-    }
-
-    public void setLink(String link) {
-        this.link = link;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
 }

@@ -27,5 +27,6 @@ public enum GobiiEntityNameType {
     LINKAGE_GROUP,
     DNARUN,
     GERMPLASM,
-    JOB
+    JOB,
+    LOADERTEMPLATE
 }

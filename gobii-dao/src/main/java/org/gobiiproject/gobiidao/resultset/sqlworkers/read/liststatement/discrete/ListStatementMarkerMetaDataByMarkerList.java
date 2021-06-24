@@ -21,14 +21,15 @@ public class ListStatementMarkerMetaDataByMarkerList implements ListStatement {
         return ListSqlId.QUERY_ID_MARKER_METADATA_BY_DATASET;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public PreparedStatement makePreparedStatement(Connection dbConnection,
                                                    Map<String, Object> jdbcParamVals,
                                                    Map<String, Object> sqlParamVals)
             throws SQLException, GobiiException {
 
-        Integer pageOffset = 0;
-        Integer pageSize = 0;
+        //Integer pageOffset = 0;
+        //Integer pageSize = 0;
 
         if(sqlParamVals != null) {
 
