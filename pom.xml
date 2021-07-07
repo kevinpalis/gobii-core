@@ -51,9 +51,9 @@
         <module>gobii-sampletracking-dao</module>
         <module>gobii-dtomapping</module>
         <module>gobii-domain</module>
+        <module>gobii-masticator</module>
         <module>gobii-process</module>
         <module>gobii-web</module>
-        <module>gobii-masticator</module>
 
     </modules>
 
