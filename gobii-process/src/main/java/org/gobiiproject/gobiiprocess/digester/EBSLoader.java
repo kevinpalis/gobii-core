@@ -20,11 +20,14 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 
+import static org.gobiiproject.gobiimodel.utils.HelperFunctions.getJdbcConnectionString;
 import static org.gobiiproject.gobiimodel.utils.HelperFunctions.tryExec;
 
 /**
@@ -42,7 +45,7 @@ public class EBSLoader {
     private String cropName="dev";
     private String dbHost="gobii-db";
     private String dbPort="5432";
-    private String dbUser="appuser";
+    private String dbUser="ebsuser";//new default
     private String dbName="gobii_dev";
     private String hdf5Path = "crops/dev/hdf5/";
     private boolean verbose = false;
@@ -50,7 +53,7 @@ public class EBSLoader {
 
     private String validationFile="core/validationConfig.json";
 
-    private String md5File = "core/md5List.txt";
+    private String md5File = "core/md5List.txt";//backup purposes only
 
     private enum InputEntity{
         Project, Platform, Experiment, Dataset, Germplasm_Species, Germplasm_Type
@@ -65,8 +68,9 @@ public class EBSLoader {
     private String dbPass;
     private String inputFile;
     private String baseDirectory = "/data/gobii_bundle/crops/"+cropName+"/loader/digest";
+    private String aspectInFull;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SQLException {
 
         int errorCode = 0;
         EBSLoader loader = new EBSLoader();
@@ -75,8 +79,32 @@ public class EBSLoader {
         String[] remainingArgs = loader.parseOpts(args);
 
         //Map aspects
+
+        //Connect to Postgres
+        String dbConnectionString = loader.getConnectionString();
+
+        //Because *someone* keeps putting weird special characters in the password, I have to parse it out instead of keeping it nice and tidy
+        //postgres://
+        String user = dbConnectionString.substring(13,dbConnectionString.indexOf(':',13));
+        String password = dbConnectionString.substring(1+dbConnectionString.indexOf(':',13), dbConnectionString.indexOf("@",13));
+        String jdbcConnector = "jdbc:postgresql://" + dbConnectionString.substring(1+dbConnectionString.indexOf('@'));
+
+        Connection dbConn = DriverManager.getConnection(jdbcConnector,user,password);
+        DatabaseMetaData dbMeta = dbConn.getMetaData();
+
         File aspectFile = new File(loader.pathRoot + loader.aspectFilePath);
-        FileAspect baseAspect = AspectParser.parse(Util.slurp(aspectFile));
+
+        FileAspect baseAspect;
+        if(!aspectFile.exists()) {
+            //assume it's a name from postgres
+            loader.aspectInFull=getAspectFromPostres(dbConn,loader.aspectFilePath);
+            baseAspect = AspectParser.parse(loader.aspectInFull);
+        }
+        else{
+
+            baseAspect = AspectParser.parse(Util.slurp(aspectFile));
+        }
+
 
 
 
@@ -88,7 +116,7 @@ public class EBSLoader {
 
         //checksums
         String md5Sum = md5Hash(loader.inputFile);
-        if(md5Sum == null  || !loader.checkMD5(md5Sum)){
+        if(md5Sum == null  || !loader.checkMD5(md5Sum,dbConn,dbMeta)){
             System.err.println("Non-unique checksum");
             errorCode = 4;
             System.exit(errorCode);
@@ -143,7 +171,9 @@ public class EBSLoader {
         if(loader.verbose){
             System.out.println("Data successfully loaded to " + loader.dbHost+"/"+loader.dbName);
         }
-        loader.addMD5(md5Sum);
+
+        int jobNum = new Random().nextInt();//TODO - actual people number
+        loader.addMD5(md5Sum,dbConn,dbMeta,"EBS Job " + jobNum );
     }
 
     private String createIntermediateFolder(){
@@ -282,7 +312,48 @@ public class EBSLoader {
         return stringHash;
     }
 
-    private boolean checkMD5(String md5Sum) throws IOException {
+    private boolean checkMD5(String md5Sum, Connection jdbcConnection, DatabaseMetaData dbMeta) throws IOException, SQLException {
+        if(tableExists(dbMeta, "PUBLIC", "JOB")){ //TODO - still a bit jank
+            return hasMD5InPostgres(jdbcConnection,md5Sum);
+        }
+        else{
+            return checkMD5Standalone(md5Sum);
+        }
+
+
+
+    }
+
+
+    /**
+     * Super simple 'check if a table with this name exists' method
+     * @param dbMeta DatabaseMetaData JDBC type, to find the schema from
+     * @param tableName name of table. Postgres is case agnostic, so this should work no matter the input case
+     * @return
+     */
+    private static boolean tableExists(DatabaseMetaData dbMeta, String tableName){
+        return tableExists(dbMeta,null,tableName);
+    }
+
+    /**
+     * Super simple 'check if a table with this name exists' method
+     * @param dbMeta DatabaseMetaData JDBC type, to find the schema from
+     * @param tableName name of table. Postgres is case agnostic, so this should work no matter the input case
+     * @return
+     */
+    private static boolean tableExists(DatabaseMetaData dbMeta, String schemaName,String tableName){
+        try{
+            ResultSet rs = dbMeta.getTables(null,schemaName,tableName,new String[]{"TABLE"});
+            boolean hadAResult=rs.next();
+            rs.close();
+            return hadAResult;
+        }catch(Exception e){
+            //Something went wrong in postgres, assume the PG connection's bad, and just return nope to does the table exist here
+            return false;
+        }
+    }
+
+    private boolean checkMD5Standalone(String md5Sum) throws IOException {
         boolean isUnique = true;
         File md5File = new File(pathRoot + this.md5File);
         BufferedReader reader = new BufferedReader(new FileReader(md5File));
@@ -297,7 +368,17 @@ public class EBSLoader {
         return isUnique;
     }
 
-    private void addMD5(String md5Sum) throws IOException {
+    private void addMD5(String md5Sum, Connection dbConn, DatabaseMetaData dbMeta, String jobName) throws IOException, SQLException {
+        if(tableExists(dbMeta, "CHECKSUM")){
+            setMD5InPostgres(dbConn,md5Sum,jobName);
+        }
+        else{
+            addMD5Standalone(md5Sum);
+        }
+
+    }
+
+    private void addMD5Standalone(String md5Sum) throws IOException {
         File md5File = new File(pathRoot + this.md5File);
         BufferedWriter writer = new BufferedWriter(new FileWriter(md5File, true));
         writer.write(md5Sum);
@@ -317,11 +398,45 @@ public class EBSLoader {
 
     }
 
+    private static String getAspectFromPostres(Connection jdbcConnection, String aspectName) throws SQLException {
+        Statement statement = jdbcConnection.createStatement();
+        ResultSet rs = statement.executeQuery("SELECT aspect from public.template WHERE name = '" + aspectName+"'");
+        rs.next();
+        String ret = rs.getString(1); //why are columns one-indexed?
+        rs.close();
+        statement.close();
+        return ret;
+    }
+
+    private static boolean hasMD5InPostgres(Connection jdbcConnection, String md5Hash) throws SQLException {
+        Statement statement = jdbcConnection.createStatement();
+        ResultSet rs = statement.executeQuery("SELECT * from job WHERE checksum_id = '" + md5Hash+"'");
+        boolean ret = rs.next(); //True if there's at least one result
+        rs.close();
+        statement.close();
+        return ret;
+    }
+
+    private static void setMD5InPostgres(Connection jdbcConnection, String md5Hash, String jobName) throws SQLException {
+        Statement statement = jdbcConnection.createStatement();
+        int type = 1; //load
+        int crop = 1;//dev - TODO
+        int status = 0; //TODO - dunno what's a good number here
+        String message = "EBSLoader load";
+
+        statement.executeUpdate("INSERT INTO public.job( name, crop_id, type_id, status, message, checksum_id)\n" +
+                "VALUES ('"+jobName+"', "+type+", "+crop+", "+status+", '"+message+"', '"+md5Hash+"');");
+        statement.close();
+    }
+
     //Building commands
     private String iflCommand(String intermediatePath, String ifName, String outputPath){
         return pathRoot + IFLPath+ " -v -c "+ pgURL()+" -i " +intermediatePath+"/digest."+ifName+" -o "+outputPath;
     }
     private String masticatorCommand(String aspectPath, String dataPath, String intermediatePath){
+        if(aspectInFull !=null){
+            return "java -jar Masticator.jar -a "+aspectInFull+" -d "+dataPath+" -o "+ intermediatePath;
+        }
         return "java -jar Masticator.jar -a "+aspectPath+" -d "+dataPath+" -o "+ intermediatePath;
     }
 
