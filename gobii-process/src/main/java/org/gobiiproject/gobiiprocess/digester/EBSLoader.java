@@ -41,7 +41,7 @@ public class EBSLoader {
     //Hardcoded parameters
     private static final String VARIANT_CALL_TABNAME = "matrix";
     private final String HDF5MatrixLoadPath="/data/gobii_bundle/loader/hdf5/bin";
-    private final String IFLPath="loaders/postgres/gobii_ifl/gobii_ifl.py";
+    private final String IFLPath="loaders/gobii_ifl/gobii_ifl.py";
 
 
     //Sane and often correct defaults
@@ -51,6 +51,7 @@ public class EBSLoader {
     private String dbPort="5432";
     private String dbUser="ebsuser";//new default
     private String dbName="gobii_dev";
+    private String metaDBName="gobii_meta";
     private String hdf5Path = "crops/dev/hdf5/";
     private boolean verbose = false;
     private String aspectFilePath="core/intertek.json";
@@ -84,8 +85,8 @@ public class EBSLoader {
 
         //Map aspects
 
-        //Connect to Postgres
-        String dbConnectionString = loader.getConnectionString();
+        //Connect to Postgres Metadata
+        String dbConnectionString = loader.getMetaConnectionString();
 
         //Because *someone* keeps putting weird special characters in the password, I have to parse it out instead of keeping it nice and tidy
         //postgres://
@@ -105,7 +106,6 @@ public class EBSLoader {
             baseAspect = AspectParser.parse(loader.aspectInFull);
         }
         else{
-
             baseAspect = AspectParser.parse(Util.slurp(aspectFile));
         }
 
@@ -153,6 +153,7 @@ public class EBSLoader {
         boolean hasMatrix=false;
         for(TableAspect table : baseAspect.getAspects().values()){
             String tableName = table.getTable();
+            System.out.println("Reading table: " + table.getTable());
             if(tableName.equals("matrix")){
                 hasMatrix = true;
                 continue;//don't process the matrix
@@ -211,8 +212,13 @@ public class EBSLoader {
         return outputPath;
     }
 
-    private boolean createIntermediates(String intermediatePath){
+    private boolean createIntermediates(String intermediatePath) throws IOException {
         String aspectPath = pathRoot+aspectFilePath;
+
+        if(aspectInFull != null){
+            aspectPath = intermediatePath+"/aspect.tmp";
+            createTempAspectFile(aspectPath,aspectInFull);
+        }
 
         String command = masticatorCommand(aspectPath,inputFile,intermediatePath);
 
@@ -299,7 +305,7 @@ public class EBSLoader {
 
         } catch (org.apache.commons.cli.ParseException exp) {
             new HelpFormatter().printHelp("java -jar EBSLoader.jar ", "" +
-                    "Example: java -jar EBSLoader.jar -pw secretP@ssword -v -h crops/dev/hdf5/ -a intertekLD -i crops/dev/files/filea.txt", o, null, true);
+                    "Example: java -jar EBSLoader.jar -dbpw secretP@ssword -a testAspect -i crops/dev/files/filea.txt", o, null, true);
             System.exit(2);
         }
 
@@ -334,9 +340,6 @@ public class EBSLoader {
         else{
             return checkMD5Standalone(md5Sum);
         }
-
-
-
     }
 
 
@@ -415,7 +418,7 @@ public class EBSLoader {
 
     private static String getAspectFromPostres(Connection jdbcConnection, String aspectName) throws SQLException {
         Statement statement = jdbcConnection.createStatement();
-        ResultSet rs = statement.executeQuery("SELECT aspect from public.template WHERE name = '" + aspectName+"'");
+        ResultSet rs = statement.executeQuery("SELECT aspect from template WHERE name = '" + aspectName+"'");
         rs.next();
         String ret = rs.getString(1); //why are columns one-indexed?
         rs.close();
@@ -449,9 +452,6 @@ public class EBSLoader {
         return pathRoot + IFLPath+ " -v -c "+ pgURL()+" -i " +intermediatePath+"/digest."+ifName+" -o "+outputPath;
     }
     private String masticatorCommand(String aspectPath, String dataPath, String intermediatePath){
-        if(aspectInFull !=null){
-            return "java -jar Masticator.jar -a "+aspectInFull+" -d "+dataPath+" -o "+ intermediatePath;
-        }
         return "java -jar Masticator.jar -a "+aspectPath+" -d "+dataPath+" -o "+ intermediatePath;
     }
 
@@ -476,7 +476,7 @@ public class EBSLoader {
         //TODO: This doesn't work at all any more
  /*       DigestFileValidator digestFileValidator = new DigestFileValidator(directory, validationFilePath, dbConnectionString);
         digestFileValidator.performValidation(dbConnectionString, matrixOrientation);
- */       if(true)return true; //TODO - unskip
+ */       if(true)return false; //TODO - unskip
 
 
         //Call validations here, update 'success' to false with any call to ErrorLogger.logError()
@@ -516,6 +516,25 @@ public class EBSLoader {
                 + dbPort
                 + "/"
                 + dbName;
+    }
+    private String getMetaConnectionString(){
+        return "postgresql://"
+                + dbUser
+                + ":"
+                + dbPass
+                + "@"
+                + dbHost
+                + ":"
+                + dbPort
+                + "/"
+                + metaDBName;
+    }
+
+    //Technically we can pass in the aspect as a string, but it requires a lot of special character manipulation
+    private void createTempAspectFile(String tempAspectFile, String aspectInFull) throws IOException {
+        FileWriter fw = new FileWriter(tempAspectFile);
+        fw.write(aspectInFull);
+        fw.close();
     }
 }
 
