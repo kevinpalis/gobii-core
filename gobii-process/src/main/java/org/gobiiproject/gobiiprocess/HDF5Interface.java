@@ -57,7 +57,6 @@ public class HDF5Interface {
                                                 Integer dataSetId,
                                                 String crop,
                                                 String errorPath,
-                                                String variantFilename,
                                                 File variantFile) throws Exception {
         //HDF-5
         //Usage: %s <datasize> <input file> <output HDF5 file
@@ -108,7 +107,7 @@ public class HDF5Interface {
         }
         DatasetService datasetService = 
             SpringContextLoaderSingleton.getInstance().getBean(DatasetService.class);
-        datasetService.update(dataSetId,variantFilename, HDF5File);
+        datasetService.update(dataSetId,variantFile.getAbsolutePath(), HDF5File);
         return true;
     }
 

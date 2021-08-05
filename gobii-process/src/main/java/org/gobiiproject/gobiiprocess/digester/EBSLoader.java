@@ -7,13 +7,17 @@ import org.apache.commons.cli.*;
 import org.gobii.Util;
 import org.gobii.masticator.aspects.AspectParser;
 import org.gobii.masticator.aspects.FileAspect;
+import org.gobii.masticator.aspects.MatrixAspect;
 import org.gobii.masticator.aspects.TableAspect;
+import org.gobiiproject.gobiimodel.config.ConfigSettings;
 import org.gobiiproject.gobiimodel.dto.instructions.validation.ValidationConstants;
 import org.gobiiproject.gobiimodel.dto.instructions.validation.ValidationResult;
 import org.gobiiproject.gobiimodel.dto.instructions.validation.errorMessage.Failure;
 import org.gobiiproject.gobiimodel.types.DatasetOrientationType;
 import org.gobiiproject.gobiimodel.utils.InstructionFileValidator;
+import org.gobiiproject.gobiimodel.utils.email.ProcessMessage;
 import org.gobiiproject.gobiimodel.utils.error.Logger;
+import org.gobiiproject.gobiiprocess.HDF5Interface;
 import org.gobiiproject.gobiiprocess.digester.utils.validation.DigestFileValidator;
 
 import java.io.*;
@@ -35,8 +39,8 @@ import static org.gobiiproject.gobiimodel.utils.HelperFunctions.tryExec;
  */
 public class EBSLoader {
     //Hardcoded parameters
-    private final String VARIANT_CALL_TABNAME = "matrix";
-    private final String HDF5MatrixLoadPath="/data/gobii_bundle/loader/something/loadHDF5";
+    private static final String VARIANT_CALL_TABNAME = "matrix";
+    private final String HDF5MatrixLoadPath="/data/gobii_bundle/loader/hdf5/bin";
     private final String IFLPath="loaders/postgres/gobii_ifl/gobii_ifl.py";
 
 
@@ -70,7 +74,7 @@ public class EBSLoader {
     private String baseDirectory = "/data/gobii_bundle/crops/"+cropName+"/loader/digest";
     private String aspectInFull;
 
-    public static void main(String[] args) throws IOException, SQLException {
+    public static void main(String[] args) throws Exception {
 
         int errorCode = 0;
         EBSLoader loader = new EBSLoader();
@@ -162,7 +166,20 @@ public class EBSLoader {
         }
 
         if(hasMatrix){
-            //todo - load matrix
+            TableAspect matrixTable = baseAspect.getAspects().get(VARIANT_CALL_TABNAME);
+            ConfigSettings derp = new ConfigSettings();
+            MatrixAspect aspect = (MatrixAspect) matrixTable.getAspects().get(VARIANT_CALL_TABNAME);//TODO - what if this isn't here
+            //TODO - maybe dataset type should be in matrix?
+            String datasetType = "2_letter_nucleotide";//TODO - fix this
+            ProcessMessage dummy = new ProcessMessage();
+            int datasetId = 1;
+            String errorFilePath="logger";
+            String variantFilename = intermediateDirectory + matrixTable.getTable();
+            File variantFile = new File(variantFilename);
+            //TODO - methodize
+            HDF5Interface.setPathToHDF5(loader.HDF5MatrixLoadPath);
+            HDF5Interface.setPathToHDF5Files(loader.hdf5Path);
+            HDF5Interface.createHDF5FromDataset(dummy, datasetType, derp, datasetId, loader.cropName, errorFilePath, variantFile);
         }
 
 
@@ -196,8 +213,6 @@ public class EBSLoader {
 
     private boolean createIntermediates(String intermediatePath){
         String aspectPath = pathRoot+aspectFilePath;
-
-        String tempPath = baseDirectory + "/temp";
 
         String command = masticatorCommand(aspectPath,inputFile,intermediatePath);
 
