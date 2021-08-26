@@ -1,8 +1,14 @@
 #author: Kevin Palis <kdp44@cornell.edu>, John Palis <johnv.palis@gmail.com>
 
+from alpine/git:v2.30.2 as pre-build
+WORKDIR /gobii_bundle
+RUN git clone --progress --verbose https://bitbucket.org/ebsproject/gobii-db.git && echo "Gobii-db cloned."
+RUN ls -lht gobii-db/dal/gobii_ifl/gobii_ifl && sleep 60
+
 #from maven:3.8.1-openjdk-16 as build
 #if jdk16 fails, use 3.6.3-jdk-13
 from maven:3.6.3-jdk-13 as build
+
 #copy all build sub-directories
 COPY gobii-api-model gobii-api-model
 COPY gobii-brapi gobii-brapi
@@ -51,7 +57,7 @@ ENV os_group=gobii
 #COPY --from=build gobii_client gobii_client
 COPY --from=build gobii-process/target gobii-process/target
 COPY --from=build gobii-web/target gobii-web/target
-
+COPY --from=pre-build gobii_bundle gobii_bundle
 #Create default user and group. NOTE: change the gadm password on a production system
 RUN useradd $os_user -s /bin/bash -m --password $(echo $os_pass | openssl passwd -1 -stdin) && adduser $os_user sudo && \
 groupadd $os_group && \
