@@ -69,8 +69,8 @@ ENV os_group=gobii
 #COPY --from=build gobii_client gobii_client
 COPY --from=pre-build toolbox/gobii_bundle gobii_bundle
 COPY --from=build gobii-process/target gobii_bundle/core
-#this is the WAR file and not required, but is here for the sake of completeness
-COPY --from=build gobii-web/target gobii-web/target
+#this is the WAR file and bloats the image - not required
+#COPY --from=build gobii-web/target gobii-web/target
 #Create default user and group. NOTE: change the gadm password on a production system
 RUN useradd $os_user -s /bin/bash -m --password $(echo $os_pass | openssl passwd -1 -stdin) && adduser $os_user sudo && \
 groupadd $os_group && \
