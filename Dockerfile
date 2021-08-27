@@ -1,15 +1,24 @@
 #author: Kevin Palis <kdp44@cornell.edu>, John Palis <johnv.palis@gmail.com>
 
+#use a lightweight image for pre-build to minimize footprint, this only needs to pull repos
 from alpine/git:v2.30.2 as pre-build
 WORKDIR /toolbox
-RUN mkdir -p gobii_bundle/core gobii_bundle/logs gobii_bundle/loaders/gobii_ifl gobii_bundle/extractors/gobii_mde
+#create minimal gobii_bundle structure
+RUN mkdir -p gobii_bundle/core gobii_bundle/logs gobii_bundle/loaders/gobii_ifl gobii_bundle/extractors/gobii_mde gobii_bundle/loaders/hdf5 gobii_bundle/extractors/hdf5
+
+#prepare IFL and MDE modules
 RUN git clone --progress https://bitbucket.org/ebsproject/gobii-db.git && echo "Gobii-db cloned."
-#RUN ls -lht gobii-db/dal/gobii_ifl/gobii_ifl && sleep 60
-RUN cp -R gobii-db/dal/gobii_ifl/gobii_ifl gobii_bundle/loaders/gobii_ifl && cp -R gobii-db/dal/gobii_mde/gobii_mde gobii_bundle/extractors/gobii_mde
+RUN cp -R gobii-db/dal/gobii_ifl/gobii_ifl/* gobii_bundle/loaders/gobii_ifl && cp -R gobii-db/dal/gobii_mde/gobii_mde/* gobii_bundle/extractors/gobii_mde
+
+#prepare middleware scripts 
 RUN git clone --progress https://bitbucket.org/ebsproject/gobii.scripts.git && echo "Gobii-scripts cloned."
-RUN cp -R gobii.scripts/loaders gobii_bundle/loaders && cp -R gobii.scripts/extractors gobii_bundle/extractors
-#from maven:3.8.1-openjdk-16 as build
-#if jdk16 fails, use 3.6.3-jdk-13
+RUN cp -R gobii.scripts/loaders/* gobii_bundle/loaders && cp -R gobii.scripts/extractors/* gobii_bundle/extractors
+
+#prepare hdf5 binaries
+RUN git clone https://bitbucket.org/ebsproject/gobii.hdf5.git && echo "Gobii-HDF5 cloned."
+RUN cp -R gobii.hdf5/production/bin/fetch* gobii_bundle/extractors/hdf5 && cp -R gobii.hdf5/production/bin/dump* gobii_bundle/extractors/hdf5 && cp -R gobii.hdf5/production/bin/load* gobii_bundle/loaders/hdf5
+
+#use maven image for the main build stage
 from maven:3.6.3-jdk-13 as build
 
 #copy all build sub-directories
@@ -58,9 +67,10 @@ ENV os_group=gobii
 #COPY --from=build gobii_api_model gobii_api_model
 #COPY --from=build gobii_model gobii_model
 #COPY --from=build gobii_client gobii_client
-COPY --from=build gobii-process/target gobii-process/target
-COPY --from=build gobii-web/target gobii-web/target
 COPY --from=pre-build toolbox/gobii_bundle gobii_bundle
+COPY --from=build gobii-process/target gobii_bundle/core
+#this is the WAR file and not required, but is here for the sake of completeness
+COPY --from=build gobii-web/target gobii-web/target
 #Create default user and group. NOTE: change the gadm password on a production system
 RUN useradd $os_user -s /bin/bash -m --password $(echo $os_pass | openssl passwd -1 -stdin) && adduser $os_user sudo && \
 groupadd $os_group && \
