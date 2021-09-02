@@ -38,11 +38,11 @@ public class EBSLoader {
 
 
     //Sane and often correct defaults
-    private String pathRoot="/data/gobii_bundle/";
+    private String pathRoot="/gobii_bundle/";
     private String cropName="dev";
     private String dbHost="gobii-db";
     private String dbPort="5432";
-    private String dbUser="appuser";
+    private String dbUser="ebsuser";
     private String dbName="gobii_dev";
     private String hdf5Path = "crops/dev/hdf5/";
     private boolean verbose = false;
