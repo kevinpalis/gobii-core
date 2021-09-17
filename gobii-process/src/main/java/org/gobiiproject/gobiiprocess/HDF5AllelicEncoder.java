@@ -129,9 +129,7 @@ public class HDF5AllelicEncoder {
             byte[] inputLine;
             int i = 0;
             int nextLookupLineRow = lookupLine!=null?Integer.parseInt(lookupLine.split(Pattern.quote("\t"))[0]):-1;
-            System.out.println("Reading file");
             while((inputLine=getBytesTillNewline(encodedFile)) != null) {
-                System.out.println(Arrays.toString(inputLine));
                 RowTranslator currentRowTranslator = null;
                 //advance through the lookup line to find 'this' line if we're behind
                 if(lookupLine!=null && nextLookupLineRow<i){
