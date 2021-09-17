@@ -149,7 +149,8 @@ public class HDF5AllelicEncoderTest {
         BufferedReader lookupReader = new BufferedReader(new FileReader(lookup));
 
         char e1 = (char)129;
-        String firstAltx2 = ""+e1+e1;
+        //String firstAltx2 = ""+e1+e1;
+        String firstAltx2 = "��"; // This might not be portable, if it breaks, just destroy this test
         Assert.assertEquals("First Line encoded as alt/alt",firstAltx2+"\t"+firstAltx2+"\tNN",encodedReader.readLine());
         Assert.assertEquals("Second Line encoded as alt/alt",firstAltx2+"\t" + firstAltx2+"\tNN",encodedReader.readLine());
 

@@ -4,6 +4,7 @@ import htsjdk.variant.variantcontext.Allele;
 import org.gobiiproject.gobiimodel.utils.error.Logger;
 import org.gobiiproject.gobiiprocess.digester.csv.matrixValidation.NucleotideSeparatorSplitter;
 
+import javax.xml.bind.annotation.XmlType;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -87,7 +88,7 @@ public class HDF5AllelicEncoder {
 
 
                 bos.write(ret.encodedRow);
-                bos.write(System.lineSeparator().getBytes());
+                bos.write('\n');
                 //encodedFile.write(ret.encodedRow);
                 //encodedFile.write(System.lineSeparator());//Eww.
 
@@ -128,7 +129,9 @@ public class HDF5AllelicEncoder {
             byte[] inputLine;
             int i = 0;
             int nextLookupLineRow = lookupLine!=null?Integer.parseInt(lookupLine.split(Pattern.quote("\t"))[0]):-1;
+            System.out.println("Reading file");
             while((inputLine=getBytesTillNewline(encodedFile)) != null) {
+                System.out.println(Arrays.toString(inputLine));
                 RowTranslator currentRowTranslator = null;
                 //advance through the lookup line to find 'this' line if we're behind
                 if(lookupLine!=null && nextLookupLineRow<i){
@@ -256,7 +259,7 @@ public class HDF5AllelicEncoder {
 
         while(i<inputRow.length) {
             byte[] segment = new byte[20];//Arbitrary Large Number
-            while (inputRow[i] != elementSeparatorAsByte) {
+            while ((i< inputRow.length) && (inputRow[i] != elementSeparatorAsByte)) {
                 segment[j++] = inputRow[i++];
             }
             i++;
@@ -267,7 +270,7 @@ public class HDF5AllelicEncoder {
                 first=false;
             }
             outRow.append(currentRowTranslator.getDecodedString(segment,j,alleleSeparator));
-            }
+        }
         return outRow.toString();
     }
 
@@ -426,6 +429,9 @@ public class HDF5AllelicEncoder {
             boolean first=true;
             for(int i = 0; i < length; i++){
                 char encodedAllele = (char) encodedBytes[i];
+                if((encodedAllele== '\t') || (encodedAllele == ' ') || encodedAllele == 0){ //Yeah, sometimes it's 0?
+                    continue;
+                }
                 if(!first){
                     out.append(separator);
                 }else{
@@ -437,7 +443,10 @@ public class HDF5AllelicEncoder {
         }
 
         String getDecodedAllele(char internalChar) throws Exception{
-
+            String internalCharAsString=internalChar+"";
+            if(unencodedAlleles.contains(internalCharAsString)){
+                return internalCharAsString;
+            }
             int index;
             try {
                 index = decodeChar(internalChar);
@@ -445,7 +454,7 @@ public class HDF5AllelicEncoder {
             catch(Exception e){
                 //Throw a warning, but pass through the character on catastrophic decode failure. (Probably an unexpected unencoded value, not an encoded value at all.)
                 index = -1;
-                Logger.logWarning("HDF5AlleleEncoder","No character to decode to- '" + internalChar + "'");
+                Logger.logWarning("HDF5AlleleEncoder","No character to decode to- '" + internalChar + "'" + " ("+(int)internalChar+")");
                 return internalChar+"";
             }
             if(index>=nonstandardAlleles.size()){
@@ -460,8 +469,8 @@ public class HDF5AllelicEncoder {
     }
 
     static int decodeChar(char value) throws Exception{
-        int intVal=(int)value;
+        int intVal=((int)value)&0xFF; //Cut it off at a byte, making it a ubyte, effectively
         if(intVal < 129) throw new Exception("Decoded character from h5 does not map (under 128)");
-        return ((int)value)-129;
+        return intVal-129;
     }
 }
