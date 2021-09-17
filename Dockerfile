@@ -1,4 +1,5 @@
 #author: Kevin Palis <kdp44@cornell.edu>, John Palis <johnv.palis@gmail.com>
+#This is the main dockerfile for the gobii-core service and is meant to be used via compose or swarm
 
 #use a lightweight image for pre-build to minimize footprint, this only needs to pull repos
 from alpine/git:v2.30.2 as pre-build
