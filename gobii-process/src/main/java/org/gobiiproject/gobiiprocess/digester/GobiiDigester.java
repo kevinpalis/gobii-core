@@ -442,7 +442,6 @@ public class GobiiDigester {
                 digesterResult.getDatasetId(),
                 digesterResult.getCropType(),
                 errorPath,
-                variantFilename,
                 variantFile);
             rmIfExist(variantFile.getPath());
         }
