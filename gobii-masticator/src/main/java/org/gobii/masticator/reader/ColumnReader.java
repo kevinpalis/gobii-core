@@ -3,6 +3,7 @@ package org.gobii.masticator.reader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Iterator;
 import lombok.Data;
 
@@ -38,7 +39,13 @@ public class ColumnReader implements Reader {
 		if (! lines.hasNext()) {
 			return End.inst;
 		}
+		String[] split = lines.next().split(delimiter);
 
-		return new Val(lines.next().split(delimiter)[col]);
+		if(split.length >= col){
+			System.err.println("Out of bounds, got " + col + " of " + split.length + " columns in line " + Arrays.deepToString(split) ); // Debugging println
+			return new Val("");
+		}
+
+		return new Val(split[col]);
 	}
 }
