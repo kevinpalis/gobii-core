@@ -5,6 +5,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import org.apache.commons.cli.*;
 import org.gobii.Util;
+import org.gobii.masticator.Masticator;
 import org.gobii.masticator.aspects.AspectParser;
 import org.gobii.masticator.aspects.FileAspect;
 import org.gobii.masticator.aspects.MatrixAspect;
@@ -18,20 +19,19 @@ import org.gobiiproject.gobiimodel.utils.InstructionFileValidator;
 import org.gobiiproject.gobiimodel.utils.email.ProcessMessage;
 import org.gobiiproject.gobiimodel.utils.error.Logger;
 import org.gobiiproject.gobiiprocess.HDF5Interface;
-import org.gobiiproject.gobiiprocess.digester.utils.validation.DigestFileValidator;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 
-import static org.gobiiproject.gobiimodel.utils.HelperFunctions.getJdbcConnectionString;
 import static org.gobiiproject.gobiimodel.utils.HelperFunctions.tryExec;
 
 /**
@@ -59,6 +59,8 @@ public class EBSLoader {
     private String validationFile="core/validationConfig.json";
 
     private String md5File = "core/md5List.txt";//backup purposes only
+
+    private String pathToIFLs= "/gobii_bundle/loaders/postgres/gobii_ifl/gobii_ifl.py";
 
     private enum InputEntity{
         Project, Platform, Experiment, Dataset, Germplasm_Species, Germplasm_Type
@@ -128,8 +130,11 @@ public class EBSLoader {
 
 
         //create intermediates
-        if(!loader.createIntermediates(intermediateDirectory)){
+        try{
+            loader.createIntermediates(intermediateDirectory,baseAspect);
+        }catch(Exception e){
             errorCode = 1;
+            e.printStackTrace();
             System.exit(errorCode);
         }
 
@@ -149,29 +154,32 @@ public class EBSLoader {
         }
 
         //IFL load intermediates
+        try{
+            loader.runIFLs(intermediateDirectory,baseAspect);
+        }catch(Exception e){
+            errorCode = 1;
+            e.printStackTrace();
+            System.exit(errorCode);
+        }
 
+        //Matrix
         boolean hasMatrix=false;
         for(TableAspect table : baseAspect.getAspects().values()){
             String tableName = table.getTable();
             System.out.println("Reading table: " + table.getTable());
             if(tableName.equals("matrix")){
                 hasMatrix = true;
-                continue;//don't process the matrix
-            }
-            boolean success = loader.runIFL(intermediateDirectory, tableName, outputDirectory);
-            if(!success){
-                System.err.println("Error in Intermediate File Load " + table.getTable());
-                errorCode=5;
-                System.exit(errorCode);
+                break;
             }
         }
 
         if(hasMatrix){
             TableAspect matrixTable = baseAspect.getAspects().get(VARIANT_CALL_TABNAME);
-            ConfigSettings derp = new ConfigSettings();
+            ConfigSettings settings = new ConfigSettings();
+
             MatrixAspect aspect = (MatrixAspect) matrixTable.getAspects().get(VARIANT_CALL_TABNAME);//TODO - what if this isn't here
-            //TODO - maybe dataset type should be in matrix?
-            String datasetType = "2_letter_nucleotide";//TODO - fix this
+            String datasetType = aspect.getDatasetType();
+
             ProcessMessage dummy = new ProcessMessage();
             int datasetId = 1;
             String errorFilePath="logger";
@@ -180,7 +188,7 @@ public class EBSLoader {
             //TODO - methodize
             HDF5Interface.setPathToHDF5(loader.HDF5MatrixLoadPath);
             HDF5Interface.setPathToHDF5Files(loader.hdf5Path);
-            HDF5Interface.createHDF5FromDataset(dummy, datasetType, derp, datasetId, loader.cropName, errorFilePath, variantFile);
+            HDF5Interface.createHDF5FromDataset(dummy, datasetType, settings, datasetId, loader.cropName, errorFilePath, variantFile);
         }
 
 
@@ -212,22 +220,22 @@ public class EBSLoader {
         return outputPath;
     }
 
-    private boolean createIntermediates(String intermediatePath) throws IOException {
-        String aspectPath = pathRoot+aspectFilePath;
-
-        if(aspectInFull != null){
-            aspectPath = intermediatePath+"/aspect.tmp";
-            createTempAspectFile(aspectPath,aspectInFull);
-        }
-
-        String command = masticatorCommand(aspectPath,inputFile,intermediatePath);
-
+    private void createIntermediates(String intermediatePath, FileAspect baseAspect) throws Exception {
+        String[] masticatorArgs = masticatorArgs(inputFile,intermediatePath);
         if(verbose){
-            System.out.println(command);
+            System.out.println(Arrays.deepToString(masticatorArgs));
         }
-
-        return tryExec(command);
+        Masticator.masticate(masticatorArgs,baseAspect, pathToIFLs,true,false);
     }
+
+    private void runIFLs(String intermediatePath, FileAspect baseAspect) throws Exception {
+        String[] masticatorArgs = masticatorArgs(inputFile,intermediatePath);
+        if(verbose){
+            System.out.println(Arrays.deepToString(masticatorArgs));
+        }
+        Masticator.masticate(masticatorArgs,baseAspect, pathToIFLs,false,true);
+    }
+
 
     private boolean validate(FileAspect aspect){
         // Instruction file Validation
@@ -248,7 +256,7 @@ public class EBSLoader {
             Logger.logError("Validation failed.", validationStatus);
         }
 
-        return false;//TODO
+        return true;//TODO - write full validation logic back in
     }
 
 
@@ -406,16 +414,6 @@ public class EBSLoader {
     }
 
 
-    private boolean runIFL(String intermediatePath, String ifName, String outputPath){
-        String command = iflCommand(intermediatePath,ifName,outputPath);
-        if(verbose){
-            System.out.println(command);
-        }
-
-        return tryExec(command);
-
-    }
-
     private static String getAspectFromPostres(Connection jdbcConnection, String aspectName) throws SQLException {
         Statement statement = jdbcConnection.createStatement();
         ResultSet rs = statement.executeQuery("SELECT aspect from template WHERE name = '" + aspectName+"'");
@@ -447,12 +445,11 @@ public class EBSLoader {
         statement.close();
     }
 
-    //Building commands
-    private String iflCommand(String intermediatePath, String ifName, String outputPath){
-        return pathRoot + IFLPath+ " -v -c "+ pgURL()+" -i " +intermediatePath+"/digest."+ifName+" -o "+outputPath;
+    private String[] masticatorArgs(String aspectPath, String dataPath, String intermediatePath){
+        return new String[]{"-a",aspectPath,"-d",dataPath,"-o",intermediatePath};
     }
-    private String masticatorCommand(String aspectPath, String dataPath, String intermediatePath){
-        return "java -jar Masticator.jar -a "+aspectPath+" -d "+dataPath+" -o "+ intermediatePath;
+    private String[] masticatorArgs( String dataPath, String intermediatePath){
+        return new String[]{"-d",dataPath,"-o",intermediatePath};
     }
 
 
@@ -528,13 +525,6 @@ public class EBSLoader {
                 + dbPort
                 + "/"
                 + metaDBName;
-    }
-
-    //Technically we can pass in the aspect as a string, but it requires a lot of special character manipulation
-    private void createTempAspectFile(String tempAspectFile, String aspectInFull) throws IOException {
-        FileWriter fw = new FileWriter(tempAspectFile);
-        fw.write(aspectInFull);
-        fw.close();
     }
 }
 

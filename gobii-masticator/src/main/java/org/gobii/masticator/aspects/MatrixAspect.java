@@ -1,13 +1,13 @@
 package org.gobii.masticator.aspects;
 
-import lombok.Data;
-
-@Data
 public class MatrixAspect extends CoordinateAspect {
-
-	public MatrixAspect(Integer row, Integer col) {
+	private String datasetType;
+	public MatrixAspect(Integer row, Integer col, String datasetType) {
 		super(row, col);
+		this.datasetType=datasetType;
 	}
 
-
+	public String getDatasetType() {
+		return datasetType;
+	}
 }

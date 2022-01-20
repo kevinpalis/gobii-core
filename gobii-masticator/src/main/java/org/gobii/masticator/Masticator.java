@@ -61,41 +61,46 @@ public class Masticator {
 
 	public static void main(String[] args) throws Exception {
 
+		masticate(args,null,null, true, true);
+	}
+
+	/**
+	 * Calls the masticator with arguments, including an optional pre-parsed aspect file. If not supplied, will use -a
+	 * (ARG_ASPECT_FILE) to find the aspect as normal. This allows a running program to mess with the aspect in memory
+	 * and pass the new aspect directly down, or use a virtual aspect file not on disk, without having to deal with
+	 * standard input.
+	 * @param args argument list, as per main(String[] args)
+	 * @param aspect Optional FileAspect for the base aspect to be used in place of -a
+	 * @param iflPath path to base IFLs
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public static void masticate(String[] args, FileAspect aspect, String iflPath, boolean createIntermediateFiles, boolean runIFLs) throws IOException, InterruptedException {
 		Logger logger = LoggerFactory.getLogger("Masticator (Main)");
 
 		Map<String, String> argMap =
 				zipmap(takeNth(2, args), takeNth(1, 2, args));
 
-		FileAspect aspect = null;
-		if (argMap.containsKey(ARG_ASPECT_FILE) && !(argMap.get(ARG_ASPECT_FILE).trim().equals("-"))) {
-			try {
-				aspect = AspectParser.parse(slurp(argMap.get(ARG_ASPECT_FILE)));
-			} catch (IOException e) {
-				logger.error(String.format("File for aspect at %s not found", argMap.get(ARG_ASPECT_FILE)));
-			} catch (JsonParseException e) {
-				e.printStackTrace();
-				logger.error("Malformed Aspect",e);
-			}
-		} else {
-			try {
-				logger.info("Reading aspect file from std in ...");
-				aspect = AspectParser.parse(slurp(System.in));
-			} catch (JsonParseException e) {
-//				e.printStackTrace();
-				logger.error("Malformed Aspect",e);
+		if(aspect==null) {
+			if (argMap.containsKey(ARG_ASPECT_FILE) && !(argMap.get(ARG_ASPECT_FILE).trim().equals("-"))) {
+				try {
+					aspect = AspectParser.parse(slurp(argMap.get(ARG_ASPECT_FILE)));
+				} catch (IOException e) {
+					logger.error(String.format("File for aspect at %s not found", argMap.get(ARG_ASPECT_FILE)));
+				} catch (JsonParseException e) {
+					e.printStackTrace();
+					logger.error("Malformed Aspect", e);
+				}
+			} else {
+				try {
+					logger.info("Reading aspect file from std in ...");
+					aspect = AspectParser.parse(slurp(System.in));
+				} catch (JsonParseException e) {
+					logger.error("Malformed Aspect", e);
+				}
 			}
 		}
 
-		File data = null;
-
-		if (argMap.containsKey(ARG_DATA_FILE)) {
-			data = new File(argMap.get(ARG_DATA_FILE));
-			if (! data.exists()) {
-				logger.error(String.format("Data file at %s does not exist", argMap.get(ARG_DATA_FILE)));
-			}
-		} else {
-			logger.info(usage());
-		}
 
 		File outputDir = null;
 
@@ -109,6 +114,26 @@ public class Masticator {
 			}
 		} else {
 			logger.error(usage());
+		}
+
+		if(createIntermediateFiles) {
+			createIntermediateFiles(argMap.getOrDefault(ARG_DATA_FILE,null),aspect, logger, outputDir);
+		}
+		if(runIFLs) {
+			runIFLs(iflPath, logger, argMap.getOrDefault(ARG_CONNECTION_STRING,null), aspect, outputDir);
+		}
+	}
+
+	public static void createIntermediateFiles(String argDataFile, FileAspect aspect, Logger logger, File outputDir) throws IOException, InterruptedException {
+		File data = null;
+
+		if (argDataFile!=null) {
+			data = new File(argDataFile);
+			if (! data.exists()) {
+				logger.error(String.format("Data file at %s does not exist", argDataFile));
+			}
+		} else {
+			logger.info(usage());
 		}
 
 		Masticator masticator = new Masticator(aspect, data);
@@ -138,14 +163,16 @@ public class Masticator {
 		for (Thread t : threads) {
 			t.join();
 		}
+	}
 
-		if(argMap.containsKey(ARG_CONNECTION_STRING)){
+	public static void runIFLs(String iflPath, Logger logger, String connectionString, FileAspect aspect, File outputDir) throws IOException {
+		if(connectionString!=null){
 			logger.info("Running IFL");
-			for(String key:getTableKeys(argMap.get(ARG_ASPECT_FILE))){
+			for(String key:getTableKeys(aspect)){
 				String inputDir = outputDir.getAbsolutePath();
 				String inputFile = String.format("%s%sdigest.%s", outputDir.getAbsolutePath(), File.separator, key);
 
-				runIfl(argMap.get(ARG_CONNECTION_STRING),inputFile,inputDir,inputDir);
+				runIfl(connectionString,inputFile,inputDir,inputDir,iflPath);
 			}
 		}
 	}
@@ -167,9 +194,24 @@ public class Masticator {
 		return tableNames;
 	}
 
+	private static List<String> getTableKeys(FileAspect baseAspect) throws IOException {
+		List<String> tableNames = new ArrayList<String>();
+		for (Map.Entry jsonObject : baseAspect.getAspects().entrySet()) {
+			String tableName = jsonObject.getKey().toString();
+			if(tableName.equals("matrix")){
+				continue; //Ignore Matrix from tables
+			}
+			tableNames.add(tableName);
+		}
+		return tableNames;
+	}
+
 	private static final String BASE_IFL_PATH="/data/gobii_bundle/loaders/postgres/gobii_ifl/gobii_ifl.py";
-	private static void runIfl(String connectionString, String inputFile, String inputDir, String outputDir) throws IOException {
+	private static void runIfl(String connectionString, String inputFile, String inputDir, String outputDir, String iflPath) throws IOException {
 		//It's ugly, but it works
+		if(iflPath==null){
+			iflPath=BASE_IFL_PATH;
+		}
 		String iflExec = String.format(BASE_IFL_PATH+" -c %s -i %s -d %s -o %s", connectionString, inputFile, inputDir, outputDir);
 		Runtime.getRuntime().exec(iflExec);
 	}

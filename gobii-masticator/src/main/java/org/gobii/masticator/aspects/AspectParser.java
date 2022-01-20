@@ -79,7 +79,8 @@ public class AspectParser {
 						JsonObject coordinates = arr.get(1).getAsJsonObject();
 						return new MatrixAspect(
 								coordinates.get("row").getAsInt(),
-								coordinates.get("column").getAsInt());
+								coordinates.get("column").getAsInt(),
+								coordinates.get("datasetType").getAsString());
 					} else if ("CONSTANT".equals(aspectType)) {
 						return new ConstantAspect(arr.get(1).getAsString());
 					} else if ("RANGE".equals(aspectType)) {
