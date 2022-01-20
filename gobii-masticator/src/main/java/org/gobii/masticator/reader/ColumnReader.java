@@ -41,7 +41,7 @@ public class ColumnReader implements Reader {
 		}
 		String[] split = lines.next().split(delimiter);
 
-		if(split.length >= col){
+		if(col >= split.length){
 			System.err.println("Out of bounds, got " + col + " of " + split.length + " columns in line " + Arrays.deepToString(split) ); // Debugging println
 			return new Val("");
 		}
