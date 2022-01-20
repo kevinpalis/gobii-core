@@ -23,7 +23,6 @@ public class ColumnReader implements Reader {
 	private Iterator<String> lines;
 
 	public ColumnReader(File file, int row, int col) throws IOException {
-		this.delimiter = String.valueOf(AspectMapper.delimitter);
 		this.file = file;
 		this.row = row;
 		this.col = col;

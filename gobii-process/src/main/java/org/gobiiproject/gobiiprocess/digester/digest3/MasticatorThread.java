@@ -61,7 +61,7 @@ public class MasticatorThread extends Thread {
 
                 TableReader reader = 
                     AspectMapper
-                        .map(fileAspect.getAspects().get(tableName), fileDelimitter.charAt(0))
+                        .map(fileAspect.getAspects().get(tableName))
                         .build(dataFile);
 
                 // Matrix file don't need header
