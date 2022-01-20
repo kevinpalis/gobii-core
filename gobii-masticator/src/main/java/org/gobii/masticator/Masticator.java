@@ -212,7 +212,7 @@ public class Masticator {
 		if(iflPath==null){
 			iflPath=BASE_IFL_PATH;
 		}
-		String iflExec = String.format(BASE_IFL_PATH+" -c %s -i %s -d %s -o %s", connectionString, inputFile, inputDir, outputDir);
+		String iflExec = String.format(iflPath+" -c %s -i %s -d %s -o %s", connectionString, inputFile, inputDir, outputDir);
 		Runtime.getRuntime().exec(iflExec);
 	}
 }

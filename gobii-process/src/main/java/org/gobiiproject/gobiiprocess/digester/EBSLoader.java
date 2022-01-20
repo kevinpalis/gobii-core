@@ -60,7 +60,7 @@ public class EBSLoader {
 
     private String md5File = "core/md5List.txt";//backup purposes only
 
-    private String pathToIFLs= "/gobii_bundle/loaders/postgres/gobii_ifl/gobii_ifl.py";
+    private String pathToIFLs= "/gobii_bundle/loaders/gobii_ifl/gobii_ifl.py";
 
     private enum InputEntity{
         Project, Platform, Experiment, Dataset, Germplasm_Species, Germplasm_Type
