@@ -21,6 +21,7 @@ import org.gobiiproject.gobiimodel.utils.error.Logger;
 import org.gobiiproject.gobiiprocess.HDF5Interface;
 
 import java.io.*;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,25 +41,22 @@ import static org.gobiiproject.gobiimodel.utils.HelperFunctions.tryExec;
 public class EBSLoader {
     //Hardcoded parameters
     private static final String VARIANT_CALL_TABNAME = "matrix";
-    private final String HDF5MatrixLoadPath="/data/gobii_bundle/loader/hdf5/bin";
-    private final String IFLPath="loaders/gobii_ifl/gobii_ifl.py";
+    private final String HDF5MatrixLoadPath="/gobii_bundle/loader/hdf5/bin";
 
 
     //Sane and often correct defaults
-    private String pathRoot="/gobii_bundle/";
     private String cropName="dev";
     private String dbHost="gobii-db";
     private String dbPort="5432";
     private String dbUser="ebsuser";//new default
     private String dbName="gobii_dev";
     private String metaDBName="gobii_meta";
-    private String hdf5Path = "crops/dev/hdf5/";
+    private String hdf5Path = "/data/hdf5";
     private boolean verbose = false;
-    private String aspectFilePath="core/intertek.json";
+    private String aspectFilePath="intertek.json";
+    private String validationFile="/gobii_bundle/core/validationConfig.json";
 
-    private String validationFile="core/validationConfig.json";
-
-    private String md5File = "core/md5List.txt";//backup purposes only
+    private String md5File = "/data/md5List.txt";//backup purposes only
 
     private String pathToIFLs= "/gobii_bundle/loaders/gobii_ifl/gobii_ifl.py";
 
@@ -99,7 +97,7 @@ public class EBSLoader {
         Connection dbConn = DriverManager.getConnection(jdbcConnector,user,password);
         DatabaseMetaData dbMeta = dbConn.getMetaData();
 
-        File aspectFile = new File(loader.pathRoot + loader.aspectFilePath);
+        File aspectFile = new File(loader.aspectFilePath);
 
         FileAspect baseAspect;
         if(!aspectFile.exists()) {
@@ -139,7 +137,7 @@ public class EBSLoader {
         }
 
         //validateIntermediates
-        String validationFile =  loader.pathRoot + loader.validationFile;
+        String validationFile =   loader.validationFile;
         try {
             boolean hasErrors = loader.validateMetadata(intermediateDirectory, validationFile, DatasetOrientationType.MARKER_FAST);//TODO - choose orientation correctly
             if(hasErrors){
@@ -221,7 +219,7 @@ public class EBSLoader {
     }
 
     private void createIntermediates(String intermediatePath, FileAspect baseAspect) throws Exception {
-        String[] masticatorArgs = masticatorArgs(inputFile,intermediatePath);
+        String[] masticatorArgs = masticatorArgs(inputFile,intermediatePath, getConnectionString());
         if(verbose){
             System.out.println(Arrays.deepToString(masticatorArgs));
         }
@@ -229,7 +227,7 @@ public class EBSLoader {
     }
 
     private void runIFLs(String intermediatePath, FileAspect baseAspect) throws Exception {
-        String[] masticatorArgs = masticatorArgs(inputFile,intermediatePath);
+        String[] masticatorArgs = masticatorArgs(inputFile,intermediatePath, getConnectionString());
         if(verbose){
             System.out.println(Arrays.deepToString(masticatorArgs));
         }
@@ -264,7 +262,6 @@ public class EBSLoader {
 
     private String[] parseOpts(String[] args){
         Options o = new Options()
-                .addOption("pr", "pathRoot", true, "Fully qualified path to gobii bundle root")
                 .addOption("a", "aspect", true, "Aspect file path or name")
                 .addOption("crop", "cropName", true, "Name of crop being loaded (and paths to place output)")
                 .addOption("dbh", "dbHost", true, "Database hostname")
@@ -288,7 +285,6 @@ public class EBSLoader {
         CommandLineParser parser = new DefaultParser();
         try {
             CommandLine cli = parser.parse(o, args);
-            if (cli.hasOption("pathRoot")) pathRoot=cli.getOptionValue("pathRoot");
             if (cli.hasOption("aspect")) aspectFilePath=cli.getOptionValue("aspect");
             if (cli.hasOption("verbose")) verbose=true;
             if (cli.hasOption("dbHost")) dbHost = cli.getOptionValue("dbHost");
@@ -381,7 +377,10 @@ public class EBSLoader {
 
     private boolean checkMD5Standalone(String md5Sum) throws IOException {
         boolean isUnique = true;
-        File md5File = new File(pathRoot + this.md5File);
+        File md5File = new File(this.md5File);
+        if(!md5File.exists()){
+            return true;
+        }
         BufferedReader reader = new BufferedReader(new FileReader(md5File));
         while(reader.ready()){
             String hash = reader.readLine();
@@ -405,7 +404,7 @@ public class EBSLoader {
     }
 
     private void addMD5Standalone(String md5Sum) throws IOException {
-        File md5File = new File(pathRoot + this.md5File);
+        File md5File = new File( this.md5File );
         BufferedWriter writer = new BufferedWriter(new FileWriter(md5File, true));
         writer.write(md5Sum);
         writer.newLine();
@@ -445,20 +444,11 @@ public class EBSLoader {
         statement.close();
     }
 
-    private String[] masticatorArgs(String aspectPath, String dataPath, String intermediatePath){
-        return new String[]{"-a",aspectPath,"-d",dataPath,"-o",intermediatePath};
+    private String[] masticatorArgs(String aspectPath, String dataPath, String intermediatePath, String connectionString){
+        return new String[]{"-a",aspectPath,"-d",dataPath,"-o",intermediatePath, "-s", connectionString};
     }
-    private String[] masticatorArgs( String dataPath, String intermediatePath){
-        return new String[]{"-d",dataPath,"-o",intermediatePath};
-    }
-
-
-    //Postgres connection string
-    private String pgURL(){
-        return pgURL(dbUser,dbPass,dbHost,dbPort,dbName);
-    }
-    private static String pgURL(String user, String pass, String host, String port, String dbName){
-        return "postgresql://"+user + ":"+pass+"@"+host+":"+port+"/"+dbName;
+    private String[] masticatorArgs( String dataPath, String intermediatePath, String connectionString){
+        return new String[]{"-d",dataPath,"-o",intermediatePath, "-s", connectionString};
     }
 
 
@@ -506,7 +496,7 @@ public class EBSLoader {
         return "postgresql://"
                 + dbUser
                 + ":"
-                + dbPass
+                + URLEncoder.encode( dbPass ) //encode special characters (@, !, etc)
                 + "@"
                 + dbHost
                 + ":"
@@ -518,7 +508,7 @@ public class EBSLoader {
         return "postgresql://"
                 + dbUser
                 + ":"
-                + dbPass
+                + URLEncoder.encode( dbPass ) //encode special characters (@, !, etc)
                 + "@"
                 + dbHost
                 + ":"
