@@ -55,7 +55,15 @@ RUN apt-get update -y && apt-get install -y \
  openssl \
  gnupg2 \
  software-properties-common \
- vim
+ vim \
+ coreutils \
+ python2.7-dev \
+ python-psycopg2 \
+ curl \
+ python-pip
+
+RUN pip install --upgrade pip
+RUN pip install Numpy pandas
 EXPOSE 22
 
 #set variables defaults
