@@ -63,7 +63,7 @@ RUN apt-get update -y && apt-get install -y \
  python-pip \
     && add-apt-repository ppa:deadsnakes/ppa \
     && apt-get update -y \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y python3.9
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y python3.10
 
 RUN pip install --upgrade pip
 RUN pip install Numpy pandas
