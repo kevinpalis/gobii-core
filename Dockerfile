@@ -60,15 +60,14 @@ RUN apt-get update -y && apt-get install -y \
  python2.7-dev \
  python-psycopg2 \
  curl \
- python-pip
+ python-pip \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update -y \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y python3.9
 
 RUN pip install --upgrade pip
 RUN pip install Numpy pandas
 EXPOSE 22
-
-RUN add-apt-repository -y ppa:deadsnakes/ppa
-RUN apt-get update -y
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python3.9
 
 #set variables defaults
 ENV os_user=gadm
