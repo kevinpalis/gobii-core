@@ -66,6 +66,10 @@ RUN pip install --upgrade pip
 RUN pip install Numpy pandas
 EXPOSE 22
 
+RUN add-apt-repository -y ppa:deadsnakes/ppa
+RUN apt-get update -y
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python3.9
+
 #set variables defaults
 ENV os_user=gadm
 ENV os_pass=g0b11Admin
