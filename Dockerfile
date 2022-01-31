@@ -1,7 +1,7 @@
 #author: Kevin Palis <kdp44@cornell.edu>, John Palis <johnv.palis@gmail.com>
 
 #use a lightweight image for pre-build to minimize footprint, this only needs to pull repos
-from alpine/git:v2.30.2 as pre-build
+FROM alpine/git:v2.30.2 AS pre-build
 WORKDIR /toolbox
 #create minimal gobii_bundle structure
 RUN mkdir -p gobii_bundle/core gobii_bundle/logs gobii_bundle/loaders/gobii_ifl gobii_bundle/extractors/gobii_mde gobii_bundle/loaders/hdf5 gobii_bundle/extractors/hdf5
@@ -19,7 +19,7 @@ RUN git clone https://bitbucket.org/ebsproject/gobii.hdf5.git && echo "Gobii-HDF
 RUN cp -R gobii.hdf5/production/bin/fetch* gobii_bundle/extractors/hdf5 && cp -R gobii.hdf5/production/bin/dump* gobii_bundle/extractors/hdf5 && cp -R gobii.hdf5/production/bin/load* gobii_bundle/loaders/hdf5
 
 #use maven image for the main build stage
-from maven:3.6.3-jdk-13 as build
+FROM maven:3.6.3-jdk-13 AS build
 
 #copy all build sub-directories
 COPY gobii-api-model gobii-api-model
@@ -60,7 +60,11 @@ RUN apt-get update -y && apt-get install -y \
  python2.7-dev \
  python-psycopg2 \
  curl \
- python-pip
+ python-pip \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update -y \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y python3.10 \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 
 RUN pip install --upgrade pip
 RUN pip install Numpy pandas
