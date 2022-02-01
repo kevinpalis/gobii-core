@@ -85,13 +85,9 @@ public class EBSLoader {
         //Connect to Postgres Metadata
         String dbConnectionString = loader.getMetaConnectionString();
 
-        //Because *someone* keeps putting weird special characters in the password, I have to parse it out instead of keeping it nice and tidy
-        //postgres://
-        String user = dbConnectionString.substring(13,dbConnectionString.indexOf(':',13));
-//        String password = dbConnectionString.substring(1+dbConnectionString.indexOf(':',13), dbConnectionString.indexOf("@",13));
         String jdbcConnector = "jdbc:postgresql://" + dbConnectionString.substring(1+dbConnectionString.indexOf('@'));
 
-        Connection dbConn = DriverManager.getConnection(jdbcConnector,user,loader.dbPass);
+        Connection dbConn = DriverManager.getConnection(jdbcConnector,loader.dbUser,loader.dbPass);
         DatabaseMetaData dbMeta = dbConn.getMetaData();
 
         File aspectFile = new File(loader.aspectFilePath);
@@ -134,7 +130,7 @@ public class EBSLoader {
         }
 
         //validateIntermediates
-        String validationFile =   loader.validationFile;
+        String validationFile = loader.validationFile;
         try {
             boolean hasErrors = loader.validateMetadata(intermediateDirectory, validationFile, DatasetOrientationType.MARKER_FAST);//TODO - choose orientation correctly
             if(hasErrors){
@@ -197,7 +193,7 @@ public class EBSLoader {
         loader.addMD5(md5Sum,dbConn,dbMeta,"EBS Job " + jobNum );
     }
 
-    private void generateEntities(FileAspect baseAspect) {
+    private void generateEntities(FileAspect baseAspect) throws SQLException {
         String userlessConnector= "postgresql://"
                 + dbHost
                 + ":"
@@ -212,7 +208,7 @@ public class EBSLoader {
 
         }
         EntityGenerator eg = new EntityGenerator(inputEntityValues,dbConn);
-        eg.generateEntities(baseAspect);
+        eg.updateAspect(baseAspect);
 
     }
 

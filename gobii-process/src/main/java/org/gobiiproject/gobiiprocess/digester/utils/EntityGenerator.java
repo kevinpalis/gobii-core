@@ -1,11 +1,15 @@
 package org.gobiiproject.gobiiprocess.digester.utils;
 
 import lombok.Builder;
+import org.gobii.masticator.aspects.ConstantAspect;
+import org.gobii.masticator.aspects.ElementAspect;
 import org.gobii.masticator.aspects.FileAspect;
+import org.gobii.masticator.aspects.TableAspect;
 import org.gobiiproject.gobiiprocess.SimplePostgresConnector;
 import org.gobiiproject.gobiiprocess.digester.EBSLoader;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -29,15 +33,28 @@ public class EntityGenerator {
         this.entityConnection = new EntityConnection(dbConnection);
     }
 
+    /**
+     * Modifies baseAspect using Connection to create a) entities in baseAspect that relate to IDs in the system, and
+     * b) entities in the database that correspond to entities in the aspect
+     *
+     * @param baseAspect
+     */
 
-    public void updateAspect(FileAspect baseAspect) {
+    public void updateAspect(FileAspect baseAspect) throws SQLException {
+
+        //For <inputEntity> we have a list of table+id that entity could exist in.
+        //For each table+id, if that is in the input entities list, we get the ID in the database if it exists
+        //If it does not exist, we create the entity in the database
+        //Either way, we update the aspect's ID column to match that ID.
+
         for(InputEntity entity:InputEntity.values()){
+            DefaultInputEntity defaultEntity = InputEntityDefaults.get(entity);
             String entityValue;
             if(inputEntityMap.containsKey(entity)){
                 entityValue = inputEntityMap.get(entity);
             }
             else{
-                entityValue = InputEntityDefaults.get(entity).getDefaultValue();
+                entityValue = defaultEntity.getDefaultValue();
             }
 
             Integer id = entityConnection.getEntityIdbyName(entity,entityValue);
@@ -45,28 +62,27 @@ public class EntityGenerator {
                 id = entityConnection.createEntitybyName(entity,entityValue);
             }
 
+            //Set ID in all constant fields referenced
+            if(id==null){
+                continue;
+            }
+            Map<String, TableAspect> tables = baseAspect.getAspects();
+            for(TableEntry te:defaultEntity.tableEntryList){
+                if(tables.containsKey(te.table)){
+                    TableAspect aspect = tables.get(te.table);
+
+                    ElementAspect element = aspect.getAspects().getOrDefault(te.element,null);
+                    if(element instanceof ConstantAspect){ // != null is implicit here
+                        ConstantAspect cAspect = (ConstantAspect)element;
+                        cAspect.setConstant(Integer.toString(id));
+                    }
+                }
+            }
         }
 
 
-        //For <inputEntity> we have a list of table+id that entity could exist in.
-        //For each table+id, if that is in the input entities list, we get the ID in the database if it exists
-        //If it does not exist, we create the entity in the database
-        //Either way, we update the aspect's ID column to match that ID.
     }
 
-    /**
-     * Modifies baseAspect using Connection to create a) entities in baseAspect that relate to IDs in the system, and
-     * b) entities in the database that correspond to entities in the aspect
-     *
-     * @param baseAspect
-     */
-    public void generateEntities(FileAspect baseAspect) {
-
-
-
-
-
-    }
 
     public enum InputEntity {
         Project, Platform, Experiment, Dataset, Germplasm_Species, Germplasm_Type
@@ -101,7 +117,7 @@ public class EntityGenerator {
 
     private static class DefaultInputEntity {
         InputEntity entity;
-        List<TableEntry> tableEntryList;
+        public List<TableEntry> tableEntryList;
 
         DefaultInputEntity(InputEntity entity, List<TableEntry> tableEntryList){
             this.entity=entity;
@@ -142,11 +158,13 @@ public class EntityGenerator {
 
             return null;
         }
-        Integer createEntitybyName(InputEntity entity, String name){
+        Integer createEntitybyName(InputEntity entity, String name) throws SQLException {
             Integer ret = null;
+            SimplePostgresConnector connector = new SimplePostgresConnector(dbConn);
             switch(entity){
                 case Project:
-                    String sqlCommand = "INSERT INTO PROJECT (name) VALUES (" + name + ");";
+                    String sqlCommand = "INSERT INTO project (name,pi_contact) VALUES (" + name + ",1);";
+                        connector.boolQuery(sqlCommand);
                     break;
                 default:
                     break;

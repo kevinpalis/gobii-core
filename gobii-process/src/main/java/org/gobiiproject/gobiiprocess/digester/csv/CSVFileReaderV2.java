@@ -48,12 +48,13 @@ public class CSVFileReaderV2 extends CSVFileReaderInterface {
     private static final String OUTPUT_SEPARATOR="/";
     private static final String NEWLINE = "\n";
     private static final String TAB = "\t";
-    private final String loaderScriptPath;
+    private static String missingIndicatorsFile ="/gobii_bundle/loaders/etc/missingIndicators.txt";
+
     private GobiiProcessedInstruction processedInstruction;
     private int maxLines = 0;
 
     CSVFileReaderV2(String loaderScriptPath) {
-        this.loaderScriptPath = loaderScriptPath;
+        //Removed use of that param here...
     }
 
     public static void parseInstructionFile(GobiiLoaderProcedure procedure, String loaderScriptPath) {
@@ -293,14 +294,13 @@ public class CSVFileReaderV2 extends CSVFileReaderInterface {
         }
         // For matrix file there is no need of writing first line. Setting it to false for consistency
         processedInstruction.setFirstLine(false);
-        String missingFile = loaderScriptPath + "/etc/missingIndicators.txt";
         String parentDirectory = outputFile.getParentFile().getAbsolutePath();
         String markerFile = parentDirectory + "/digest.marker";
 
 
 
 
-        MatrixValidation matrixValidation = new MatrixValidation(procedure.getMetadata().getDatasetType().getName(), missingFile, markerFile);
+        MatrixValidation matrixValidation = new MatrixValidation(procedure.getMetadata().getDatasetType().getName(), missingIndicatorsFile, markerFile);
         if (matrixValidation.setUp()) {
             try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
                 int rowNo = 0;
