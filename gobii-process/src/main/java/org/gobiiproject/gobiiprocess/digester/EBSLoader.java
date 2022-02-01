@@ -91,10 +91,10 @@ public class EBSLoader {
         //Because *someone* keeps putting weird special characters in the password, I have to parse it out instead of keeping it nice and tidy
         //postgres://
         String user = dbConnectionString.substring(13,dbConnectionString.indexOf(':',13));
-        String password = dbConnectionString.substring(1+dbConnectionString.indexOf(':',13), dbConnectionString.indexOf("@",13));
+//        String password = dbConnectionString.substring(1+dbConnectionString.indexOf(':',13), dbConnectionString.indexOf("@",13));
         String jdbcConnector = "jdbc:postgresql://" + dbConnectionString.substring(1+dbConnectionString.indexOf('@'));
 
-        Connection dbConn = DriverManager.getConnection(jdbcConnector,user,password);
+        Connection dbConn = DriverManager.getConnection(jdbcConnector,user,loader.dbPass);
         DatabaseMetaData dbMeta = dbConn.getMetaData();
 
         File aspectFile = new File(loader.aspectFilePath);
