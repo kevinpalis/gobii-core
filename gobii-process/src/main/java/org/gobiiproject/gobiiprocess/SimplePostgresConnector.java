@@ -17,6 +17,10 @@ public class SimplePostgresConnector {
         this.dbConn=getDataSource(config);
     }
 
+    public SimplePostgresConnector(Connection dbConn){
+        this.dbConn = dbConn;
+    }
+
     private Connection dbConn=null;
     public static Connection getDataSource(ServerConfig config){
         Connection conn = null;
@@ -73,6 +77,41 @@ public class SimplePostgresConnector {
         }
         return false;
     }
+    public boolean hasProject(String name){
+        try {
+            return hasEntry("project", "name", name);
+        }catch(SQLException e){
+            Logger.logError("Postgres Connector",e);
+        }
+        return false;
+    }
+    public boolean hasPlatform(String name){
+        try {
+            return hasEntry("platform", "name", name);
+        }catch(SQLException e){
+            Logger.logError("Postgres Connector",e);
+        }
+        return false;
+    }
+    public boolean hasExperiment(String name){
+        try {
+            return hasEntry("experiment", "name", name);
+        }catch(SQLException e){
+            Logger.logError("Postgres Connector",e);
+        }
+        return false;
+    }
+
+    public boolean hasDataset(String name){
+        try {
+            return hasEntry("dataset", "name", name);
+        }catch(SQLException e){
+            Logger.logError("Postgres Connector",e);
+        }
+        return false;
+    }
+
+
 
 
     public boolean hasDNARuninExperiment(String name, int experiment) {

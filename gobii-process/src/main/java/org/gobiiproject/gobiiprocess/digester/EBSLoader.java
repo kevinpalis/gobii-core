@@ -19,6 +19,7 @@ import org.gobiiproject.gobiimodel.utils.InstructionFileValidator;
 import org.gobiiproject.gobiimodel.utils.email.ProcessMessage;
 import org.gobiiproject.gobiimodel.utils.error.Logger;
 import org.gobiiproject.gobiiprocess.HDF5Interface;
+import org.gobiiproject.gobiiprocess.digester.utils.EntityGenerator;
 
 import java.io.*;
 import java.net.URLEncoder;
@@ -31,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+
+import static org.gobiiproject.gobiiprocess.digester.utils.EntityGenerator.InputEntity;
 
 
 import static org.gobiiproject.gobiimodel.utils.HelperFunctions.tryExec;
@@ -60,16 +63,11 @@ public class EBSLoader {
 
     private String pathToIFLs= "/gobii_bundle/loaders/gobii_ifl/gobii_ifl.py";
 
-    private enum InputEntity{
-        Project, Platform, Experiment, Dataset, Germplasm_Species, Germplasm_Type
-    }
-
-    private HashMap<InputEntity, String> inputEntityValues = new HashMap<InputEntity, String>();
+    private HashMap<EntityGenerator.InputEntity, String> inputEntityValues = new HashMap<EntityGenerator.InputEntity, String>();
 
 
 
     //Defaultless items
-    private int matrixElementSize;
     private String dbPass;
     private String inputFile;
     private String baseDirectory = "/data/gobii_bundle/crops/"+cropName+"/loader/digest";
@@ -83,7 +81,6 @@ public class EBSLoader {
 
         String[] remainingArgs = loader.parseOpts(args);
 
-        //Map aspects
 
         //Connect to Postgres Metadata
         String dbConnectionString = loader.getMetaConnectionString();
@@ -109,7 +106,7 @@ public class EBSLoader {
             baseAspect = AspectParser.parse(Util.slurp(aspectFile));
         }
 
-
+        loader.generateEntities(baseAspect);
 
 
         //validate tables
@@ -198,6 +195,25 @@ public class EBSLoader {
 
         int jobNum = new Random().nextInt();//TODO - actual people number
         loader.addMD5(md5Sum,dbConn,dbMeta,"EBS Job " + jobNum );
+    }
+
+    private void generateEntities(FileAspect baseAspect) {
+        String userlessConnector= "postgresql://"
+                + dbHost
+                + ":"
+                + dbPort
+                + "/"
+                + dbName;
+        Connection dbConn=null;
+        try {
+             dbConn = DriverManager.getConnection(userlessConnector, dbUser, dbPass);
+        }
+        catch(Exception e){
+
+        }
+        EntityGenerator eg = new EntityGenerator(inputEntityValues,dbConn);
+        eg.generateEntities(baseAspect);
+
     }
 
     private String createIntermediateFolder(){
