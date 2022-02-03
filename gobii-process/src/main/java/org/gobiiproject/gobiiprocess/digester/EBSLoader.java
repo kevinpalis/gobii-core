@@ -205,10 +205,11 @@ public class EBSLoader {
              dbConn = DriverManager.getConnection(userlessConnector, dbUser, dbPass);
         }
         catch(Exception e){
-
+            e.printStackTrace();
         }
         EntityGenerator eg = new EntityGenerator(inputEntityValues,dbConn);
         eg.updateAspect(baseAspect);
+        System.out.println("Updated baseAspect with entities " + inputEntityValues.keySet() +" | " + inputEntityValues.values());
 
     }
 

@@ -1,9 +1,7 @@
 package org.gobiiproject.gobiiprocess;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+
 import org.gobiiproject.gobiimodel.config.ServerConfig;
 import org.gobiiproject.gobiimodel.utils.HelperFunctions;
 import org.gobiiproject.gobiimodel.utils.error.Logger;
@@ -47,6 +45,22 @@ public class SimplePostgresConnector {
     }
 
     /**
+     *
+     * @param query Query to execute, as a string
+     * @return null if failed, first integer otherwise
+     * @throws SQLException Often
+     */
+    public Integer intQuery(String query) throws SQLException{
+        Statement s = dbConn.createStatement();
+        if(!s.execute(query)) return null;
+        ResultSet rs = s.getResultSet();
+        if(rs.isAfterLast()) return null;
+        int i = rs.getInt(1);//1 based for some reason
+        s.close();
+        return i;
+    }
+
+    /**
      * Calls boolQuery on 'Select 1 from {TABLE} where {ENTITY} = {NAME} LIMIT 1
      * returns true if there were any results
      * @param table table name
@@ -58,6 +72,19 @@ public class SimplePostgresConnector {
     public boolean hasEntry(String table, String entity, String name) throws SQLException{
         String statement="SELECT 1 from "+table+" WHERE "+entity+" = '"+ name + "' LIMIT 1";
         return boolQuery(statement);
+    }
+
+    public Integer getProjectId(String name) throws SQLException{
+        String statement="SELECT project_id from project WHERE name = '"+ name + "' LIMIT 1";
+        return intQuery(statement);
+    }
+    public Integer getPlatformId(String name) throws SQLException{
+        String statement="SELECT platform_id from platform WHERE name = '"+ name + "' LIMIT 1";
+        return intQuery(statement);
+    }
+    public Integer getExperimentId(String name) throws SQLException{
+        String statement="SELECT experiment_id from experiment WHERE name = '"+ name + "' LIMIT 1";
+        return intQuery(statement);
     }
 
     public boolean hasMarkerInPlatform(String name, int platform) {
@@ -72,39 +99,6 @@ public class SimplePostgresConnector {
     public boolean hasMarker(String markerName){
         try {
             return hasEntry("marker", "name", markerName);
-        }catch(SQLException e){
-            Logger.logError("Postgres Connector",e);
-        }
-        return false;
-    }
-    public boolean hasProject(String name){
-        try {
-            return hasEntry("project", "name", name);
-        }catch(SQLException e){
-            Logger.logError("Postgres Connector",e);
-        }
-        return false;
-    }
-    public boolean hasPlatform(String name){
-        try {
-            return hasEntry("platform", "name", name);
-        }catch(SQLException e){
-            Logger.logError("Postgres Connector",e);
-        }
-        return false;
-    }
-    public boolean hasExperiment(String name){
-        try {
-            return hasEntry("experiment", "name", name);
-        }catch(SQLException e){
-            Logger.logError("Postgres Connector",e);
-        }
-        return false;
-    }
-
-    public boolean hasDataset(String name){
-        try {
-            return hasEntry("dataset", "name", name);
         }catch(SQLException e){
             Logger.logError("Postgres Connector",e);
         }

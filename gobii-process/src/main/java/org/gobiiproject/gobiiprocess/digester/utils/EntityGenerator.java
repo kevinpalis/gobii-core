@@ -59,8 +59,9 @@ public class EntityGenerator {
 
             Integer id = entityConnection.getEntityIdbyName(entity,entityValue);
             if(id==null){
-                id = entityConnection.createEntitybyName(entity,entityValue);
+                id = entityConnection.createEntitybyName(entity,entityValue,InputEntityDefaults);
             }
+            defaultEntity.setValue = id;
 
             //Set ID in all constant fields referenced
             if(id==null){
@@ -118,6 +119,7 @@ public class EntityGenerator {
     private static class DefaultInputEntity {
         InputEntity entity;
         public List<TableEntry> tableEntryList;
+        public Integer setValue;
 
         DefaultInputEntity(InputEntity entity, List<TableEntry> tableEntryList){
             this.entity=entity;
@@ -139,32 +141,50 @@ public class EntityGenerator {
 }
 
 
-    private class EntityConnection {
+    private static class EntityConnection {
         Connection dbConn;
         EntityConnection(Connection dbConn){
             this.dbConn = dbConn;
         }
-        Integer getEntityIdbyName(InputEntity entity, String name){
+        Integer getEntityIdbyName(InputEntity entity, String name) throws SQLException {
             SimplePostgresConnector connector = new SimplePostgresConnector(dbConn);
             Integer ret = null;
             switch(entity){
                 case Project:
-                    connector.hasProject(name);
+                    ret = connector.getProjectId(name);
                     break;
+                case Platform:
+                    ret = connector.getPlatformId(name);
+                    break;
+                case Experiment:
+                    ret = connector.getExperimentId(name);
                 default:
                     break;
             }
 
 
-            return null;
+            return ret;
         }
-        Integer createEntitybyName(InputEntity entity, String name) throws SQLException {
+        Integer createEntitybyName(InputEntity entity, String name, HashMap<InputEntity,DefaultInputEntity> defaultEntities) throws SQLException {
             Integer ret = null;
+            String sqlCommand;
             SimplePostgresConnector connector = new SimplePostgresConnector(dbConn);
             switch(entity){
                 case Project:
-                    String sqlCommand = "INSERT INTO project (name,pi_contact) VALUES (" + name + ",1);";
-                        connector.boolQuery(sqlCommand);
+                    sqlCommand = "INSERT INTO project (name,pi_contact,status) VALUES ('" + name + "',1,57)";
+                    connector.boolQuery(sqlCommand);
+                    break;
+                case Platform:
+                    sqlCommand = "INSERT INTO platform (name,code,status) VALUES ('" + name + "','"+name+"',57)";
+                    connector.boolQuery(sqlCommand);
+                    break;
+                case Experiment:
+                    int project_id=1; //An experiment is tied to a project. Find out what project we're working with from the project entity request
+                    if(defaultEntities.containsKey(InputEntity.Project) && defaultEntities.get(InputEntity.Project).setValue!=null){
+                        project_id=defaultEntities.get(InputEntity.Project).setValue;
+                    }
+                    sqlCommand = "INSERT INTO platform (name,code,project_id,status) VALUES ('" + name + "','"+name+"',"+project_id+",57)";
+                    connector.boolQuery(sqlCommand);
                     break;
                 default:
                     break;
