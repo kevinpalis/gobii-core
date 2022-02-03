@@ -202,7 +202,7 @@ public class EBSLoader {
                 + dbName;
         Connection dbConn=null;
         try {
-             dbConn = DriverManager.getConnection(userlessConnector, dbUser, dbPass);
+             dbConn = DriverManager.getConnection("jdbc:"+userlessConnector, dbUser, dbPass);
         }
         catch(Exception e){
             e.printStackTrace();
