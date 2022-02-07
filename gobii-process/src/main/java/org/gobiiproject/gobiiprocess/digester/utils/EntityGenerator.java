@@ -86,7 +86,7 @@ public class EntityGenerator {
 
 
     public enum InputEntity {
-        Project, Platform, Experiment, Dataset, Germplasm_Species, Germplasm_Type
+        Project, Platform, Experiment, Dataset/*, Germplasm_Species, Germplasm_Type -- No uses of these for now */
     }
 
     static HashMap<InputEntity, DefaultInputEntity> InputEntityDefaults = generateEntityDefaults();
@@ -105,13 +105,14 @@ public class EntityGenerator {
                         new TableEntry("dnarun","experiment_id"))));
 
         ret.put(InputEntity.Dataset,new DefaultInputEntity(InputEntity.Dataset, Arrays.asList(
-                new TableEntry("dataset_dnarun","dataset_id"))));
-
+                new TableEntry("dataset_dnarun","dataset_id"),
+                new TableEntry("dataset_marker","dataset_id"))));
+/*
         ret.put(InputEntity.Germplasm_Species,new DefaultInputEntity(InputEntity.Germplasm_Species, Arrays.asList(
-                new TableEntry("dna_sample","project_id"))));
+               )));
 
         ret.put(InputEntity.Germplasm_Type,new DefaultInputEntity(InputEntity.Germplasm_Type, Arrays.asList(
-                new TableEntry("dna_sample","project_id"))));
+                )));*/
 
         return ret;
     }
@@ -158,6 +159,9 @@ public class EntityGenerator {
                     break;
                 case Experiment:
                     ret = connector.getExperimentId(name);
+                    break;
+                case Dataset:
+                    ret = connector.getDatasetId(name);
                 default:
                     break;
             }
@@ -183,9 +187,16 @@ public class EntityGenerator {
                     if(defaultEntities.containsKey(InputEntity.Project) && defaultEntities.get(InputEntity.Project).setValue!=null){
                         project_id=defaultEntities.get(InputEntity.Project).setValue;
                     }
-                    sqlCommand = "INSERT INTO platform (name,code,project_id,status) VALUES ('" + name + "','"+name+"',"+project_id+",57)";
+                    sqlCommand = "INSERT INTO experiment (name,code,project_id,status) VALUES ('" + name + "','"+name+"',"+project_id+",57)";
                     connector.boolQuery(sqlCommand);
                     break;
+                case Dataset:
+                    int experiment_id=1; //A dataset is tied to an experiment, find the experiment we're working with from the previous request
+                    if(defaultEntities.containsKey(InputEntity.Experiment) && defaultEntities.get(InputEntity.Experiment).setValue!=null){
+                        experiment_id=defaultEntities.get(InputEntity.Experiment).setValue;
+                    }
+                    sqlCommand = "INSERT INTO dataset (experiment_id,callinganalysis_id,name) VALUES ("+experiment_id+",1,'"+name+"')";
+                    connector.boolQuery(sqlCommand);
                 default:
                     break;
             }

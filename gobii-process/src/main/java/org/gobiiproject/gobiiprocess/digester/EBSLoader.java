@@ -289,8 +289,8 @@ public class EBSLoader {
 
         addEntityOption("dst", InputEntity.Dataset,o);
         addEntityOption("exp", InputEntity.Experiment,o);
-        addEntityOption("grs", InputEntity.Germplasm_Species,o);
-        addEntityOption("grt", InputEntity.Germplasm_Type,o);
+        //addEntityOption("grs", InputEntity.Germplasm_Species,o);
+        //addEntityOption("grt", InputEntity.Germplasm_Type,o);
         addEntityOption("pltfm", InputEntity.Platform,o);
         addEntityOption("prjct", InputEntity.Project,o);
 

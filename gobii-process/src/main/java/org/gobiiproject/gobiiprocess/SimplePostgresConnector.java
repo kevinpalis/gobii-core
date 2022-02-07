@@ -54,7 +54,12 @@ public class SimplePostgresConnector {
         Statement s = dbConn.createStatement();
         if(!s.execute(query)) return null;
         ResultSet rs = s.getResultSet();
-        if(rs.isAfterLast()) return null;
+        if(!rs.next()){
+            return null; //No rows returned
+        }
+        if(rs.isAfterLast()){
+            return null; //also no rows returned
+        }
         int i = rs.getInt(1);//1 based for some reason
         s.close();
         return i;
@@ -84,6 +89,10 @@ public class SimplePostgresConnector {
     }
     public Integer getExperimentId(String name) throws SQLException{
         String statement="SELECT experiment_id from experiment WHERE name = '"+ name + "' LIMIT 1";
+        return intQuery(statement);
+    }
+    public Integer getDatasetId(String name) throws SQLException{
+        String statement="SELECT dataset_id from dataset WHERE name = '"+ name + "' LIMIT 1";
         return intQuery(statement);
     }
 
