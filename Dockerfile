@@ -80,6 +80,7 @@ ENV os_group=gobii
 #COPY --from=build gobii_client gobii_client
 COPY --from=pre-build toolbox/gobii_bundle gobii_bundle
 COPY --from=build gobii-process/target gobii_bundle/core
+RUN chmod +x /gobii_bundle/loaders/gobii_ifl/gobii_ifl.py
 #this is the WAR file and bloats the image - not required
 #COPY --from=build gobii-web/target gobii-web/target
 #Create default user and group. NOTE: change the gadm password on a production system
