@@ -70,14 +70,13 @@ public class EBSLoader {
     //Defaultless items
     private String dbPass;
     private String inputFile;
-    private String baseDirectory = "/data/gobii_bundle/crops/"+cropName+"/loader/digest";
+    private String baseDirectory = "/data/digest";
     private String aspectInFull;
 
     public static void main(String[] args) throws Exception {
 
         int errorCode = 0;
         EBSLoader loader = new EBSLoader();
-        loader.baseDirectory = "/data/gobii_bundle/crops/"+loader.cropName+"/loader/digest";
 
         String[] remainingArgs = loader.parseOpts(args);
 
@@ -109,7 +108,6 @@ public class EBSLoader {
         loader.validate(baseAspect);
 
         String intermediateDirectory = loader.createIntermediateFolder();
-        String outputDirectory = loader.createOutputFolder();
 
         //checksums
         String md5Sum = md5Hash(loader.inputFile);
