@@ -168,12 +168,17 @@ public class Masticator {
 	public static void runIFLs(String iflPath, Logger logger, String connectionString, FileAspect aspect, File outputDir) throws IOException {
 		if(connectionString!=null){
 			logger.info("Running IFL");
-			for(String key:getTableKeys(aspect)){
+			for(String key:aspect.getAspects().keySet()){
+				if(key.equals("matrix")) continue;
+				logger.info("Loading " + key);
 				String inputDir = outputDir.getAbsolutePath();
 				String inputFile = String.format("%s%sdigest.%s", outputDir.getAbsolutePath(), File.separator, key);
 
 				runIfl(connectionString,inputFile,inputDir,inputDir,iflPath);
 			}
+		}
+		else{
+			logger.info("No Connection String");
 		}
 	}
 
