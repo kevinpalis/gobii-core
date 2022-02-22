@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Logging levels: TRACE, DEBUG, INFO, WARN and ERROR -->
+<!-- logger.properties file has the variable to control the logger and appender configuration.
+     The file which is closer in its path will always take precedence.
+     EX: If logger.properties is defined in web and model then the one in web takes preference.
+     Hence every module will have a file even if it is dummy. -->
+<!-- If logger with same name is defined multiple times, first definition is picked -->
+<!-- Configuration file is checked for changes every 1 min -->
+<configuration scan="true">
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <!-- To enable JMX Management -->
+    <jmxConfigurator/>
+
+    <property name="log-dir" value="../logs"/>
+    <property name="loggerLevel" value="DEBUG"/>
+    <property scope="context" resource="logger.properties"/>
+    <timestamp key="timestamp" datePattern="yyyyMMdd'T'HHmmss"/>
+
+    <!--                      Default Console Appender                            -->
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- By default, encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
+        <encoder>
+            <!-- %M: Method Name %L: Line Number -->
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- Loggers for all the 9 modules of GOBII.
+         If any other package apart from these(dependencies) look for a logger,
+         as there is nothing defined for them they will go with root logger which is set to ERROR level.-->
+    <if condition='property("module").equals("model")'>
+        <then>
+            <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+                <file>${log-dir}/process-${timestamp}.log</file>
+                <encoder>
+                    <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} %class{36}.%M %L - %msg%n</pattern>
+                </encoder>
+            </appender>
+            <logger name="org.gobiiproject.gobiimodel" level="${loggerLevel}" additivity="false">
+                <appender-ref ref="FILE"/>
+                <appender-ref ref="STDOUT"/>
+            </logger>
+            <logger name="org.gobiiproject.gobiiprocess" level="${loggerLevel}" additivity="false">
+                <appender-ref ref="FILE"/>
+                <appender-ref ref="STDOUT"/>
+            </logger>
+            <logger name="gobii" level="${loggerLevel}" additivity="false">
+                <appender-ref ref="FILE"/>
+                <appender-ref ref="STDOUT"/>
+            </logger>
+        </then>
+    </if>
+
+    <logger name="org.gobiiproject.gobiimodel" level="${loggerLevel}" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="org.gobiiproject.gobiiprocess" level="${loggerLevel}" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="org.gobiiproject" level="${loggerLevel}" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="GOBii" level="${loggerLevel}" additivity="false">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <!-- In investigating GSD-269, it is believed gobii-model is overwriting gobii-processes logback.xml.
+    Temporarily reducing log level to ERROR as a stopgap measure. -->
+    <root level="ERROR">
+        <appender-ref ref="STDOUT"/>
+        <if condition='property("module").equals("model")'>
+            <then>
+                <appender-ref ref="FILE"/>
+            </then>
+        </if>
+    </root>
+</configuration>
