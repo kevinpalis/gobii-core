@@ -10,6 +10,7 @@
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <resetJUL>true</resetJUL>
     </contextListener>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" /> <!-- Removes giant 'INFO - we did a thing' dump from beginning of execution-->
 
     <!-- To enable JMX Management -->
     <jmxConfigurator/>
@@ -41,14 +42,6 @@
                     <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} %class{36}.%M %L - %msg%n</pattern>
                 </encoder>
             </appender>
-            <logger name="org.gobiiproject.gobiimodel" level="${loggerLevel}" additivity="false">
-                <appender-ref ref="FILE"/>
-                <appender-ref ref="STDOUT"/>
-            </logger>
-            <logger name="org.gobiiproject.gobiiprocess" level="${loggerLevel}" additivity="false">
-                <appender-ref ref="FILE"/>
-                <appender-ref ref="STDOUT"/>
-            </logger>
             <logger name="gobii" level="${loggerLevel}" additivity="false">
                 <appender-ref ref="FILE"/>
                 <appender-ref ref="STDOUT"/>
@@ -56,19 +49,17 @@
         </then>
     </if>
 
-    <logger name="org.gobiiproject.gobiimodel" level="${loggerLevel}" additivity="false">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-
-    <logger name="org.gobiiproject.gobiiprocess" level="${loggerLevel}" additivity="false">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-
     <logger name="org.gobiiproject" level="${loggerLevel}" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 
     <logger name="GOBii" level="${loggerLevel}" additivity="false">
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>${log-dir}/process-${timestamp}.log</file>
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} %class{36}.%M %L - %msg%n</pattern>
+            </encoder>
+        </appender>
         <appender-ref ref="FILE"/>
         <appender-ref ref="STDOUT"/>
     </logger>
