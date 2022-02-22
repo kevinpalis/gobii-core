@@ -2,11 +2,7 @@ package org.gobii.masticator;
 
 import com.google.gson.*;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.util.*;
 
 import lombok.AllArgsConstructor;
@@ -211,13 +207,20 @@ public class Masticator {
 		return tableNames;
 	}
 
-	private static final String BASE_IFL_PATH="/data/gobii_bundle/loaders/postgres/gobii_ifl/gobii_ifl.py";
+	private static final String BASE_IFL_PATH="/gobii_bundle/loaders/gobii_ifl/gobii_ifl.py";
 	private static void runIfl(String connectionString, String inputFile, String inputDir, String outputDir, String iflPath) throws IOException {
 		//It's ugly, but it works
 		if(iflPath==null){
 			iflPath=BASE_IFL_PATH;
 		}
 		String iflExec = String.format(iflPath+" -c %s -i %s -d %s -o %s", connectionString, inputFile, inputDir, outputDir);
-		Runtime.getRuntime().exec(iflExec);
+		Process proc = Runtime.getRuntime().exec(iflExec);
+		try {
+			proc.waitFor();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		proc.getErrorStream().transferTo(System.err);
+		proc.getInputStream().transferTo(System.out);
 	}
 }
