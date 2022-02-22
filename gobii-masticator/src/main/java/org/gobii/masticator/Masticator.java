@@ -170,7 +170,7 @@ public class Masticator {
 				String inputDir = outputDir.getAbsolutePath();
 				String inputFile = String.format("%s%sdigest.%s", outputDir.getAbsolutePath(), File.separator, key);
 
-				runIfl(connectionString,inputFile,inputDir,inputDir,iflPath);
+				runIfl(connectionString,inputFile,inputDir,iflPath);
 			}
 		}
 		else{
@@ -208,12 +208,12 @@ public class Masticator {
 	}
 
 	private static final String BASE_IFL_PATH="/gobii_bundle/loaders/gobii_ifl/gobii_ifl.py";
-	private static void runIfl(String connectionString, String inputFile, String inputDir, String outputDir, String iflPath) throws IOException {
+	private static void runIfl(String connectionString, String inputFile, String outputDir, String iflPath) throws IOException {
 		//It's ugly, but it works
 		if(iflPath==null){
 			iflPath=BASE_IFL_PATH;
 		}
-		String iflExec = String.format(iflPath+" -c %s -i %s -d %s -o %s", connectionString, inputFile, inputDir, outputDir);
+		String iflExec = String.format(iflPath+" -c %s -i %s -o %s", connectionString, inputFile, outputDir);
 		Process proc = Runtime.getRuntime().exec(iflExec);
 		try {
 			proc.waitFor();
