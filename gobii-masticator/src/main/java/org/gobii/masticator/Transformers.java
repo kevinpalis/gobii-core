@@ -32,7 +32,7 @@ public class Transformers {
 	public String ARRAYIFY(List<String> values, List<Object> args){
 		if(values.size()<1)return "";
 		String value = values.get(0);
-		String retVal = Arrays.stream(value.split(String.valueOf(AspectMapper.delimitter))).map(s -> "\"{"+s+"}\"").collect(Collectors.joining("\t"));
+		String retVal = Arrays.stream(value.split(String.valueOf(AspectMapper.delimitter))).map(s -> "{"+s+"}").collect(Collectors.joining("\t"));
 		return retVal;
 	}
 
