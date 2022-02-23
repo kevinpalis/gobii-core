@@ -167,7 +167,7 @@ public class Masticator {
 			for(String key:aspect.getAspects().keySet()){
 				if(key.equals("matrix")) continue;
 				logger.info("Loading " + key);
-				String inputDir = outputDir.getAbsolutePath();
+				String inputDir = outputDir.getAbsolutePath()+"/"; // TODO - better line separator - fix bug found in dev testing
 				String inputFile = String.format("%s%sdigest.%s", outputDir.getAbsolutePath(), File.separator, key);
 
 				runIfl(connectionString,inputFile,inputDir,iflPath);
