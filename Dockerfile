@@ -60,13 +60,11 @@ RUN apt-get update -y && apt-get install -y \
  python2.7-dev \
  python-psycopg2 \
  curl \
- python-pip \
-    && add-apt-repository ppa:deadsnakes/ppa \
-    && apt-get update -y \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y python3.10
+ python-pip
 
 RUN pip install --upgrade pip
 RUN pip install Numpy pandas
+RUN pip3 install pandas==1.1.5
 EXPOSE 22
 
 #set variables defaults
