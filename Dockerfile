@@ -60,7 +60,8 @@ RUN apt-get update -y && apt-get install -y \
  python2.7-dev \
  python-psycopg2 \
  curl \
- python-pip
+ python-pip \
+ python3-pip
 
 RUN pip install --upgrade pip
 RUN pip install Numpy pandas
