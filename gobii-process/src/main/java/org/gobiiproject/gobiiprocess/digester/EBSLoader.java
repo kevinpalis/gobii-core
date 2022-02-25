@@ -86,22 +86,22 @@ public class EBSLoader {
 
         String jdbcConnector = "jdbc:postgresql://" + dbConnectionString.substring(1+dbConnectionString.indexOf('@'));
 
-        Connection dbConn = DriverManager.getConnection(jdbcConnector,loader.dbUser,loader.dbPass);
-        DatabaseMetaData dbMeta = dbConn.getMetaData();
+        Connection metadataDBConn = DriverManager.getConnection(jdbcConnector,loader.dbUser,loader.dbPass);
+        DatabaseMetaData dbMeta = metadataDBConn.getMetaData();
 
         File aspectFile = new File(loader.aspectFilePath);
 
         FileAspect baseAspect;
         if(!aspectFile.exists()) {
             //assume it's a name from postgres
-            loader.aspectInFull=getAspectFromPostres(dbConn,loader.aspectFilePath);
+            loader.aspectInFull=getAspectFromPostres(metadataDBConn,loader.aspectFilePath);
             baseAspect = AspectParser.parse(loader.aspectInFull);
         }
         else{
             baseAspect = AspectParser.parse(Util.slurp(aspectFile));
         }
 
-        EntityGenerator eg = new EntityGenerator(loader.inputEntityValues,dbConn);
+        EntityGenerator eg = loader.getEntityGenerator(loader);
         loader.generateEntities(baseAspect,eg);
 
 
@@ -112,7 +112,7 @@ public class EBSLoader {
 
         //checksums
         String md5Sum = md5Hash(loader.inputFile);
-        if(md5Sum == null  || !loader.checkMD5(md5Sum,dbConn,dbMeta)){
+        if(md5Sum == null  || !loader.checkMD5(md5Sum,metadataDBConn,dbMeta)){
             System.err.println("Non-unique checksum");
             errorCode = 4;
             System.exit(errorCode);
@@ -193,10 +193,10 @@ public class EBSLoader {
         }
 
         int jobNum = new Random().nextInt();//TODO - actual people number
-        loader.addMD5(md5Sum,dbConn,dbMeta,"EBS Job " + jobNum );
+        loader.addMD5(md5Sum,metadataDBConn,dbMeta,"EBS Job " + jobNum );
     }
 
-    private void generateEntities(FileAspect baseAspect, EntityGenerator eg) throws SQLException {
+    public EntityGenerator getEntityGenerator(EBSLoader loader) {
         String userlessConnector= "postgresql://"
                 + dbHost
                 + ":"
@@ -205,11 +205,15 @@ public class EBSLoader {
                 + dbName;
         Connection dbConn=null;
         try {
-             dbConn = DriverManager.getConnection("jdbc:"+userlessConnector, dbUser, dbPass);
+            dbConn = DriverManager.getConnection("jdbc:"+userlessConnector, dbUser, dbPass);
         }
         catch(Exception e){
             e.printStackTrace();
         }
+        return new EntityGenerator(loader.inputEntityValues,dbConn);
+    }
+
+    private void generateEntities(FileAspect baseAspect, EntityGenerator eg) throws SQLException {
         eg.updateAspect(baseAspect);
         System.out.println("Updated baseAspect with entities " + inputEntityValues.keySet() +" | " + inputEntityValues.values());
 

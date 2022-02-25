@@ -128,7 +128,7 @@ public class EntityGenerator {
         }
 
         String getDefaultValue(){
-            return entity.name() + " " + Math.random();
+            return entity.name() + " " + Math.round(Math.random()*100000);//Random 5 digit integer
         }
     }
 
