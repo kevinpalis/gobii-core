@@ -54,7 +54,7 @@ public class EBSLoader {
     private String dbUser="ebsuser";//new default
     private String dbName="gobii_dev";
     private String metaDBName="gobii_meta";
-    private String hdf5Path = "/data/hdf5";
+    private String hdf5Path = "/data/hdf5/";
     private boolean verbose = false;
     private String aspectFilePath="intertek.json";
     private String validationFile="/gobii_bundle/core/validationConfig.json";
@@ -101,7 +101,8 @@ public class EBSLoader {
             baseAspect = AspectParser.parse(Util.slurp(aspectFile));
         }
 
-        loader.generateEntities(baseAspect);
+        EntityGenerator eg = new EntityGenerator(loader.inputEntityValues,dbConn);
+        loader.generateEntities(baseAspect,eg);
 
 
         //validate tables
@@ -164,20 +165,24 @@ public class EBSLoader {
 
         if(hasMatrix){
             TableAspect matrixTable = baseAspect.getAspects().get(VARIANT_CALL_TABNAME);
-            ConfigSettings settings = new ConfigSettings();
 
             MatrixAspect aspect = (MatrixAspect) matrixTable.getAspects().get(VARIANT_CALL_TABNAME);//TODO - what if this isn't here
             String datasetType = aspect.getDatasetType();
 
             ProcessMessage dummy = new ProcessMessage();
+            Integer entityDS = eg.getValue(InputEntity.Dataset);
+
             int datasetId = 1;
+            if(entityDS!=null){
+                datasetId=entityDS;
+            }
             String errorFilePath="logger";
             String variantFilename = intermediateDirectory + matrixTable.getTable();
             File variantFile = new File(variantFilename);
             //TODO - methodize
             HDF5Interface.setPathToHDF5(loader.HDF5MatrixLoadPath);
             HDF5Interface.setPathToHDF5Files(loader.hdf5Path);
-            HDF5Interface.createHDF5FromDataset(dummy, datasetType, settings, datasetId, loader.cropName, errorFilePath, variantFile);
+            HDF5Interface.createHDF5FromDataset(dummy, datasetType, null, datasetId, null, errorFilePath, variantFile);
         }
 
 
@@ -191,7 +196,7 @@ public class EBSLoader {
         loader.addMD5(md5Sum,dbConn,dbMeta,"EBS Job " + jobNum );
     }
 
-    private void generateEntities(FileAspect baseAspect) throws SQLException {
+    private void generateEntities(FileAspect baseAspect, EntityGenerator eg) throws SQLException {
         String userlessConnector= "postgresql://"
                 + dbHost
                 + ":"
@@ -205,7 +210,6 @@ public class EBSLoader {
         catch(Exception e){
             e.printStackTrace();
         }
-        EntityGenerator eg = new EntityGenerator(inputEntityValues,dbConn);
         eg.updateAspect(baseAspect);
         System.out.println("Updated baseAspect with entities " + inputEntityValues.keySet() +" | " + inputEntityValues.values());
 

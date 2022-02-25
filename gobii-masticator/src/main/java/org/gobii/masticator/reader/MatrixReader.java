@@ -44,7 +44,7 @@ public class MatrixReader implements Reader {
 	*/
 	private void skipLineBeginning() throws IOException {
 		for (int i = 0 ; i < col ; i++) {
-			while (raf.readByte() != AspectMapper.delimitter) ;
+			while (raf.readByte() != '\t') ;
 		}
 	}
 

@@ -47,7 +47,6 @@ public class HDF5Interface {
      * @param dataSetId ID of dataset to create
      * @param crop crop to create the dataset for
      * @param errorPath Place to store temporary files in case of needing temporary files
-     * @param variantFilename Name of the dataset (Only used to set the postgres name [probably a bug)
      * @param variantFile Location of the file to use for creating the dataset
      * @return if the process succeeded
      */
@@ -61,7 +60,9 @@ public class HDF5Interface {
         //HDF-5
         //Usage: %s <datasize> <input file> <output HDF5 file
         String loadHDF5= Paths.get(getPathToHDF5(), "loadHDF5").toString();
-        dm.addPath("matrix directory", pathToHDF5Files, configuration, false);
+        if(configuration != null) { //Null config no setup
+            dm.addPath("matrix directory", pathToHDF5Files, configuration, false);
+        }
         String HDF5File= getFileLoc(dataSetId);
         int size = 8;
         switch(dst.toUpperCase()){

@@ -31,7 +31,7 @@ public class RowReader implements Reader {
 		}
 
 		for (int i = 0 ; i < col ; i++) {
-			while (raf.readByte() != AspectMapper.delimitter) ;
+			while (raf.readByte() != '\t') ;
 		}
 	}
 
@@ -44,7 +44,7 @@ public class RowReader implements Reader {
 
 		StringBuilder s = new StringBuilder();
 		try {
-			for (char c = (char) raf.readByte(); c != AspectMapper.delimitter; c = (char) raf.readByte()) {
+			for (char c = (char) raf.readByte(); c != '\t'; c = (char) raf.readByte()) {
 				if (c == '\n' || c == '\r') {
 					this.closed = true;
 					break;

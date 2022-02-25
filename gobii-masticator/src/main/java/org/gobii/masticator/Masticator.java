@@ -164,18 +164,37 @@ public class Masticator {
 	public static void runIFLs(String iflPath, Logger logger, String connectionString, FileAspect aspect, File outputDir) throws IOException {
 		if(connectionString!=null){
 			logger.info("Running IFL");
-			for(String key:aspect.getAspects().keySet()){
-				if(key.equals("matrix")) continue;
-				logger.info("Loading " + key);
-				String inputDir = outputDir.getAbsolutePath()+"/"; // TODO - better line separator - fix bug found in dev testing
-				String inputFile = String.format("%s%sdigest.%s", outputDir.getAbsolutePath(), File.separator, key);
+			Set<String> aspectSet = aspect.getAspects().keySet();
 
-				runIfl(connectionString,inputFile,inputDir,iflPath);
+			//Aspect housekeeping
+
+			aspectSet.remove("matrix"); // Matrix file is not processed
+
+			if(aspectSet.contains("germplasm")){
+				loadSingleIFL(iflPath, logger, connectionString, outputDir, "germplasm");
+				aspectSet.remove("germplasm");//HashSet.KeySet has a working remove, this could have been messy otherwise
+			}
+			if(aspectSet.contains("dnasample")){
+				loadSingleIFL(iflPath, logger, connectionString, outputDir, "dnasample");
+				aspectSet.remove("dnasample");
+			}
+
+			//Once those two are done, there are no more required orderings in the table, so the rest can be done
+			for(String key:aspectSet){
+				loadSingleIFL(iflPath, logger, connectionString, outputDir, key);
 			}
 		}
 		else{
 			logger.info("No Connection String");
 		}
+	}
+
+	public static void loadSingleIFL(String iflPath, Logger logger, String connectionString, File outputDir, String key) throws IOException {
+		logger.info("Loading " + key);
+		String inputDir = outputDir.getAbsolutePath()+"/"; // TODO - better line separator - fix bug found in dev testing
+		String inputFile = String.format("%s%sdigest.%s", outputDir.getAbsolutePath(), File.separator, key);
+
+		runIfl(connectionString,inputFile,inputDir,iflPath);
 	}
 
 	private static String usage() {

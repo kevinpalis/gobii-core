@@ -205,4 +205,11 @@ public class EntityGenerator {
         }
     }
 
+    public Integer getValue(InputEntity entity){
+        DefaultInputEntity defEntity = InputEntityDefaults.getOrDefault(entity,null);
+        if(defEntity==null) return null;
+
+        return defEntity.setValue;
+    }
+
 }
