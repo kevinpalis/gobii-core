@@ -77,7 +77,12 @@ public class MatrixReader implements Reader {
 			}
 			//Note, removed special handling of tab characters, as internal tabs should be preserved on 'matrix' calls
 			if (c == '\n' || c == '\r') {
-				skipLineBeginning();
+				try {
+					skipLineBeginning();
+				}
+				catch(EOFException e){
+					hitEoF=true;
+				}
 				break;
 			} else {
 				sb.append(c);
