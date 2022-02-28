@@ -33,8 +33,9 @@ public class Masticator {
 		logger.info("Masticating {}", table);
 
         TableReader reader = AspectMapper.map(fileAspect.getAspects().get(table)).build(file);
-        writer.write(String.join(reader.getDelimiter(), reader.getHeader()) + "\n");
-
+        if(!table.equalsIgnoreCase("matrix)")) { //Omit header on 'matrix' 
+			writer.write(String.join(reader.getDelimiter(), reader.getHeader()) + "\n");
+		}
 		for (ReaderResult read = reader.read(); ! (read instanceof End) ; read = reader.read()) {
 
 			if (read instanceof Val) {
