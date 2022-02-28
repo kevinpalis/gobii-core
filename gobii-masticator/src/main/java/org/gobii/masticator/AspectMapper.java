@@ -59,7 +59,7 @@ public class AspectMapper {
 				(RowAspect aspect) -> new RowReaderPrototype(aspect.getRow(), aspect.getCol()));
 
 		mappers.put(MatrixAspect.class,
-				(MatrixAspect aspect) -> new MatrixReaderPrototype(aspect.getRow(), aspect.getCol()));
+				(MatrixAspect aspect) -> new MatrixReaderPrototype(aspect.getRow(), aspect.getCol(), aspect.getDatasetType()));
 
 		mappers.put(ConstantAspect.class,
 				(ConstantAspect aspect) -> new ConstantReaderPrototype(aspect.getConstant()));

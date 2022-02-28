@@ -4,11 +4,14 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.gobii.masticator.AspectMapper;
 import org.gobii.masticator.reader.result.Break;
 import org.gobii.masticator.reader.result.End;
 import org.gobii.masticator.reader.result.Val;
+import org.gobii.masticator.reader.transform.types.NucleotideSeparatorSplitter;
 
 
 public class MatrixReader implements Reader {
@@ -17,6 +20,7 @@ public class MatrixReader implements Reader {
 	private File file;
 	private int row;
 	private int col;
+	private String datasetType;
 
 	private RandomAccessFile raf;
 
@@ -24,7 +28,9 @@ public class MatrixReader implements Reader {
 
 	private boolean hitEoF = false;
 
-	public MatrixReader(File file, int row, int col) throws IOException {
+	private NucleotideSeparatorSplitter splitter;
+
+	public MatrixReader(File file, int row, int col, String datasetType) throws IOException {
 		this.file = file;
 		this.row = row;
 		this.col = col;
@@ -36,6 +42,13 @@ public class MatrixReader implements Reader {
 		}
 
 		skipLineBeginning();
+
+		if(datasetType.equals("NUCLEOTIDE_2_LETTER")){
+			splitter = new NucleotideSeparatorSplitter(2);
+		}
+		else{
+			splitter=null;
+		}
 
 	}
 
@@ -89,6 +102,12 @@ public class MatrixReader implements Reader {
 			}
 		}
 
-		return Val.of(sb.toString());
+
+		String ret = sb.toString();
+		if(splitter != null){
+			ret = Arrays.stream(ret.split("\t")).map(s->splitter.process(s)).collect(Collectors.joining("\t"));
+		}
+
+		return Val.of(ret);
 	}
 }

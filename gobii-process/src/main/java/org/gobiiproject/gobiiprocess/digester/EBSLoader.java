@@ -182,6 +182,7 @@ public class EBSLoader {
             //TODO - methodize
             HDF5Interface.setPathToHDF5(loader.HDF5MatrixLoadPath);
             HDF5Interface.setPathToHDF5Files(loader.hdf5Path);
+
             HDF5Interface.createHDF5FromDataset(dummy, datasetType, null, datasetId, null, errorFilePath, variantFile);
         }
 

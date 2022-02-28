@@ -37,7 +37,7 @@ public class NucleotideSeparatorSplitter {
 
     public NucleotideSeparatorSplitter(int nucleotideCount) {
         List<String> missingFileElements = new ArrayList<>();
-        String missingFile = "/data/gobii_bundle/loaders/etc/missingIndicators.txt";
+        String missingFile = "/gobii_bundle/loaders/etc/missingIndicators.txt";
         try (Stream<String> stream = Files.lines(Paths.get(missingFile))) {
             stream.forEach(missingFileElements::add);
         } catch (IOException e) {

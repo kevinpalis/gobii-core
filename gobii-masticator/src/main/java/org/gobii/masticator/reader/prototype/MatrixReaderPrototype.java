@@ -12,9 +12,10 @@ public class MatrixReaderPrototype implements ReaderPrototype<MatrixReader> {
 
 	private int row;
 	private int col;
+	private String datasetType;
 
 	@Override
 	public MatrixReader build(File file) throws IOException {
-		return new MatrixReader(file, row, col);
+		return new MatrixReader(file, row, col,datasetType);
 	}
 }
