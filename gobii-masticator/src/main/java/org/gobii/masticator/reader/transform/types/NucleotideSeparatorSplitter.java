@@ -55,7 +55,9 @@ public class NucleotideSeparatorSplitter {
             }
 
             if (element.length() < 1) {
-                throw new RuntimeException("SNPSepRemoval Unsupported empty Allele Call " + element);
+                
+                //("SNPSepRemoval Unsupported empty Allele Call " + element);
+                return unknownSegment;
             } else {
                 String result = unknownSegment;
                 String error = null;
