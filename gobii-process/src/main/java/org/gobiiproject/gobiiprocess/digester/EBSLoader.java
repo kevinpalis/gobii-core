@@ -44,6 +44,7 @@ import static org.gobiiproject.gobiimodel.utils.HelperFunctions.tryExec;
 public class EBSLoader {
     //Hardcoded parameters
     private static final String VARIANT_CALL_TABNAME = "matrix";
+    private static final String VARIANT_CALL_COLNAME = "matrix";
     private final String HDF5MatrixLoadPath="/gobii_bundle/loader/hdf5/bin";
 
 
@@ -118,6 +119,7 @@ public class EBSLoader {
             System.exit(errorCode);
         }
 
+        TableAspect matrixTable = baseAspect.getAspects().get(VARIANT_CALL_TABNAME);
 
         //create intermediates
         try{
@@ -154,9 +156,7 @@ public class EBSLoader {
         }
 
 
-        if(hasMatrix){
-            TableAspect matrixTable = baseAspect.getAspects().get(VARIANT_CALL_TABNAME);
-
+        if(matrixTable!=null){
             MatrixAspect aspect = (MatrixAspect) matrixTable.getAspects().get(VARIANT_CALL_TABNAME);//TODO - what if this isn't here
             String datasetType = aspect.getDatasetType();
 
