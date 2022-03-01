@@ -55,7 +55,7 @@ public class NucleotideSeparatorSplitter {
             }
 
             if (element.length() < 1) {
-                
+
                 //("SNPSepRemoval Unsupported empty Allele Call " + element);
                 return unknownSegment;
             } else {

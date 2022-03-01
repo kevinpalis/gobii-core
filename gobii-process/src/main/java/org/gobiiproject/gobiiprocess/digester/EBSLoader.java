@@ -144,24 +144,15 @@ public class EBSLoader {
         }
 
         //IFL load intermediates
+        boolean hasMatrix=false;
         try{
-            loader.runIFLs(intermediateDirectory,baseAspect);
+            hasMatrix=loader.runIFLs(intermediateDirectory,baseAspect);
         }catch(Exception e){
             errorCode = 1;
             e.printStackTrace();
             System.exit(errorCode);
         }
 
-        //Matrix
-        boolean hasMatrix=false;
-        for(TableAspect table : baseAspect.getAspects().values()){
-            String tableName = table.getTable();
-            System.out.println("Reading table: " + table.getTable());
-            if(tableName.equals("matrix")){
-                hasMatrix = true;
-                break;
-            }
-        }
 
         if(hasMatrix){
             TableAspect matrixTable = baseAspect.getAspects().get(VARIANT_CALL_TABNAME);
@@ -246,12 +237,19 @@ public class EBSLoader {
         Masticator.masticate(masticatorArgs,baseAspect, pathToIFLs,true,false);
     }
 
-    private void runIFLs(String intermediatePath, FileAspect baseAspect) throws Exception {
+    /**
+     * Runs the IFLs
+     * @param intermediatePath intermediate path for IFLs
+     * @param baseAspect aspect to use to masticate
+     * @return if the aspect had a matrix to process
+     * @throws Exception
+     */
+    private boolean runIFLs(String intermediatePath, FileAspect baseAspect) throws Exception {
         String[] masticatorArgs = masticatorArgs(inputFile,intermediatePath, getConnectionString());
         if(verbose){
             System.out.println(Arrays.deepToString(masticatorArgs));
         }
-        Masticator.masticate(masticatorArgs,baseAspect, pathToIFLs,false,true);
+        return Masticator.masticate(masticatorArgs,baseAspect, pathToIFLs,false,true);
     }
 
 

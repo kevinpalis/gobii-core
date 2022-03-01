@@ -69,10 +69,11 @@ public class Masticator {
 	 * @param args argument list, as per main(String[] args)
 	 * @param aspect Optional FileAspect for the base aspect to be used in place of -a
 	 * @param iflPath path to base IFLs
+	 * @return If the masticated fileaspect had a matrix in it
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public static void masticate(String[] args, FileAspect aspect, String iflPath, boolean createIntermediateFiles, boolean runIFLs) throws IOException, InterruptedException {
+	public static boolean masticate(String[] args, FileAspect aspect, String iflPath, boolean createIntermediateFiles, boolean runIFLs) throws IOException, InterruptedException {
 		Logger logger = LoggerFactory.getLogger("Masticator (Main)");
 
 		Map<String, String> argMap =
@@ -113,12 +114,14 @@ public class Masticator {
 			logger.error(usage());
 		}
 
+		boolean hadMatrix=false;
 		if(createIntermediateFiles) {
 			createIntermediateFiles(argMap.getOrDefault(ARG_DATA_FILE,null),aspect, logger, outputDir);
 		}
 		if(runIFLs) {
-			runIFLs(iflPath, logger, argMap.getOrDefault(ARG_CONNECTION_STRING,null), aspect, outputDir);
+			hadMatrix = runIFLs(iflPath, logger, argMap.getOrDefault(ARG_CONNECTION_STRING,null), aspect, outputDir);
 		}
+		return hadMatrix;
 	}
 
 	public static void createIntermediateFiles(String argDataFile, FileAspect aspect, Logger logger, File outputDir) throws IOException, InterruptedException {
@@ -162,14 +165,25 @@ public class Masticator {
 		}
 	}
 
-	public static void runIFLs(String iflPath, Logger logger, String connectionString, FileAspect aspect, File outputDir) throws IOException {
+	/**
+	 * Runs the IFLs. WARNING: This modifies the FileAspect object by messing with getAspects().keySet() which is the live keyset.
+	 * @param iflPath
+	 * @param logger
+	 * @param connectionString
+	 * @param aspect
+	 * @param outputDir
+	 * @return true if there was a 'matrix' that was removed
+	 * @throws IOException
+	 */
+	public static boolean runIFLs(String iflPath, Logger logger, String connectionString, FileAspect aspect, File outputDir) throws IOException {
+		boolean hadMatrix=false;
 		if(connectionString!=null){
 			logger.info("Running IFL");
 			Set<String> aspectSet = aspect.getAspects().keySet();
 
 			//Aspect housekeeping
 
-			aspectSet.remove("matrix"); // Matrix file is not processed
+			hadMatrix= aspectSet.remove("matrix"); // Matrix file is not processed
 
 			if(aspectSet.contains("germplasm")){
 				loadSingleIFL(iflPath, logger, connectionString, outputDir, "germplasm");
@@ -188,6 +202,7 @@ public class Masticator {
 		else{
 			logger.info("No Connection String");
 		}
+		return hadMatrix;
 	}
 
 	public static void loadSingleIFL(String iflPath, Logger logger, String connectionString, File outputDir, String key) throws IOException {
@@ -228,6 +243,8 @@ public class Masticator {
 	}
 
 	private static final String BASE_IFL_PATH="/gobii_bundle/loaders/gobii_ifl/gobii_ifl.py";
+
+	@SuppressWarnings(value = "deprecation") //It's not great, but it's working, and reimplementing using Utils.tryExec will take time - JDLS
 	private static void runIfl(String connectionString, String inputFile, String outputDir, String iflPath) throws IOException {
 		//It's ugly, but it works
 		if(iflPath==null){
