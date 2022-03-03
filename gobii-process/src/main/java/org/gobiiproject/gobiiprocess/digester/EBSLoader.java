@@ -168,7 +168,7 @@ public class EBSLoader {
                 datasetId=entityDS;
             }
             String errorFilePath="logger";
-            String variantFilename = intermediateDirectory + matrixTable.getTable();
+            String variantFilename = intermediateDirectory +"/digest."+ matrixTable.getTable();
             File variantFile = new File(variantFilename);
             //TODO - methodize
             HDF5Interface.setPathToHDF5(loader.HDF5MatrixLoadPath);
