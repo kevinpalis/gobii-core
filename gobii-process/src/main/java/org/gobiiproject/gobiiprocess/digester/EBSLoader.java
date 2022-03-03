@@ -45,7 +45,7 @@ public class EBSLoader {
     //Hardcoded parameters
     private static final String VARIANT_CALL_TABNAME = "matrix";
     private static final String VARIANT_CALL_COLNAME = "matrix";
-    private final String HDF5MatrixLoadPath="/gobii_bundle/loader/hdf5/bin";
+    private final String HDF5MatrixLoadPath="/gobii_bundle/loaders/hdf5/";
 
 
     //Sane and often correct defaults
