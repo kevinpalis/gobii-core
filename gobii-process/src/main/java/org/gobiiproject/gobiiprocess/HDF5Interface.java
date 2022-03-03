@@ -106,9 +106,13 @@ public class HDF5Interface {
             rmIfExist(hdf5MapFile);
             return false;
         }
-        DatasetService datasetService = 
-            SpringContextLoaderSingleton.getInstance().getBean(DatasetService.class);
-        datasetService.update(dataSetId,variantFile.getAbsolutePath(), HDF5File);
+        try {
+            DatasetService datasetService =
+                    SpringContextLoaderSingleton.getInstance().getBean(DatasetService.class);
+            datasetService.update(dataSetId, variantFile.getAbsolutePath(), HDF5File);
+        }catch(Exception e){
+            Logger.logDebug("HDF5Interface", "No bean to update dataset info with");
+        }
         return true;
     }
 
