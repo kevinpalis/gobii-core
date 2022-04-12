@@ -5,6 +5,7 @@ import org.gobii.masticator.aspects.ConstantAspect;
 import org.gobii.masticator.aspects.ElementAspect;
 import org.gobii.masticator.aspects.FileAspect;
 import org.gobii.masticator.aspects.TableAspect;
+import org.gobiiproject.gobiimodel.utils.error.Logger;
 import org.gobiiproject.gobiiprocess.SimplePostgresConnector;
 import org.gobiiproject.gobiiprocess.digester.EBSLoader;
 
@@ -195,7 +196,11 @@ public class EntityGenerator {
                     if(defaultEntities.containsKey(InputEntity.Experiment) && defaultEntities.get(InputEntity.Experiment).setValue!=null){
                         experiment_id=defaultEntities.get(InputEntity.Experiment).setValue;
                     }
-                    sqlCommand = "INSERT INTO dataset (experiment_id,callinganalysis_id,name) VALUES ("+experiment_id+",1,'"+name+"')";
+                    Integer analysisId=connector.getAnalysisId("undefined");
+                    if(analysisId==null){
+                        Logger.logError("EntityGenerator","No undefined calling analysis in DB. Does this DB have default data?");
+                    }
+                    sqlCommand = "INSERT INTO dataset (experiment_id,callinganalysis_id,name) VALUES ("+experiment_id+","+analysisId+",'"+name+"')";
                     connector.boolQuery(sqlCommand);
                 default:
                     break;

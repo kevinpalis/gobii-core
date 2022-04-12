@@ -95,6 +95,10 @@ public class SimplePostgresConnector {
         String statement="SELECT dataset_id from dataset WHERE name = '"+ name + "' LIMIT 1";
         return intQuery(statement);
     }
+    public Integer getAnalysisId(String name) throws SQLException{
+        String statement="SELECT analysis_id from analysis WHERE name = '"+ name + "' LIMIT 1";
+        return intQuery(statement);
+    }
 
     public boolean hasMarkerInPlatform(String name, int platform) {
         String statement="SELECT 1 from marker WHERE name = '"+ name + "' and platform_id = "+platform+" LIMIT 1";
