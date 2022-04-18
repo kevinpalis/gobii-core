@@ -20,12 +20,12 @@ import org.gobii.masticator.reader.result.Val;
 @Accessors(chain = true)
 public class TableReader implements Reader {
 
-	private String delimiter = "\t";
+	/*package*/ String delimiter = "\t";
 
 	@NonNull
-	private List<String> header;
+	/*package*/ List<String> header;
 	@NonNull
-	private List<Reader> readers;
+	/*package*/ List<Reader> readers;
 
 
 	public String readHeader() {

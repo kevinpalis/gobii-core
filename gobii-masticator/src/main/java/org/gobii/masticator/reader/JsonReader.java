@@ -1,13 +1,15 @@
 package org.gobii.masticator.reader;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.StringJoiner;
-
-import org.gobii.masticator.AspectMapper;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import org.gobii.masticator.reader.result.Break;
+import org.gobii.masticator.reader.result.End;
+import org.gobii.masticator.reader.result.Val;
 
 @Data
 @Accessors(chain = true)
@@ -18,17 +20,23 @@ public class JsonReader implements Reader {
 
 	@Override
 	public ReaderResult read() throws IOException {
+		StringJoiner joiner = new StringJoiner(",");
+		Iterator<String> headerIterator = reader.header.iterator();
+		Iterator<Reader> entryIterator = reader.readers.iterator();
+		while(headerIterator.hasNext() && entryIterator.hasNext()) {
+			ReaderResult read = entryIterator.next().read();
+			String key = headerIterator.next();
 
-		return reader.read()
-				.map(s -> {
-					String delimitter = String.valueOf(AspectMapper.delimitter);
-					String[] toks = s.split(delimitter, -1);
-					StringJoiner joiner = new StringJoiner(",");
-					for (int i = 0; i < toks.length; i++) {
-						joiner.add(String.format("\"\"%s\"\":\"\"%s\"\"", reader.getHeader().get(i), toks[i]));
-					}
+			//If anyone's EoF, we're EoF
+			if (read instanceof End) {
+				return read;
+			} else if (read instanceof Break) {
+				return read;
+			}
 
-					return String.format("\"{%s}\"", joiner.toString());
-				});
+			// "key":"value","key2":"value2"
+			joiner.add(String.format("\"%s\":\"%s\"", key, read.value()));
+		}
+		return new Val(joiner.toString());
 	}
 }
