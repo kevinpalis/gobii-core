@@ -116,7 +116,14 @@ public class AspectParser {
 					}
 				}
 			} else {
-				return new ConstantAspect(json.getAsString());
+				try {
+					return new ConstantAspect(json.getAsString());
+				}catch(UnsupportedOperationException e){
+					//this json fragment does not support 'getAsString', but base JsonElement has a toString to write the contents to string....
+					// which begs the question.. why?
+					// But, if this does what I want, I'm not mad, I'm just disappointed
+					return new ConstantAspect(json.toString());
+				}
 			}
 
 			throw new RuntimeException(String.format("Error while parsing aspect %s", json));
