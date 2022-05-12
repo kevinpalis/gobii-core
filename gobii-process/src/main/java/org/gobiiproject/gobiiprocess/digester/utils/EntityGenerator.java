@@ -9,6 +9,7 @@ import org.gobiiproject.gobiimodel.utils.error.Logger;
 import org.gobiiproject.gobiiprocess.SimplePostgresConnector;
 import org.gobiiproject.gobiiprocess.digester.EBSLoader;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -81,8 +82,10 @@ public class EntityGenerator {
                 }
             }
         }
+    }
 
-
+    public boolean updateDataset(int datasetId, File variantFile) throws SQLException {
+        return entityConnection.updateDataset(datasetId,variantFile);
     }
 
 
@@ -208,6 +211,12 @@ public class EntityGenerator {
             ret = getEntityIdbyName(entity,name);
             return ret;
         }
+        boolean updateDataset(int datasetId, File hdf5File) throws SQLException {
+            String sqlCommand="UPDATE dataset SET data_file = '"+hdf5File.getAbsolutePath() +"' WHERE dataset_id = "+datasetId+"";
+            SimplePostgresConnector connector = new SimplePostgresConnector(dbConn);
+            return connector.boolQuery(sqlCommand);
+        }
+
     }
 
     public Integer getValue(InputEntity entity){
@@ -216,5 +225,8 @@ public class EntityGenerator {
 
         return defEntity.setValue;
     }
+
+
+
 
 }

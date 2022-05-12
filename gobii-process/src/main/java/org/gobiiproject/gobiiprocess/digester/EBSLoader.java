@@ -44,7 +44,6 @@ import static org.gobiiproject.gobiimodel.utils.HelperFunctions.tryExec;
 public class EBSLoader {
     //Hardcoded parameters
     private static final String VARIANT_CALL_TABNAME = "matrix";
-    private static final String VARIANT_CALL_COLNAME = "matrix";
     private final String HDF5MatrixLoadPath="/gobii_bundle/loaders/hdf5/";
 
 
@@ -73,6 +72,8 @@ public class EBSLoader {
     private String inputFile;
     private String baseDirectory = "/data/digest";
     private String aspectInFull;
+
+    private boolean ignoreMD5=false;
 
     public static void main(String[] args) throws Exception {
 
@@ -113,10 +114,12 @@ public class EBSLoader {
 
         //checksums
         String md5Sum = md5Hash(loader.inputFile);
-        if(md5Sum == null  || !loader.checkMD5(md5Sum,metadataDBConn,dbMeta)){
-            System.err.println("Non-unique checksum");
-            errorCode = 4;
-            System.exit(errorCode);
+        if(!loader.ignoreMD5) {
+            if (md5Sum == null || !loader.checkMD5(md5Sum, metadataDBConn, dbMeta)) {
+                System.err.println("Non-unique checksum");
+                errorCode = 4;
+                System.exit(errorCode);
+            }
         }
 
         TableAspect matrixTable = baseAspect.getAspects().get(VARIANT_CALL_TABNAME);
@@ -174,7 +177,14 @@ public class EBSLoader {
             HDF5Interface.setPathToHDF5(loader.HDF5MatrixLoadPath);
             HDF5Interface.setPathToHDF5Files(loader.hdf5Path);
 
-            HDF5Interface.createHDF5FromDataset(dummy, datasetType, null, datasetId, null, errorFilePath, variantFile);
+            boolean createdHDF5Successfully = HDF5Interface.createHDF5FromDataset(dummy, datasetType, null, datasetId, null, errorFilePath, variantFile);
+            if(createdHDF5Successfully){
+                try{
+                    eg.updateDataset(datasetId,variantFile);
+                }catch(SQLException e){
+                    //Warn
+                }
+            }
         }
 
 
@@ -185,7 +195,9 @@ public class EBSLoader {
         }
 
         int jobNum = new Random().nextInt();//TODO - actual people number
-        loader.addMD5(md5Sum,metadataDBConn,dbMeta,"EBS Job " + jobNum );
+        if(!loader.ignoreMD5) {
+            loader.addMD5(md5Sum, metadataDBConn, dbMeta, "EBS Job " + jobNum);
+        }
     }
 
     public EntityGenerator getEntityGenerator(EBSLoader loader) {
@@ -207,8 +219,6 @@ public class EBSLoader {
 
     private void generateEntities(FileAspect baseAspect, EntityGenerator eg) throws SQLException {
         eg.updateAspect(baseAspect);
-        System.out.println("Updated baseAspect with entities " + inputEntityValues.keySet() +" | " + inputEntityValues.values());
-
     }
 
     private String createIntermediateFolder(){
@@ -290,7 +300,8 @@ public class EBSLoader {
                 .addOption("bd", "baseDir", true, "Fully qualified path to intermediate and output base directories")
                 .addOption("v", "verbose", false, "Enable verbose console output")
                 .addOption("i", "inputFile", true, "input file path")
-                .addOption("h", "hdfFiles", true, "Fully qualified path to hdf files");
+                .addOption("h", "hdfFiles", true, "Fully qualified path to hdf files")
+                .addOption("m","ignoreMD5",false,"Ignore MD5 hash checks");
 
         addEntityOption("dst", InputEntity.Dataset,o);
         addEntityOption("exp", InputEntity.Experiment,o);
@@ -313,6 +324,7 @@ public class EBSLoader {
             if (cli.hasOption("baseDir")) baseDirectory = cli.getOptionValue("baseDir");
             if (cli.hasOption("hdfFiles")) hdf5Path=cli.getOptionValue("hdfFiles");
             if (cli.hasOption("inputFile")) inputFile=cli.getOptionValue("inputFile");
+            if (cli.hasOption("ignoreMD5")) ignoreMD5=true;
 
             for(InputEntity entity: InputEntity.values()){
                 if(cli.hasOption(entity.toString())){
